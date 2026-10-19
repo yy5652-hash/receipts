@@ -1,5 +1,5 @@
 from receipts.config import Settings
-from receipts.judge import judge_all, judge_one
+from receipts.judge import JUDGE_SYSTEM, judge_all, judge_one
 from receipts.models import Claim, FetchedSource, Source
 from receipts.testing import FakeLLM
 
@@ -47,6 +47,21 @@ def test_unverifiable_quote_caps_confidence_and_bad_label_is_not_in_source():
     assert v.label == "not_in_source" and v.confidence == 0.0 and v.quote == ""
     v = judge_one(c, SRC, ok(), Scripted({"label": "not_in_source", "confidence": 0.9, "quote": ""}), "super")
     assert v.confidence == 0.9  # no cap when nothing is asserted
+
+
+def test_abstract_coverage_is_flagged_to_the_judge_only_then():
+    seen = []
+
+    class Spy(FakeLLM):
+        def _judge(self, payload):
+            seen.append(payload)
+            return super()._judge(payload)
+
+    c = claim("c1", "Global investment in renewable energy reached $400 billion in 2022.")
+    judge_one(c, SRC, ok(), Spy(), "super")
+    judge_one(c, SRC, FetchedSource(source_id="s1", status="ok", text=TEXT, via="openalex", coverage="abstract"), Spy(), "super")
+    assert "coverage" not in seen[0] and seen[1]["coverage"] == "abstract only"
+    assert '"abstract only"' in JUDGE_SYSTEM and "not_in_source with confidence at most 0.5" in JUDGE_SYSTEM.replace("\n", " ")
 
 
 def _settings(**kw):

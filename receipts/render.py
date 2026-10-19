@@ -2,7 +2,7 @@
 
 import re
 
-from .models import LABEL_ORDER, AuditReport, Verdict
+from .models import LABEL_ORDER, AuditReport, FetchedSource, Verdict
 
 BADGES = {
     "supported": "✅ supported",
@@ -22,6 +22,13 @@ def _tier_note(v: Verdict) -> str:
         return "no model call"
     note = f"{v.tier}" + (" (escalated from super)" if v.escalated else "")
     return f"{note}, confidence {v.confidence:.2f}" + ("" if v.quote_found or not v.quote else ", quote not verified")
+
+
+def _record_note(f: FetchedSource | None) -> str:
+    """For a source that could not be read: whether a record of it exists at all."""
+    if f is None or f.status != "not_found" or f.exists is None:
+        return ""
+    return "a record of the source exists, but its text could not be read" if f.exists else "no record of the source was found"
 
 
 def render_markdown(report: AuditReport) -> str:
@@ -49,7 +56,10 @@ def render_markdown(report: AuditReport) -> str:
             url = (f.url if f and f.url else s.url) or ""
             title = s.title or _one_line(s.raw)[:80]
             lines.append(f"**Source {s.marker or s.id}:** {title}" + (f" · <{url}>" if url else ""))
-            lines.append(f"Verdict: {BADGES[v.label]} · judged by {_tier_note(v)}" + (f" · {v.model}" if v.model else ""))
+            lines.append(f"Verdict: {BADGES[v.label]} · judged by {_tier_note(v)}" + (f" · {v.model}" if v.model else "")
+                         + (" · checked against abstract only" if f and f.coverage == "abstract" else ""))
+            if note := _record_note(f):
+                lines.append(f"Record: {note}")
             if v.quote:
                 lines += ["", f"> {_one_line(v.quote)}"]
             if v.rationale:

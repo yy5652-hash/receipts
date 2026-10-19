@@ -1,4 +1,4 @@
-"""Text helpers: sentence spans, body/reference split, quote matching, chunking."""
+"""Text helpers: sentence spans, body/reference split, quote matching, chunking, web-text cleanup."""
 
 import difflib
 import re
@@ -250,3 +250,35 @@ def numbers(text: str) -> set[str]:
     for tok in re.findall(r"\d+(?:[.,]\d+)*", text):
         out.add(tok.replace(",", "") if re.fullmatch(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?", tok) else tok)
     return out
+
+
+# --- fetched web text ----------------------------------------------------------
+
+_MD_URL = r"""\(\s*<?(?:[^()\s<>]|\([^()\s]*\))+>?(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)"""  # one level of (...) in the URL
+_MD_IMAGE_RE = re.compile(r"!\[[^\]\n]*\]" + _MD_URL)
+_MD_LINK_RE = re.compile(r"\[((?:[^\[\]\n]|\[[^\[\]\n]*\])*)\]" + _MD_URL)  # [anchor](url); the anchor may hold [47]
+# Footnote-style markers: [47] [[47]] [^3] [a] [citation needed] [edit]. Digits are capped at 3 so [2019] stays;
+# a single letter only counts when no word character follows, so quote edits like "[T]he" stay.
+_MARKER = r"\^?\d{1,3}|citation needed|clarification needed|edit"
+_REF_MARKER_RE = re.compile(rf"[ \t]*(?:\[\[(?:{_MARKER}|[a-z])\]\]|\[(?:{_MARKER})\]|\[[a-z]\](?!\w))", re.I)
+# Emphasis wrapping a word (`_x_`, `*x*`, `**x**`); URLs are matched first so their underscores survive.
+_EMPHASIS_RE = re.compile(
+    r"(?P<url>https?://[^\s<>\"']+)"
+    r"|(?<![\w*])(?P<star>\*{1,3})(?=[^\s*])(?P<a>[^*\n]+?)(?<=[^\s*])(?P=star)(?![\w*])"
+    r"|(?<![\w_])(?P<under>_{1,2})(?=[^\s_])(?P<b>[^_\n]+?)(?<=[^\s_])(?P=under)(?![\w_]|\.\w)"
+)
+
+
+def clean_web_text(text: str) -> str:
+    """Strip the markdown that page extractors leave behind, keeping the readable words.
+
+    Links keep their anchor, images and footnote markers go, emphasis marks around words go
+    (identifiers like snake_case and URLs are untouched); blank-line and space runs collapse.
+    """
+    text = _MD_IMAGE_RE.sub("", text)
+    text = _MD_LINK_RE.sub(r"\1", text)
+    text = _REF_MARKER_RE.sub("", text)
+    text = _EMPHASIS_RE.sub(lambda m: m["url"] or m["a"] or m["b"], text)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()

@@ -2,6 +2,7 @@ import time
 
 from receipts.textutil import (
     chunk,
+    clean_web_text,
     contains_quote,
     normalize,
     split_body_and_references,
@@ -147,3 +148,39 @@ def test_strip_citations_and_numbers():
     assert strip_citations("It rose in (Q3 2021) only.") == "It rose in (Q3 2021) only."
     assert strip_citations("- Bullet text [1].") == "Bullet text."
     assert numbers("$1,200 billion, 3.5% in 2022 and 10-15") == {"1200", "3.5", "2022", "10", "15"}
+
+
+def test_clean_links_keep_anchor():
+    t = "centrepiece for the proposed [1889 Exposition Universelle](https://en.wikipedia.org/wiki/Exposition_Universelle_(1889)) in Paris"
+    assert clean_web_text(t) == "centrepiece for the proposed 1889 Exposition Universelle in Paris"
+    assert clean_web_text('see [the docs](https://x.test/d "Docs") now') == "see the docs now"
+
+
+def test_clean_images_and_badges_removed():
+    assert clean_web_text("![logo](https://x.test/a.png) Hello") == "Hello"
+    assert clean_web_text("[![badge](https://b.test/i.svg)](https://b.test/l) text") == "text"
+
+
+def test_clean_reference_markers():
+    assert clean_web_text("in _Flying Circus_.[[47]]") == "in Flying Circus."
+    assert clean_web_text("a claim[12], another [a]. History[[edit](https://w.test/e \"Edit section\")]") == "a claim, another. History"
+    assert clean_web_text("needs support [citation needed] and [edit] and [[3]] and [^4]") == "needs support and and and"
+
+
+def test_clean_keeps_ordinary_bracketed_prose():
+    t = "the court said [T]he rule applies in [2019] UKSC 1, on [0, 1], [see below] and [sic]"
+    assert clean_web_text(t) == t
+
+
+def test_clean_emphasis_wrapping_words():
+    assert clean_web_text("_x_ and *y* and **z** and __w__ and ***v***") == "x and y and z and w and v"
+    assert clean_web_text("**Note:** a _long phrase_ here") == "Note: a long phrase here"
+
+
+def test_clean_emphasis_leaves_identifiers_urls_and_maths():
+    t = "use snake_case_name, __init__.py, https://x.test/a_b_c/_foo_/ , 2*3*4, a * b * c and `x_y_z`"
+    assert clean_web_text(t) == t
+
+
+def test_clean_collapses_whitespace():
+    assert clean_web_text("a   b \t c\n\n\n\n d \n \n\n e  ") == "a b c\n\n d\n\n e"

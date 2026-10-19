@@ -4,6 +4,7 @@ import json
 import re
 import threading
 from pathlib import Path
+from typing import Literal
 
 from .models import Usage
 from .textutil import AUTHOR_YEAR_RE, numbers, split_sentences, strip_citations
@@ -53,6 +54,24 @@ class FakeSearcher:
              "raw_content": r.get("raw_content")}
             for _, r in scored[:max_results]
         ]
+
+
+class FakeOpenAlex:
+    """Scholarly lookup over fixtures: `dois` maps DOI -> record (None = lookup failed; unknown DOIs are "missing"),
+    `titles` maps title -> record."""
+
+    def __init__(self, dois: dict[str, dict | None] | None = None, titles: dict[str, dict] | None = None):
+        self.dois = dois or {}
+        self.titles = titles or {}
+        self.calls: list[tuple] = []
+
+    def by_doi(self, doi: str) -> dict | None | Literal["missing"]:
+        self.calls.append(("doi", doi))
+        return self.dois.get(doi, "missing")
+
+    def by_title(self, title: str, first_author: str | None = None, year: int | None = None) -> dict | None:
+        self.calls.append(("title", title, first_author, year))
+        return self.titles.get(title)
 
 
 def load_fixtures(path: str | Path):

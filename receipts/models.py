@@ -39,8 +39,10 @@ class FetchedSource(BaseModel):
     url: str | None = None
     title: str | None = None
     text: str = ""
-    via: str = ""  # "tavily_extract" | "tavily_search" | "crossref" | "fixture" | ""
+    via: str = ""  # "tavily_extract" | "tavily_search" | "openalex" | "fixture" | ""
     note: str = ""
+    coverage: Literal["full", "abstract"] = "full"  # "abstract": only the abstract could be fetched
+    exists: bool | None = None  # True: a record was found; False: looked and found none; None: not checked
 
 
 class Passage(BaseModel):

@@ -8,6 +8,7 @@ from .extract import extract
 from .judge import MODES, judge_all
 from .llm import LLM
 from .models import AuditReport
+from .scholarly import Scholarly
 from .search import Searcher, http_status
 from .sources import fetch_sources
 
@@ -20,6 +21,7 @@ def audit(
     mode: str = "cascade",
     on_event: Callable[[dict], None] | None = None,
     status_fn: Callable[[str], int | None] = http_status,
+    openalex: Scholarly | None = None,
 ) -> AuditReport:
     if mode not in MODES:
         raise ValueError(f"unknown mode {mode!r}; choose one of {sorted(MODES)}")
@@ -28,7 +30,7 @@ def audit(
     emit({"type": "stage", "stage": "extract"})
     sources, claims = extract(doc, llm)
     emit({"type": "stage", "stage": "fetch"})
-    fetched = fetch_sources(sources, searcher, status_fn=status_fn)
+    fetched = fetch_sources(sources, searcher, status_fn=status_fn, openalex=openalex)
     emit({"type": "stage", "stage": "judge"})
     verdicts = judge_all(claims, sources, fetched, llm, mode, settings, on_event=on_event)
     emit({"type": "stage", "stage": "done"})

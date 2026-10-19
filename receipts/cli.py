@@ -9,6 +9,7 @@ from .judge import MODES
 from .models import LABEL_ORDER, AuditReport
 from .pipeline import audit
 from .render import render_markdown
+from .scholarly import OpenAlex
 from .search import DiskCache, TavilySearcher, http_status
 
 
@@ -51,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.fake:
         from .testing import FakeLLM, load_fixtures
 
-        llm, (searcher, status_fn) = FakeLLM(), load_fixtures(args.fake)
+        llm, (searcher, status_fn), openalex = FakeLLM(), load_fixtures(args.fake), None
     else:
         missing = [n for n, v in (("NEBIUS_API_KEY", settings.nebius_api_key),
                                   ("TAVILY_API_KEY", settings.tavily_api_key)) if not v]
@@ -62,9 +63,11 @@ def main(argv: list[str] | None = None) -> int:
         from .llm import TokenFactoryLLM
 
         llm = TokenFactoryLLM(settings)
-        searcher, status_fn = TavilySearcher(settings.tavily_api_key, DiskCache(settings.cache_dir)), http_status
+        cache = DiskCache(settings.cache_dir)
+        searcher, status_fn, openalex = TavilySearcher(settings.tavily_api_key, cache), http_status, OpenAlex(cache)
 
-    report = audit(doc, llm, searcher, settings, mode=args.mode, on_event=_progress, status_fn=status_fn)
+    report = audit(doc, llm, searcher, settings, mode=args.mode, on_event=_progress,
+                   status_fn=status_fn, openalex=openalex)
     _print_summary(report)
     for out, text in ((args.json, lambda: report.model_dump_json(indent=2)), (args.md, lambda: render_markdown(report))):
         if out:

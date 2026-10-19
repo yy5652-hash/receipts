@@ -5,10 +5,10 @@ import pytest
 
 from receipts import cli
 from receipts.config import Settings
-from receipts.models import AuditReport, Verdict
+from receipts.models import AuditReport, Claim, FetchedSource, Source, Verdict
 from receipts.pipeline import audit
 from receipts.render import render_markdown
-from receipts.testing import FakeLLM, load_fixtures
+from receipts.testing import FakeLLM, FakeOpenAlex, load_fixtures
 
 FIX = Path(__file__).parent / "fixtures"
 DOC = (FIX / "report_basic.md").read_text(encoding="utf-8")
@@ -89,6 +89,35 @@ def test_claim_label_prefers_best_verdict():
     assert rep.claim_label("c1") == "partial"
     rep.verdicts = [v("source_unavailable", "s1"), v("not_in_source", "s2")]
     assert rep.claim_label("c1") == "not_in_source"
+
+
+def test_openalex_is_wired_through_to_fetch_judge_and_render():
+    searcher, status_fn = load_fixtures(FIXTURES)
+    rec = {"title": "Solar PV module price trends", "doi": "10.5555/iea.solar.2021", "year": 2021, "authors": [], "venue": "",
+           "url": "https://publisher.example/closed", "abstract": "Solar PV module prices fell 89% between 2010 and 2020."}
+    oa = FakeOpenAlex(dois={"10.5555/iea.solar.2021": rec})
+    rep = audit(DOC, FakeLLM(), searcher, Settings(), mode="super", status_fn=status_fn, openalex=oa)
+    f2 = next(f for f in rep.fetched if f.source_id == "s2")
+    assert (f2.status, f2.via, f2.coverage, f2.exists) == ("ok", "openalex", "abstract", True)
+    assert label_of(rep, "Solar module prices") == "supported"
+    assert ("doi", "10.5555/iea.solar.2021") in oa.calls and any(c[0] == "title" for c in oa.calls)
+    md = render_markdown(rep)
+    assert "checked against abstract only" in md
+    assert "Record: a record of the source exists, but its text could not be read" in md  # s5: link answers, no text
+
+
+def test_render_says_whether_an_unreadable_source_exists():
+    def md(exists):
+        f = FetchedSource(source_id="s1", status="not_found", note="n", exists=exists)
+        v = Verdict(claim_id="c1", source_id="s1", label="source_unavailable")
+        rep = AuditReport(document="", mode="cascade", sources=[Source(id="s1", raw="r", title="T")], fetched=[f],
+                          claims=[Claim(id="c1", sentence="S.", start=0, end=2, claim="S.", source_ids=["s1"])],
+                          verdicts=[v], usage=[], seconds=0)
+        return render_markdown(rep)
+
+    assert "Record: no record of the source was found" in md(False)
+    assert "Record: a record of the source exists, but its text could not be read" in md(True)
+    assert "Record:" not in md(None)
 
 
 def test_unknown_mode_rejected():
