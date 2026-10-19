@@ -1,0 +1,12 @@
+{
+ "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+ "calls": 78,
+ "cached_calls": 77,
+ "prompt_tokens": 169096,
+ "completion_tokens": 77796,
+ "price_per_1m_tokens_usd": {
+  "input": 0.2,
+  "output": 0.6
+ },
+ "usd": 0.0805
+}

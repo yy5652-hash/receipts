@@ -1,0 +1,247 @@
+[
+ {
+  "id": "wiki-great-barrier-reef",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Great_Barrier_Reef",
+  "title": "Great Barrier Reef",
+  "chars": 102729
+ },
+ {
+  "id": "wiki-amazon-rainforest",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+  "title": "Amazon rainforest",
+  "chars": 87430
+ },
+ {
+  "id": "wiki-iss",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/International_Space_Station",
+  "title": "International Space Station",
+  "chars": 262500
+ },
+ {
+  "id": "wiki-panama-canal",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Panama_Canal",
+  "title": "Panama Canal",
+  "chars": 139536
+ },
+ {
+  "id": "wiki-lhc",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Large_Hadron_Collider",
+  "title": "Large Hadron Collider",
+  "chars": 92161
+ },
+ {
+  "id": "wiki-three-gorges",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Three_Gorges_Dam",
+  "title": "Three Gorges Dam",
+  "chars": 76891
+ },
+ {
+  "id": "wiki-burj-khalifa",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+  "title": "Burj Khalifa",
+  "chars": 88057
+ },
+ {
+  "id": "wiki-apollo-11",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Apollo_11",
+  "title": "Apollo 11",
+  "chars": 151733
+ },
+ {
+  "id": "wiki-human-genome",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Human_Genome_Project",
+  "title": "Human Genome Project",
+  "chars": 68694
+ },
+ {
+  "id": "wiki-jwst",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope",
+  "title": "James Webb Space Telescope",
+  "chars": 174267
+ },
+ {
+  "id": "wiki-blue-whale",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Blue_whale",
+  "title": "Blue whale",
+  "chars": 59417
+ },
+ {
+  "id": "wiki-penicillin",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Penicillin",
+  "title": "Penicillin",
+  "chars": 89089
+ },
+ {
+  "id": "wiki-lagos",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Lagos",
+  "title": "Lagos",
+  "chars": 164783
+ },
+ {
+  "id": "wiki-iceland",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Iceland",
+  "title": "Iceland",
+  "chars": 157543
+ },
+ {
+  "id": "wiki-bitcoin",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Bitcoin",
+  "title": "Bitcoin",
+  "chars": 72617
+ },
+ {
+  "id": "wiki-honey-bee",
+  "kind": "wikipedia",
+  "url": "https://en.wikipedia.org/wiki/Honey_bee",
+  "title": "Honey bee",
+  "chars": 93767
+ },
+ {
+  "id": "who-malaria",
+  "kind": "organisation",
+  "url": "https://www.who.int/news-room/fact-sheets/detail/malaria",
+  "title": "Malaria",
+  "chars": 23638
+ },
+ {
+  "id": "who-obesity",
+  "kind": "organisation",
+  "url": "https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight",
+  "title": "Obesity and overweight",
+  "chars": 9977
+ },
+ {
+  "id": "who-diabetes",
+  "kind": "organisation",
+  "url": "https://www.who.int/news-room/fact-sheets/detail/diabetes",
+  "title": "Diabetes",
+  "chars": 6218
+ },
+ {
+  "id": "nasa-mars",
+  "kind": "organisation",
+  "url": "https://science.nasa.gov/mars/facts/",
+  "title": "Mars Facts",
+  "chars": 19592
+ },
+ {
+  "id": "nasa-jupiter",
+  "kind": "organisation",
+  "url": "https://science.nasa.gov/jupiter/facts/",
+  "title": "Jupiter Facts",
+  "chars": 21576
+ },
+ {
+  "id": "iea-ai-summary",
+  "kind": "organisation",
+  "url": "https://www.iea.org/reports/energy-and-ai/executive-summary",
+  "title": "Executive summary",
+  "chars": 19587
+ },
+ {
+  "id": "iea-ai-demand",
+  "kind": "organisation",
+  "url": "https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai",
+  "title": "Energy demand from AI",
+  "chars": 10924
+ },
+ {
+  "id": "owid-co2",
+  "kind": "organisation",
+  "url": "https://ourworldindata.org/co2-emissions",
+  "title": "CO₂ emissions",
+  "chars": 25449
+ },
+ {
+  "id": "noaa-acidification",
+  "kind": "organisation",
+  "url": "https://www.noaa.gov/education/resource-collections/ocean-coasts/ocean-acidification",
+  "title": "Ocean acidification",
+  "chars": 14408
+ },
+ {
+  "id": "arxiv-transformer",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/1706.03762",
+  "title": "Attention Is All You Need",
+  "chars": 40008
+ },
+ {
+  "id": "arxiv-bert",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/1810.04805",
+  "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+  "chars": 63707
+ },
+ {
+  "id": "arxiv-gpt3",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2005.14165",
+  "title": "Language Models are Few-Shot Learners",
+  "chars": 236695
+ },
+ {
+  "id": "arxiv-resnet",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/1512.03385",
+  "title": "Deep Residual Learning for Image Recognition",
+  "chars": 58476
+ },
+ {
+  "id": "arxiv-chinchilla",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2203.15556",
+  "title": "Training Compute-Optimal Large Language Models",
+  "chars": 96656
+ },
+ {
+  "id": "arxiv-rag",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2005.11401",
+  "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+  "chars": 68318
+ },
+ {
+  "id": "arxiv-clip",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2103.00020",
+  "title": "Learning Transferable Visual Models From Natural Language Supervision",
+  "chars": 223560
+ },
+ {
+  "id": "arxiv-ddpm",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2006.11239",
+  "title": "Denoising Diffusion Probabilistic Models",
+  "chars": 55920
+ },
+ {
+  "id": "arxiv-llama2",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/2307.09288",
+  "title": "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+  "chars": 263685
+ },
+ {
+  "id": "arxiv-adam",
+  "kind": "arxiv",
+  "url": "https://arxiv.org/pdf/1412.6980",
+  "title": "Adam: A Method for Stochastic Optimization",
+  "chars": 41944
+ }
+]

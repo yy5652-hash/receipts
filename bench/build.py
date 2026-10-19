@@ -346,8 +346,12 @@ def make_fabricated(gen: Gen, topics: list[str], need: int, client: httpx.Client
     """>= `need` invented references (20 asked per round) whose titles Crossref does not know."""
     good: list[dict] = []
     seen: set[str] = set()
-    for _ in range(3):
-        raw = gen.json(FAB_SYSTEM, f"Write 20 references. Topics: {'; '.join(topics)}").get("refs")
+    for round_no in range(6):  # each round is a new prompt, so the generator cache does not repeat a round
+        avoid = "; ".join(r["title"] for r in good) or "none yet"
+        prompt = f"Write 20 references. Topics: {'; '.join(topics)}"
+        if round_no:
+            prompt += f"\nRound {round_no + 1}. Use different topics and wording from these titles: {avoid}"
+        raw = gen.json(FAB_SYSTEM, prompt).get("refs")
         for r in raw if isinstance(raw, list) else []:
             try:
                 names = [str(a).strip() for a in r["authors"] if str(a).strip()]
