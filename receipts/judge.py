@@ -105,10 +105,10 @@ def judge_all(
 
     def run(job) -> Verdict:
         claim, source, f = job
-        first = "super" if mode == "cascade" else mode
+        first, last = settings.cascade if mode == "cascade" else (mode, mode)
         v = judge_one(claim, source, f, llm, first, model=settings.models[first])
         if mode == "cascade" and v.tier != "none" and _should_escalate(v, settings.escalate_below):
-            v = judge_one(claim, source, f, llm, "ultra", model=settings.models["ultra"])
+            v = judge_one(claim, source, f, llm, last, model=settings.models[last])
             v.escalated = True
         if on_event:
             with lock:

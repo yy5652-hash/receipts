@@ -82,6 +82,16 @@ def test_cascade_escalates_contradicted_not_clean_supported():
     assert len(events) == 2 and all(e["type"] == "verdict" for e in events)
 
 
+def test_cascade_tiers_are_configurable():
+    claims = [claim("c1", "Global investment in renewable energy reached $500 billion in 2022."),
+              claim("c2", "Global investment in renewable energy reached $400 billion in 2022.")]
+    llm = FakeLLM()
+    c1, c2 = judge_all(claims, [SRC], [ok()], llm, "cascade", _settings(cascade=("nano", "ultra")))
+    assert (c1.tier, c1.escalated, c1.model) == ("ultra", True, "m-ultra")
+    assert (c2.tier, c2.escalated, c2.model) == ("nano", False, "m-nano")
+    assert sorted(t for _, t in llm.calls) == ["nano", "nano", "ultra"]
+
+
 def test_cascade_escalates_low_confidence_and_unverified_supported():
     c = claim("c1", "Investment hit $400 billion.")
     v = judge_all([c], [SRC], [ok()], Scripted({"label": "supported", "confidence": 0.95, "quote": "nope nope nope nope"}), "cascade", _settings())[0]

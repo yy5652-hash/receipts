@@ -34,6 +34,7 @@ class Settings:
     cache_dir: Path = REPO_ROOT / ".cache"
     escalate_below: float = 0.7
     max_workers: int = 8
+    cascade: tuple[str, str] = ("super", "ultra")  # first-pass tier, escalation tier of the "cascade" mode
 
     def __post_init__(self):
         for t in TIERS:
@@ -61,11 +62,18 @@ def _json_dict(raw: str | None) -> dict:
     return val if isinstance(val, dict) else {}
 
 
+def _cascade(raw: str | None) -> tuple[str, str]:
+    """RECEIPTS_CASCADE="nano,ultra" -> ("nano", "ultra"); anything invalid keeps the default."""
+    parts = tuple(p.strip().lower() for p in (raw or "").split(","))
+    return parts if len(parts) == 2 and all(p in TIERS for p in parts) else ("super", "ultra")  # type: ignore[return-value]
+
+
 def load_settings() -> Settings:
     load_dotenv(REPO_ROOT / ".env")
     env = os.environ.get
     up = {t: t.upper() for t in TIERS}
     return Settings(
+        cascade=_cascade(env("RECEIPTS_CASCADE")),
         nebius_api_key=env("NEBIUS_API_KEY") or None,
         tavily_api_key=env("TAVILY_API_KEY") or None,
         models={t: env(f"RECEIPTS_MODEL_{up[t]}") or DEFAULT_MODELS[t] for t in TIERS},

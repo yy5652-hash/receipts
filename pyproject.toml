@@ -15,6 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = ["pytest>=8"]
+bench = ["matplotlib>=3.8"]  # bench/report.py: the cost-vs-quality SVG
 
 [project.scripts]
 receipts = "receipts.cli:main"
