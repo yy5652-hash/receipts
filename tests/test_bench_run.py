@@ -69,7 +69,7 @@ def test_run_report_judges_with_a_fresh_llm_per_config_and_adds_shared_cost():
 
 
 def test_config_table_matches_the_spec():
-    assert list(run.CONFIGS) == ["nano", "super", "ultra", "cascade", "cascade_nano"]
+    assert list(run.CONFIGS) == ["nano", "super", "ultra", "cascade", "cascade_nano", "routed"]
     assert run.CONFIGS["cascade"] == ("cascade", ("super", "ultra")) and run.CONFIGS["cascade_nano"] == ("cascade", ("nano", "ultra"))
 
 

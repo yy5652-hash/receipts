@@ -63,6 +63,7 @@ class Verdict(BaseModel):
     model: str = ""
     tier: Tier = "none"
     escalated: bool = False
+    unbacked: list[str] = []  # routed mode: figures or absolute words of the claim the first quote did not show
     passages: list[Passage] = []
 
 

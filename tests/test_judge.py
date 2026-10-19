@@ -1,5 +1,5 @@
 from receipts.config import Settings
-from receipts.judge import JUDGE_SYSTEM, judge_all, judge_one
+from receipts.judge import JUDGE_SYSTEM, judge_all, judge_one, unbacked
 from receipts.models import Claim, FetchedSource, Source
 from receipts.testing import FakeLLM
 
@@ -117,3 +117,27 @@ def test_one_verdict_per_claim_source_pair_in_order():
     vs = judge_all([c], srcs, [ok("s1"), ok("s2", "Unrelated text about cats.")], FakeLLM(), "super", _settings())
     assert [(v.claim_id, v.source_id) for v in vs] == [("c1", "s1"), ("c1", "s2")]
     assert vs[0].label == "supported" and vs[1].label == "not_in_source"
+
+
+def test_unbacked_lists_figures_and_absolute_words_the_quote_lacks():
+    q = "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year."
+    assert unbacked("Investment reached $400 billion in 2022.", q) == []
+    assert unbacked("Investment reached $540 billion in 2022.", q) == ["540"]
+    assert unbacked("Investment reached $400 billion, the largest ever, and will always grow.", q) == ["largest", "always"]
+
+
+def test_routed_rechecks_only_supported_verdicts_whose_quote_lacks_the_claim():
+    backed = claim("c1", "Global investment in renewable energy reached $400 billion in 2022.")
+    llm = FakeLLM()
+    (v,) = judge_all([backed], [SRC], [ok()], llm, "routed", _settings())
+    assert (v.tier, v.escalated, v.unbacked) == ("nano", False, [])
+    # the first judge says supported, but its quote does not carry the claimed figure: Ultra takes a second look
+    odd = claim("c1", "Investment reached $540 billion in 2022.")
+    out = {"label": "supported", "confidence": 0.95, "quote": "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year."}
+    (v,) = judge_all([odd], [SRC], [ok()], Scripted(out), "routed", _settings())
+    assert v.escalated and v.tier == "ultra" and v.unbacked == ["540"]
+    # a problem the first judge found stands without a second call
+    out = {"label": "contradicted", "confidence": 0.9, "quote": "Solar led the total."}
+    llm = Scripted(out)
+    (v,) = judge_all([odd], [SRC], [ok()], llm, "routed", _settings())
+    assert (v.tier, v.escalated) == ("nano", False) and len(llm.calls) == 1

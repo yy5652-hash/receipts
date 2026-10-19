@@ -11,6 +11,17 @@
    "judge_seconds": 18.41,
    "seconds": 30.0
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.006746,
+   "extract_cost_usd": 0.000264,
+   "extract_seconds": 11.49,
+   "fetch_seconds": 0.1,
+   "gold_items": 10,
+   "judge_cost_usd": 0.006482,
+   "judge_seconds": 17.68,
+   "seconds": 29.27
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.008183,
@@ -21,6 +32,17 @@
    "judge_cost_usd": 0.007919,
    "judge_seconds": 4.84,
    "seconds": 16.43
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.031418,
+   "extract_cost_usd": 0.000264,
+   "extract_seconds": 11.49,
+   "fetch_seconds": 0.1,
+   "gold_items": 10,
+   "judge_cost_usd": 0.031154,
+   "judge_seconds": 7.19,
+   "seconds": 18.78
   }
  },
  "r02": {
@@ -35,6 +57,17 @@
    "judge_seconds": 15.07,
    "seconds": 28.55
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002535,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 12.37,
+   "fetch_seconds": 1.11,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002252,
+   "judge_seconds": 24.11,
+   "seconds": 37.59
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007763,
@@ -45,6 +78,17 @@
    "judge_cost_usd": 0.00748,
    "judge_seconds": 6.13,
    "seconds": 19.61
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.025597,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 12.37,
+   "fetch_seconds": 1.11,
+   "gold_items": 10,
+   "judge_cost_usd": 0.025314,
+   "judge_seconds": 6.7,
+   "seconds": 20.18
   }
  },
  "r03": {
@@ -59,6 +103,17 @@
    "judge_seconds": 17.89,
    "seconds": 29.38
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002389,
+   "extract_cost_usd": 0.000257,
+   "extract_seconds": 11.42,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002132,
+   "judge_seconds": 16.12,
+   "seconds": 27.61
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.008181,
@@ -69,6 +124,17 @@
    "judge_cost_usd": 0.007924,
    "judge_seconds": 9.98,
    "seconds": 21.47
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.025391,
+   "extract_cost_usd": 0.000257,
+   "extract_seconds": 11.42,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.025134,
+   "judge_seconds": 8.76,
+   "seconds": 20.25
   }
  },
  "r04": {
@@ -83,6 +149,17 @@
    "judge_seconds": 13.13,
    "seconds": 24.93
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.006664,
+   "extract_cost_usd": 0.000264,
+   "extract_seconds": 11.59,
+   "fetch_seconds": 0.21,
+   "gold_items": 10,
+   "judge_cost_usd": 0.0064,
+   "judge_seconds": 29.03,
+   "seconds": 40.83
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.006655,
@@ -93,6 +170,17 @@
    "judge_cost_usd": 0.006391,
    "judge_seconds": 4.49,
    "seconds": 16.29
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.026432,
+   "extract_cost_usd": 0.000264,
+   "extract_seconds": 11.59,
+   "fetch_seconds": 0.21,
+   "gold_items": 10,
+   "judge_cost_usd": 0.026168,
+   "judge_seconds": 4.68,
+   "seconds": 16.48
   }
  },
  "r05": {
@@ -107,6 +195,17 @@
    "judge_seconds": 21.93,
    "seconds": 33.57
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002761,
+   "extract_cost_usd": 0.00027,
+   "extract_seconds": 11.58,
+   "fetch_seconds": 0.06,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002491,
+   "judge_seconds": 15.64,
+   "seconds": 27.28
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007555,
@@ -117,6 +216,17 @@
    "judge_cost_usd": 0.007285,
    "judge_seconds": 6.3,
    "seconds": 17.94
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.027046,
+   "extract_cost_usd": 0.00027,
+   "extract_seconds": 11.58,
+   "fetch_seconds": 0.06,
+   "gold_items": 10,
+   "judge_cost_usd": 0.026776,
+   "judge_seconds": 10.04,
+   "seconds": 21.68
   }
  },
  "r06": {
@@ -131,6 +241,17 @@
    "judge_seconds": 14.78,
    "seconds": 27.28
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002541,
+   "extract_cost_usd": 0.00049,
+   "extract_seconds": 12.36,
+   "fetch_seconds": 0.14,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002051,
+   "judge_seconds": 16.4,
+   "seconds": 28.9
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007477,
@@ -141,6 +262,17 @@
    "judge_cost_usd": 0.006987,
    "judge_seconds": 8.62,
    "seconds": 21.12
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.026646,
+   "extract_cost_usd": 0.00049,
+   "extract_seconds": 12.36,
+   "fetch_seconds": 0.14,
+   "gold_items": 10,
+   "judge_cost_usd": 0.026156,
+   "judge_seconds": 9.69,
+   "seconds": 22.19
   }
  },
  "r07": {
@@ -155,6 +287,17 @@
    "judge_seconds": 21.33,
    "seconds": 32.86
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002187,
+   "extract_cost_usd": 0.000266,
+   "extract_seconds": 11.46,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.001921,
+   "judge_seconds": 15.92,
+   "seconds": 27.45
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.006874,
@@ -165,6 +308,17 @@
    "judge_cost_usd": 0.006608,
    "judge_seconds": 4.72,
    "seconds": 16.25
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.024592,
+   "extract_cost_usd": 0.000266,
+   "extract_seconds": 11.46,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.024326,
+   "judge_seconds": 8.39,
+   "seconds": 19.92
   }
  },
  "r08": {
@@ -179,6 +333,17 @@
    "judge_seconds": 11.99,
    "seconds": 24.08
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002412,
+   "extract_cost_usd": 0.000286,
+   "extract_seconds": 11.98,
+   "fetch_seconds": 0.11,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002126,
+   "judge_seconds": 12.26,
+   "seconds": 24.35
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.006869,
@@ -189,6 +354,17 @@
    "judge_cost_usd": 0.006583,
    "judge_seconds": 4.13,
    "seconds": 16.22
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.026229,
+   "extract_cost_usd": 0.000286,
+   "extract_seconds": 11.98,
+   "fetch_seconds": 0.11,
+   "gold_items": 10,
+   "judge_cost_usd": 0.025943,
+   "judge_seconds": 4.62,
+   "seconds": 16.71
   }
  },
  "r09": {
@@ -203,6 +379,17 @@
    "judge_seconds": 14.92,
    "seconds": 26.27
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002397,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 11.3,
+   "fetch_seconds": 0.05,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002114,
+   "judge_seconds": 11.04,
+   "seconds": 22.39
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007508,
@@ -213,6 +400,17 @@
    "judge_cost_usd": 0.007225,
    "judge_seconds": 5.0,
    "seconds": 16.35
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.04792,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 11.3,
+   "fetch_seconds": 0.05,
+   "gold_items": 10,
+   "judge_cost_usd": 0.047637,
+   "judge_seconds": 22.93,
+   "seconds": 34.28
   }
  },
  "r10": {
@@ -227,6 +425,17 @@
    "judge_seconds": 92.66,
    "seconds": 105.48
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.00201,
+   "extract_cost_usd": 0.000239,
+   "extract_seconds": 10.16,
+   "fetch_seconds": 2.66,
+   "gold_items": 10,
+   "judge_cost_usd": 0.001771,
+   "judge_seconds": 13.66,
+   "seconds": 26.48
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.005976,
@@ -237,6 +446,17 @@
    "judge_cost_usd": 0.005737,
    "judge_seconds": 39.48,
    "seconds": 52.3
+  },
+  "ultra": {
+   "claims": 10,
+   "cost_usd": 0.02304,
+   "extract_cost_usd": 0.000239,
+   "extract_seconds": 10.16,
+   "fetch_seconds": 2.66,
+   "gold_items": 10,
+   "judge_cost_usd": 0.022801,
+   "judge_seconds": 6.55,
+   "seconds": 19.37
   }
  },
  "r11": {
@@ -272,6 +492,17 @@
    "judge_cost_usd": 0.00239,
    "judge_seconds": 30.8,
    "seconds": 43.5
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.003203,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 12.62,
+   "fetch_seconds": 0.08,
+   "gold_items": 10,
+   "judge_cost_usd": 0.00292,
+   "judge_seconds": 48.78,
+   "seconds": 61.48
   },
   "super": {
    "claims": 10,
@@ -330,6 +561,17 @@
    "judge_seconds": 25.32,
    "seconds": 37.19
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.00301,
+   "extract_cost_usd": 0.000277,
+   "extract_seconds": 10.33,
+   "fetch_seconds": 1.54,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002733,
+   "judge_seconds": 21.25,
+   "seconds": 33.12
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.008086,
@@ -386,6 +628,17 @@
    "judge_cost_usd": 0.002156,
    "judge_seconds": 17.7,
    "seconds": 34.89
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002565,
+   "extract_cost_usd": 0.000435,
+   "extract_seconds": 17.14,
+   "fetch_seconds": 0.05,
+   "gold_items": 10,
+   "judge_cost_usd": 0.00213,
+   "judge_seconds": 9.08,
+   "seconds": 26.27
   },
   "super": {
    "claims": 10,
@@ -444,6 +697,17 @@
    "judge_seconds": 22.68,
    "seconds": 42.35
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002614,
+   "extract_cost_usd": 0.000278,
+   "extract_seconds": 11.36,
+   "fetch_seconds": 8.31,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002336,
+   "judge_seconds": 23.0,
+   "seconds": 42.67
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.00756,
@@ -500,6 +764,17 @@
    "judge_cost_usd": 0.00215,
    "judge_seconds": 14.73,
    "seconds": 25.99
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.011757,
+   "extract_cost_usd": 0.000267,
+   "extract_seconds": 11.18,
+   "fetch_seconds": 0.08,
+   "gold_items": 10,
+   "judge_cost_usd": 0.01149,
+   "judge_seconds": 22.36,
+   "seconds": 33.62
   },
   "super": {
    "claims": 10,
@@ -558,6 +833,17 @@
    "judge_seconds": 17.16,
    "seconds": 28.6
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002413,
+   "extract_cost_usd": 0.000268,
+   "extract_seconds": 11.25,
+   "fetch_seconds": 0.19,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002145,
+   "judge_seconds": 16.7,
+   "seconds": 28.14
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007031,
@@ -614,6 +900,17 @@
    "judge_cost_usd": 0.002087,
    "judge_seconds": 18.59,
    "seconds": 29.03
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.00225,
+   "extract_cost_usd": 0.000281,
+   "extract_seconds": 10.37,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.001969,
+   "judge_seconds": 16.93,
+   "seconds": 27.37
   },
   "super": {
    "claims": 10,
@@ -672,6 +969,17 @@
    "judge_seconds": 13.39,
    "seconds": 24.36
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002357,
+   "extract_cost_usd": 0.000238,
+   "extract_seconds": 10.36,
+   "fetch_seconds": 0.61,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002119,
+   "judge_seconds": 16.91,
+   "seconds": 27.88
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007899,
@@ -728,6 +1036,17 @@
    "judge_cost_usd": 0.002222,
    "judge_seconds": 15.16,
    "seconds": 29.86
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.013651,
+   "extract_cost_usd": 0.000283,
+   "extract_seconds": 12.31,
+   "fetch_seconds": 2.39,
+   "gold_items": 10,
+   "judge_cost_usd": 0.013368,
+   "judge_seconds": 23.52,
+   "seconds": 38.22
   },
   "super": {
    "claims": 10,
@@ -786,6 +1105,17 @@
    "judge_seconds": 15.69,
    "seconds": 28.37
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.003197,
+   "extract_cost_usd": 0.000262,
+   "extract_seconds": 11.78,
+   "fetch_seconds": 0.9,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002935,
+   "judge_seconds": 38.1,
+   "seconds": 50.78
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.009657,
@@ -842,6 +1172,17 @@
    "judge_cost_usd": 0.002325,
    "judge_seconds": 16.77,
    "seconds": 27.47
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002569,
+   "extract_cost_usd": 0.000261,
+   "extract_seconds": 10.61,
+   "fetch_seconds": 0.09,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002308,
+   "judge_seconds": 13.95,
+   "seconds": 24.65
   },
   "super": {
    "claims": 10,
@@ -900,6 +1241,17 @@
    "judge_seconds": 20.66,
    "seconds": 31.02
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.005483,
+   "extract_cost_usd": 0.000247,
+   "extract_seconds": 10.27,
+   "fetch_seconds": 0.09,
+   "gold_items": 10,
+   "judge_cost_usd": 0.005236,
+   "judge_seconds": 13.87,
+   "seconds": 24.23
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007145,
@@ -956,6 +1308,17 @@
    "judge_cost_usd": 0.001916,
    "judge_seconds": 16.72,
    "seconds": 31.46
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002114,
+   "extract_cost_usd": 0.000282,
+   "extract_seconds": 14.67,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.001832,
+   "judge_seconds": 11.49,
+   "seconds": 26.23
   },
   "super": {
    "claims": 10,
@@ -1014,6 +1377,17 @@
    "judge_seconds": 35.79,
    "seconds": 48.97
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002768,
+   "extract_cost_usd": 0.000259,
+   "extract_seconds": 13.03,
+   "fetch_seconds": 0.15,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002509,
+   "judge_seconds": 19.98,
+   "seconds": 33.16
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007515,
@@ -1070,6 +1444,17 @@
    "judge_cost_usd": 0.002293,
    "judge_seconds": 30.48,
    "seconds": 47.05
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.003361,
+   "extract_cost_usd": 0.000427,
+   "extract_seconds": 16.52,
+   "fetch_seconds": 0.05,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002934,
+   "judge_seconds": 57.29,
+   "seconds": 73.86
   },
   "super": {
    "claims": 10,
@@ -1128,6 +1513,17 @@
    "judge_seconds": 16.35,
    "seconds": 30.93
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002611,
+   "extract_cost_usd": 0.000492,
+   "extract_seconds": 14.11,
+   "fetch_seconds": 0.47,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002119,
+   "judge_seconds": 11.9,
+   "seconds": 26.48
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007761,
@@ -1184,6 +1580,17 @@
    "judge_cost_usd": 0.002295,
    "judge_seconds": 23.65,
    "seconds": 39.29
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.009504,
+   "extract_cost_usd": 0.000302,
+   "extract_seconds": 15.57,
+   "fetch_seconds": 0.07,
+   "gold_items": 10,
+   "judge_cost_usd": 0.009202,
+   "judge_seconds": 17.62,
+   "seconds": 33.26
   },
   "super": {
    "claims": 10,
@@ -1242,6 +1649,17 @@
    "judge_seconds": 25.68,
    "seconds": 38.46
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002702,
+   "extract_cost_usd": 0.000393,
+   "extract_seconds": 12.67,
+   "fetch_seconds": 0.11,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002309,
+   "judge_seconds": 12.43,
+   "seconds": 25.21
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.007975,
@@ -1299,6 +1717,17 @@
    "judge_seconds": 22.61,
    "seconds": 39.68
   },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002247,
+   "extract_cost_usd": 0.000292,
+   "extract_seconds": 16.97,
+   "fetch_seconds": 0.1,
+   "gold_items": 10,
+   "judge_cost_usd": 0.001955,
+   "judge_seconds": 15.31,
+   "seconds": 32.38
+  },
   "super": {
    "claims": 10,
    "cost_usd": 0.006519,
@@ -1355,6 +1784,17 @@
    "judge_cost_usd": 0.002215,
    "judge_seconds": 19.56,
    "seconds": 32.91
+  },
+  "routed": {
+   "claims": 10,
+   "cost_usd": 0.002489,
+   "extract_cost_usd": 0.000244,
+   "extract_seconds": 13.22,
+   "fetch_seconds": 0.13,
+   "gold_items": 10,
+   "judge_cost_usd": 0.002245,
+   "judge_seconds": 12.22,
+   "seconds": 25.57
   },
   "super": {
    "claims": 10,

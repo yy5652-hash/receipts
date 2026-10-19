@@ -1,0 +1,15 @@
+{
+  "version": "ReceiptsBench v1.1",
+  "audited": "2026-10-19",
+  "method": "Every generated overclaim was read against its source page (not against any model's output). Items whose strengthened wording is true or arguably supported by the source are not scored.",
+  "excluded": [
+    {"report": "r03", "start": 900, "reason": "True as stated: the Burj Khalifa was the first building to surpass Taipei 101."},
+    {"report": "r04", "start": 48, "reason": "'Definitively' adds emphasis to a true statement; it does not make it false."},
+    {"report": "r05", "start": 59, "reason": "'First and only ... as of January 2022' is plausibly true at that date."},
+    {"report": "r12", "start": 464, "reason": "True: the subgenus Micrapis contains exactly these two species."},
+    {"report": "r15", "start": 44, "reason": "The source page calls Reykjavik the world's northernmost capital of a sovereign state."},
+    {"report": "r19", "start": 1076, "reason": "'Every token must attend to all previous tokens' is a fair description of causal attention."},
+    {"report": "r24", "start": 267, "reason": "'Without interruption' is not stated, but nothing in the source contradicts it."},
+    {"report": "r29", "start": 603, "reason": "The same source projects about 1,200 TWh by 2035, so continued growth is supported."}
+  ]
+}

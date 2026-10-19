@@ -1,6 +1,7 @@
 """Stage 3: judge whether each cited source actually says what the claim says."""
 
 import json
+import re
 import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -9,7 +10,7 @@ from .config import Settings
 from .llm import LLM
 from .locate import locate
 from .models import Claim, FetchedSource, Source, Verdict
-from .textutil import contains_quote
+from .textutil import contains_quote, normalize, numbers
 
 JUDGE_SYSTEM = """You are a meticulous fact-checker. You are given a CLAIM from a research report, \
 the title and reference entry of the SOURCE it cites, and PASSAGES retrieved from that source. Decide whether the \
@@ -39,7 +40,14 @@ Return ONLY a JSON object of exactly this shape:
 "quote": "<verbatim sentence from the passages>", "rationale": "<one sentence>"}"""
 
 LLM_LABELS = {"supported", "partial", "contradicted", "not_in_source"}
-MODES = {"nano", "super", "ultra", "cascade"}
+MODES = {"nano", "super", "ultra", "cascade", "routed"}
+# Absolute or strengthening words: a claim that uses one needs a quote that says it too.
+STRONG = re.compile(
+    r"\b(?:only|all|every|always|never|none|first|last|largest|smallest|biggest|highest|lowest|longest|most|least|"
+    r"exactly|entirely|completely|fully|definitively|certainly|undoubtedly|proves?|proven|causes?|caused|"
+    r"guarantees?|eliminat\w*|solves?|solved|without|unique|uniquely|solely|forever|permanently|universally)\b",
+    re.I,
+)
 
 
 def _unavailable(claim: Claim, fetched: FetchedSource) -> Verdict:
@@ -84,6 +92,27 @@ def judge_one(claim: Claim, source: Source, fetched: FetchedSource, llm: LLM, ti
     return Verdict(**base, label=label, confidence=conf, quote=quote, quote_found=quote_found, rationale=rationale)
 
 
+def unbacked(claim: str, quote: str) -> list[str]:
+    """What the claim asserts that the judge's own quote does not show: its figures and absolute words."""
+    q = normalize(quote)
+    missing = sorted(numbers(claim) - numbers(quote))
+    missing += [w for w in dict.fromkeys(x.lower() for x in STRONG.findall(claim))
+                if not re.search(rf"\b{re.escape(w)}\b", q)]
+    return missing
+
+
+def _needs_second_look(v: Verdict, claim: Claim) -> list[str]:
+    """Routed mode: re-check a 'supported' verdict whose evidence does not visibly carry the claim.
+    Problems the first judge found stand (its false-alarm rate is low); a failed answer is retried."""
+    if v.tier == "none":
+        return []
+    if v.label != "supported":
+        return ["no usable answer"] if v.confidence == 0.0 and not v.quote else []
+    if not v.quote_found:
+        return ["quote not found in source"]
+    return unbacked(claim.claim, v.quote)
+
+
 def _should_escalate(v: Verdict, threshold: float) -> bool:
     return (v.confidence < threshold or v.label in ("contradicted", "partial", "not_in_source")
             or (v.label == "supported" and not v.quote_found))
@@ -108,11 +137,14 @@ def judge_all(
 
     def run(job) -> Verdict:
         claim, source, f = job
-        first, last = settings.cascade if mode == "cascade" else (mode, mode)
+        first, last = {"cascade": settings.cascade, "routed": settings.route}.get(mode, (mode, mode))
         v = judge_one(claim, source, f, llm, first, model=settings.models[first])
         if mode == "cascade" and v.tier != "none" and _should_escalate(v, settings.escalate_below):
             v = judge_one(claim, source, f, llm, last, model=settings.models[last])
             v.escalated = True
+        elif mode == "routed" and (why := _needs_second_look(v, claim)):
+            v = judge_one(claim, source, f, llm, last, model=settings.models[last])
+            v.escalated, v.unbacked = True, why
         if on_event:
             with lock:
                 on_event({"type": "verdict", "claim_id": v.claim_id, "source_id": v.source_id, "label": v.label,

@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--base", default="results")
     ap.add_argument("--new", required=True)
     ap.add_argument("--split", choices=sorted(SPLITS), default="test")
-    ap.add_argument("--configs", default="nano,super,ultra,cascade,cascade_nano")
+    ap.add_argument("--configs", default="nano,super,ultra,cascade,cascade_nano,routed")
     ap.add_argument("--md", help="also write the table to this file (under bench/)")
     args = ap.parse_args(argv)
     reports = SPLITS[args.split]

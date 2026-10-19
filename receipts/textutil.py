@@ -247,6 +247,9 @@ def strip_citations(s: str) -> str:
 def numbers(text: str) -> set[str]:
     """Numeric tokens in text; thousands separators removed (1,200 -> 1200)."""
     out = set()
+    # "1 200" and "1\u202f200" (space-grouped thousands, common in IEA and SI style) are one number
+    text = re.sub(r"(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d])",
+                  lambda m: m.group(1) + re.sub(r"\D", "", m.group(2)), text)
     for tok in re.findall(r"\d+(?:[.,]\d+)*", text):
         out.add(tok.replace(",", "") if re.fullmatch(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?", tok) else tok)
     return out

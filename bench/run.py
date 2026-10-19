@@ -30,7 +30,8 @@ HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results"
 # config -> (judge mode, cascade tiers)
 CONFIGS = {"nano": ("nano", None), "super": ("super", None), "ultra": ("ultra", None),
-           "cascade": ("cascade", ("super", "ultra")), "cascade_nano": ("cascade", ("nano", "ultra"))}
+           "cascade": ("cascade", ("super", "ultra")), "cascade_nano": ("cascade", ("nano", "ultra")),
+           "routed": ("routed", None)}  # Nano checks; Ultra re-checks supported verdicts whose quote lacks the claim's figures
 MIN_OVERLAP = 0.5  # a claim matches a gold sentence when it covers at least this share of it
 
 

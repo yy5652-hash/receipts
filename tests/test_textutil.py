@@ -184,3 +184,11 @@ def test_clean_emphasis_leaves_identifiers_urls_and_maths():
 
 def test_clean_collapses_whitespace():
     assert clean_web_text("a   b \t c\n\n\n\n d \n \n\n e  ") == "a b c\n\n d\n\n e"
+
+
+def test_numbers_joins_space_grouped_thousands():
+    from receipts.textutil import numbers
+    assert numbers("over 1 200 kWh by 2030") == {"1200", "2030"}
+    assert numbers("around 1\u202f100 TWh") == {"1100"}
+    assert numbers("in 2022 2023 and 3.5 days") == {"2022", "2023", "3.5"}
+    assert numbers("21,196 km") == {"21196"}
