@@ -11,7 +11,16 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TIERS = ("nano", "super", "ultra")
 BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
 
-DEFAULT_PRICES = {"nano": (0.06, 0.24), "super": (0.30, 0.90), "ultra": (0.60, 1.80)}
+# NVIDIA Nemotron models served on Token Factory (IDs and USD per 1M tokens from /v1/models, 2026-10-19).
+DEFAULT_MODELS = {
+    "nano": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "super": "nvidia/nemotron-3-super-120b-a12b",
+    "ultra": "nvidia/Nemotron-3-Ultra-550b-a55b",
+}
+DEFAULT_PRICES = {"nano": (0.06, 0.24), "super": (0.30, 0.90), "ultra": (1.00, 3.00)}
+# Nano extracts with reasoning off (fast, cheap); Super and Ultra judge with reasoning on.
+NO_THINKING = {"chat_template_kwargs": {"enable_thinking": False}}
+DEFAULT_EXTRA_BODY = {"nano": NO_THINKING, "super": {}, "ultra": {}}
 
 
 @dataclass
@@ -28,7 +37,7 @@ class Settings:
 
     def __post_init__(self):
         for t in TIERS:
-            self.models.setdefault(t, f"nvidia/nemotron-{t}-placeholder")
+            self.models.setdefault(t, DEFAULT_MODELS[t])
             self.tier_options.setdefault(t, {"system_prefix": "", "extra_body": {}})
 
 
@@ -59,12 +68,12 @@ def load_settings() -> Settings:
     return Settings(
         nebius_api_key=env("NEBIUS_API_KEY") or None,
         tavily_api_key=env("TAVILY_API_KEY") or None,
-        models={t: env(f"RECEIPTS_MODEL_{up[t]}") or f"nvidia/nemotron-{t}-placeholder" for t in TIERS},
+        models={t: env(f"RECEIPTS_MODEL_{up[t]}") or DEFAULT_MODELS[t] for t in TIERS},
         prices={t: _price(env(f"RECEIPTS_PRICE_{up[t]}"), DEFAULT_PRICES[t]) for t in TIERS},
         tier_options={
             t: {
                 "system_prefix": env(f"RECEIPTS_SYSPREFIX_{up[t]}") or "",
-                "extra_body": _json_dict(env(f"RECEIPTS_EXTRA_BODY_{up[t]}")),
+                "extra_body": _json_dict(env(f"RECEIPTS_EXTRA_BODY_{up[t]}")) or dict(DEFAULT_EXTRA_BODY[t]),
             }
             for t in TIERS
         },

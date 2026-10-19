@@ -7,9 +7,10 @@ def test_load_settings_defaults_and_overrides(monkeypatch):
         monkeypatch.delenv(k, raising=False)
     s = config.load_settings()
     assert s.nebius_api_key is None and s.tavily_api_key is None
-    assert s.models["nano"] == "nvidia/nemotron-nano-placeholder"
-    assert s.prices == {"nano": (0.06, 0.24), "super": (0.30, 0.90), "ultra": (0.60, 1.80)}
+    assert s.models == config.DEFAULT_MODELS
+    assert s.prices == {"nano": (0.06, 0.24), "super": (0.30, 0.90), "ultra": (1.00, 3.00)}
     assert s.tier_options["super"] == {"system_prefix": "", "extra_body": {}}
+    assert s.tier_options["nano"]["extra_body"] == config.NO_THINKING
     assert (s.escalate_below, s.max_workers, s.cache_dir.name) == (0.7, 8, ".cache")
 
     monkeypatch.setenv("RECEIPTS_MODEL_SUPER", "nvidia/real-super")
@@ -20,4 +21,4 @@ def test_load_settings_defaults_and_overrides(monkeypatch):
     s = config.load_settings()
     assert s.models["super"] == "nvidia/real-super" and s.prices["ultra"] == (1.5, 4.0)
     assert s.tier_options["super"] == {"system_prefix": "/think ", "extra_body": {"chat_template_kwargs": {"thinking": True}}}
-    assert s.tier_options["nano"]["extra_body"] == {}
+    assert s.tier_options["nano"]["extra_body"] == config.NO_THINKING  # invalid JSON keeps the default
