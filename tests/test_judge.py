@@ -1,0 +1,94 @@
+from receipts.config import Settings
+from receipts.judge import judge_all, judge_one
+from receipts.models import Claim, FetchedSource, Source
+from receipts.testing import FakeLLM
+
+TEXT = "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year. Solar led the total."
+SRC = Source(id="s1", raw="r", title="Investment trends")
+
+
+def claim(id, text, sid="s1"):
+    return Claim(id=id, sentence=text, start=0, end=len(text), claim=text, source_ids=[sid])
+
+
+def ok(sid="s1", text=TEXT):
+    return FetchedSource(source_id=sid, status="ok", text=text, via="tavily_extract")
+
+
+def test_unavailable_makes_no_llm_call():
+    llm = FakeLLM()
+    for status, word in (("dead_link", "dead"), ("not_found", "could not be found")):
+        f = FetchedSource(source_id="s1", status=status, note="HTTP 404")
+        v = judge_one(claim("c1", "x 1."), SRC, f, llm, "super")
+        assert v.label == "source_unavailable" and v.tier == "none" and word in v.rationale
+    assert llm.calls == []
+
+
+def test_supported_with_verified_quote():
+    v = judge_one(claim("c1", "Global investment in renewable energy reached $400 billion in 2022."), SRC, ok(), FakeLLM(), "super")
+    assert (v.label, v.quote_found, v.confidence, v.tier) == ("supported", True, 0.9, "super")
+    assert v.passages and v.quote.startswith("Global investment")
+
+
+class Scripted(FakeLLM):
+    def __init__(self, out):
+        super().__init__()
+        self.out = out
+
+    def _judge(self, payload):
+        return dict(self.out)
+
+
+def test_unverifiable_quote_caps_confidence_and_bad_label_is_not_in_source():
+    c = claim("c1", "Investment hit $400 billion.")
+    v = judge_one(c, SRC, ok(), Scripted({"label": "supported", "confidence": 0.95, "quote": "Invented sentence that is not there.", "rationale": "r"}), "super")
+    assert v.label == "supported" and not v.quote_found and v.confidence == 0.5
+    v = judge_one(c, SRC, ok(), Scripted({"label": "banana", "confidence": "high", "quote": 5}), "super")
+    assert v.label == "not_in_source" and v.confidence == 0.0 and v.quote == ""
+    v = judge_one(c, SRC, ok(), Scripted({"label": "not_in_source", "confidence": 0.9, "quote": ""}), "super")
+    assert v.confidence == 0.9  # no cap when nothing is asserted
+
+
+def _settings(**kw):
+    return Settings(models={"nano": "m-nano", "super": "m-super", "ultra": "m-ultra"}, **kw)
+
+
+def test_cascade_escalates_contradicted_not_clean_supported():
+    claims = [
+        claim("c1", "Global investment in renewable energy reached $500 billion in 2022."),  # contradicted
+        claim("c2", "Global investment in renewable energy reached $400 billion in 2022."),  # supported
+    ]
+    llm, events = FakeLLM(), []
+    vs = judge_all(claims, [SRC], [ok()], llm, "cascade", _settings(), on_event=events.append)
+    c1, c2 = vs
+    assert (c1.label, c1.tier, c1.escalated, c1.model) == ("contradicted", "ultra", True, "m-ultra")
+    assert (c2.label, c2.tier, c2.escalated, c2.model) == ("supported", "super", False, "m-super")
+    assert sorted(t for _, t in llm.calls) == ["super", "super", "ultra"]
+    assert len(events) == 2 and all(e["type"] == "verdict" for e in events)
+
+
+def test_cascade_escalates_low_confidence_and_unverified_supported():
+    c = claim("c1", "Investment hit $400 billion.")
+    v = judge_all([c], [SRC], [ok()], Scripted({"label": "supported", "confidence": 0.95, "quote": "nope nope nope nope"}), "cascade", _settings())[0]
+    assert v.escalated and v.tier == "ultra"
+    v = judge_all([c], [SRC], [ok()], Scripted({"label": "supported", "confidence": 0.6, "quote": "Solar led the total."}), "cascade", _settings())[0]
+    assert v.escalated  # confidence below escalate_below
+
+
+def test_fixed_modes_use_one_tier_and_unavailable_never_escalates():
+    c = claim("c1", "Global investment in renewable energy reached $500 billion in 2022.")
+    llm = FakeLLM()
+    (v,) = judge_all([c], [SRC], [ok()], llm, "nano", _settings())
+    assert (v.tier, v.escalated, llm.calls) == ("nano", False, [("judge", "nano")])
+    llm = FakeLLM()
+    dead = FetchedSource(source_id="s1", status="dead_link")
+    (v,) = judge_all([c], [SRC], [dead], llm, "cascade", _settings())
+    assert v.label == "source_unavailable" and not v.escalated and llm.calls == []
+
+
+def test_one_verdict_per_claim_source_pair_in_order():
+    srcs = [SRC, Source(id="s2", raw="r2", title="T2")]
+    c = Claim(id="c1", sentence="x", start=0, end=1, claim="Global investment reached $400 billion.", source_ids=["s1", "s2"])
+    vs = judge_all([c], srcs, [ok("s1"), ok("s2", "Unrelated text about cats.")], FakeLLM(), "super", _settings())
+    assert [(v.claim_id, v.source_id) for v in vs] == [("c1", "s1"), ("c1", "s2")]
+    assert vs[0].label == "supported" and vs[1].label == "not_in_source"

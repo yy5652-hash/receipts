@@ -1,0 +1,28 @@
+{
+  "pages": {
+    "https://example.org/energy-journal/investment-trends": "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year. Investment in solar and wind accounted for most of the total. Developing economies received a growing share of the funding.",
+    "https://doi.org/10.5555/iea.solar.2021": "Solar PV module prices fell 89% between 2010 and 2020, according to the IEA. Module price declines were driven by manufacturing scale and technology gains. By 2020 solar was the cheapest source of new electricity in most markets.",
+    "https://example.com/old-report": null,
+    "https://example.org/h2-pipeline": null,
+    "https://example.net/irena-capacity": "According to the IRENA capacity statistics, solar PV capacity passed 1,000 GW worldwide in 2022. Wind capacity followed closely behind.",
+    "https://example.edu/jobs-energy-transition": "Employment in the solar industry grew faster than in fossil fuels between 2015 and 2019, the study finds. The gap was widest in installation and maintenance roles."
+  },
+  "search_index": [
+    {
+      "url": "https://windeurope.example/offshore-2020",
+      "title": "Offshore wind in Europe: 2020 statistics",
+      "content": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020.",
+      "raw_content": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020. Germany and the United Kingdom accounted for most of the additions. New installations slowed in 2020 because of the pandemic."
+    },
+    {
+      "url": "https://decoy.example/hydrogen-strategy",
+      "title": "Hydrogen strategy overview",
+      "content": "A general overview of national hydrogen strategies and policy goals.",
+      "raw_content": "A general overview of national hydrogen strategies and policy goals."
+    }
+  ],
+  "status": {
+    "https://example.com/old-report": 404,
+    "https://example.org/h2-pipeline": 200
+  }
+}
