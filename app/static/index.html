@@ -36,11 +36,14 @@
 
     <form id="input-form" class="composer" novalidate>
       <label for="doc-input" class="sr-only">Report text</label>
-      <textarea id="doc-input" rows="11" spellcheck="false" autocomplete="off"
+      <textarea id="doc-input" rows="9" spellcheck="false" autocomplete="off"
         placeholder="Paste a report with its reference list — Markdown or plain text"></textarea>
       <div class="composer-bar">
-        <span id="char-count" class="counter" aria-live="polite">0 / 40,000</span>
-        <button class="btn primary" id="check-btn" type="submit" disabled>Check citations</button>
+        <div class="composer-meta">
+          <span id="char-count" class="counter" aria-live="polite">0 / 40,000</span>
+          <span id="empty-hint" class="field-hint" role="alert" hidden>Paste a report first.</span>
+        </div>
+        <button class="btn primary" id="check-btn" type="submit" aria-disabled="true">Check citations</button>
       </div>
       <p id="live-note" class="note" role="status" hidden></p>
       <details class="advanced">

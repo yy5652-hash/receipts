@@ -64,11 +64,21 @@ export function fmtTime(sec) {
 export const fmtCost = (usd) => `$${(usd || 0).toFixed(4)}`;
 export const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many}`;
 
-export function modelsLine(mode, escalatedClaims) {
-  if (mode === "nano") return "Nemotron 3 Nano (extraction and checking)";
-  if (mode === "super") return "Nemotron 3 Nano (extraction) · Super (checking)";
-  if (mode === "ultra") return "Nemotron 3 Nano (extraction) · Ultra (checking)";
-  return `Nemotron 3 Nano (extraction) · Super (checking) · Ultra (re-check, ${plural(escalatedClaims, "claim")})`;
+/**
+ * The "Models" fact: only the tiers that were used, in the order nano, super, ultra, each with its role.
+ * used: Set of tiers with calls; direct: Set of tiers that gave a first-pass verdict; escalatedClaims: claims Ultra re-checked.
+ */
+export function modelsLine(used, direct, escalatedClaims = 0) {
+  const parts = [];
+  if (used.has("nano")) parts.push(`${TIER_NAME.nano} (${direct.has("nano") ? "extraction and checking" : "extraction"})`);
+  if (used.has("super")) parts.push(`${parts.length ? "Super" : TIER_NAME.super} (${direct.has("super") || escalatedClaims ? "checking" : "extraction repair"})`);
+  if (used.has("ultra")) {
+    const roles = [];
+    if (direct.has("ultra") || !escalatedClaims) roles.push("checking");
+    if (escalatedClaims) roles.push(`re-check, ${plural(escalatedClaims, "claim")}`);
+    parts.push(`${parts.length ? "Ultra" : TIER_NAME.ultra} (${roles.join("; ")})`);
+  }
+  return parts.join(" · ") || "—";
 }
 
 export function checkedBy(v) {
@@ -96,6 +106,38 @@ export function domainOf(url) {
 }
 
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
+
+/** "en.wikipedia.org · Climate change" for https://en.wikipedia.org/wiki/Climate_change; "" when there is no URL. */
+export function readableUrl(url) {
+  let u;
+  try {
+    u = new URL(url);
+  } catch {
+    return "";
+  }
+  const host = u.hostname.replace(/^www\./, "");
+  let last = u.pathname.split("/").filter(Boolean).pop() || "";
+  try {
+    last = decodeURIComponent(last);
+  } catch { /* keep it as written */ }
+  last = last.replace(/\.(?:html?|php|aspx?)$/i, "").replace(/[_\-+]+/g, " ").replace(/\s+/g, " ").trim();
+  return last ? `${host} · ${last}` : host;
+}
+
+/** Title to show for a source: its own title, the fetched page's title, then a readable form of the URL, never the raw URL. */
+export function sourceTitle(src, fetched) {
+  const real = (t) => {
+    const x = typeof t === "string" ? t.replace(/\s+/g, " ").trim() : "";
+    return x && !/^https?:\/\/\S+$/i.test(x) ? x : "";
+  };
+  const own = real(src && src.title) || real(fetched && fetched.title);
+  if (own) return own;
+  const url = safeUrl((src && src.url) || (fetched && fetched.url));
+  const fromUrl = url ? readableUrl(url) : "";
+  if (fromUrl) return fromUrl;
+  const raw = ((src && src.raw) || "").replace(/\s+/g, " ").trim();
+  return (/^https?:\/\/\S+$/i.test(raw) ? readableUrl(raw) : raw.slice(0, 120)) || "Untitled source";
+}
 
 /** Block structure of the raw text, with offsets into it: headings, paragraphs, list items, reference entries... */
 export function splitBlocks(doc) {
@@ -196,20 +238,37 @@ export function blockPieces(block, layout) {
 export function attachReferences(doc, blocks, sources, layout) {
   const floor = layout.length ? layout[layout.length - 1].end : 0;
   const unmatched = [];
+  const hits = [];
   for (const s of sources) {
-    let block = null;
-    if (s.marker != null) {
-      const raw = (s.raw || "").replace(/\s+/g, " ").trim();
-      let pos = -1;
-      for (const n of [70, 40, 20]) {
-        if (raw.length < Math.min(n, 12)) break;
-        pos = doc.indexOf(raw.slice(0, n), floor);
-        if (pos >= 0) break;
-      }
-      if (pos >= 0) block = blocks.find((b) => b.start <= pos && pos <= b.end && !b.sourceId && b.type !== "hr");
+    const raw = (s.raw || "").replace(/\s+/g, " ").trim();
+    let pos = -1;
+    for (const n of [70, 40, 20]) {
+      if (raw.length < Math.min(n, 12)) break;
+      pos = doc.indexOf(raw.slice(0, n), floor);
+      if (pos >= 0) break;
     }
-    if (block) block.sourceId = s.id;
+    if (pos >= 0) hits.push({ pos, s });
     else unmatched.push(s);
+  }
+  // Unnumbered lists (APA, Chicago) arrive as one paragraph per run of lines: split at each entry.
+  hits.sort((a, b) => a.pos - b.pos);
+  for (const { pos, s } of hits) {
+    const i = blocks.findIndex((b) => b.start <= pos && pos < b.end && b.type !== "hr" && b.type !== "code");
+    if (i < 0) {
+      unmatched.push(s);
+      continue;
+    }
+    const b = blocks[i];
+    if (pos > b.start && doc.slice(b.start, pos).trim()) {
+      let headEnd = pos;
+      while (headEnd > b.start && /\s/.test(doc[headEnd - 1])) headEnd--;
+      blocks.splice(i, 1, { ...b, end: headEnd }, { type: "ref", start: pos, end: b.end, sourceId: s.id });
+    } else if (!b.sourceId) {
+      b.sourceId = s.id;
+      if (b.type === "p") b.type = "ref";
+    } else {
+      unmatched.push(s);
+    }
   }
   return unmatched;
 }
@@ -359,6 +418,8 @@ const S = {
   known: new Set(), // ids of the sources of this report
   renderedClaims: -1,
   inputError: "",
+  emptyHint: false,
+  titles: new Map(), // source_id -> element showing the title in the reference list
 };
 
 const setSources = (sources) => {
@@ -377,7 +438,7 @@ function resetResult() {
   Object.assign(S, {
     doc: "", claims: [], sources: [], fetched: new Map(), verdicts: new Map(), stage: "idle", running: false,
     report: null, replayId: null, selected: null, selSource: null, filter: "all", notices: [], error: null,
-    abort: null, spans: new Map(), flags: new Map(), chips: new Map(), dirtyEvidence: false, known: new Set(),
+    abort: null, spans: new Map(), flags: new Map(), chips: new Map(), titles: new Map(), dirtyEvidence: false, known: new Set(),
     renderedClaims: -1,
   });
   $("#doc").replaceChildren();
@@ -408,7 +469,12 @@ function updateInputUi() {
   const counter = $("#char-count");
   counter.textContent = `${n.toLocaleString("en-US")} / ${max.toLocaleString("en-US")}`;
   counter.classList.toggle("over", over);
-  $("#check-btn").disabled = !(S.config.live && ta.value.trim() && !over);
+  const ready = !!(S.config.live && ta.value.trim() && !over);
+  $("#check-btn").setAttribute("aria-disabled", String(!ready));
+  const hint = $("#empty-hint");
+  hint.hidden = !S.emptyHint;
+  if (S.emptyHint) ta.setAttribute("aria-describedby", "empty-hint");
+  else ta.removeAttribute("aria-describedby");
 
   const note = $("#live-note");
   const overText = `Reports longer than ${max.toLocaleString("en-US")} characters are not accepted. Shorten it to check it.`;
@@ -431,7 +497,7 @@ function renderExamples() {
   list.replaceChildren();
   for (const ex of S.config.examples) {
     list.append(
-      h("button", { type: "button", class: "example-card", dataset: { id: ex.id }, onclick: () => openExample(ex.id) },
+      h("button", { type: "button", class: "example-card", dataset: { id: ex.id }, "aria-label": `Open recorded example: ${ex.title}`, onclick: () => openExample(ex.id) },
         h("span", { class: "example-tag" }, icon("receipt", 13), "Recorded run"),
         h("span", { class: "example-title", text: ex.title }),
         ex.blurb ? h("span", { class: "example-blurb", text: ex.blurb }) : null,
@@ -454,6 +520,7 @@ function renderDocument() {
   S.spans = new Map();
   S.flags = new Map();
   S.chips = new Map();
+  S.titles = new Map();
   S.renderedClaims = S.claims.length;
   const doc = S.doc;
   const blocks = splitBlocks(doc);
@@ -528,7 +595,10 @@ function renderDocument() {
       const chip = h("span", { class: "src-chip", dataset: { source: s.id } });
       (S.chips.get(s.id) || S.chips.set(s.id, []).get(s.id)).push(chip);
       const href = safeUrl(s.url);
-      ul.append(h("li", null, href ? h("a", { href, target: "_blank", rel: "noopener noreferrer", text: s.title || s.url }) : h("span", { text: s.title || s.raw }), " ", chip));
+      const label = href ? h("a", { href, target: "_blank", rel: "noopener noreferrer" }) : h("span");
+      label.textContent = sourceTitle(s, S.fetched.get(s.id));
+      S.titles.set(s.id, label);
+      ul.append(h("li", null, label, " ", chip));
     }
     root.append(h("section", { class: "doc-sources" }, h("h4", { text: unmatched.length === S.sources.length ? "Linked sources" : "Other sources" }), ul));
   }
@@ -558,6 +628,10 @@ function updateClaimStates() {
 }
 
 function updateSourceChips() {
+  for (const [sid, el] of S.titles) {
+    const t = sourceTitle(sourceById(sid), S.fetched.get(sid));
+    if (el.textContent !== t) el.textContent = t;
+  }
   for (const [sid, chips] of S.chips) {
     const st = sourceStatus(S.fetched.get(sid), S.running);
     for (const chip of chips) {
@@ -605,8 +679,24 @@ function renderSummary() {
 
   // facts
   const escalated = new Set();
-  for (const vm of S.verdicts.values()) for (const v of vm.values()) if (v.escalated) escalated.add(v.claim_id);
-  $("#fact-models").textContent = modelsLine(S.report ? S.report.mode : S.mode, escalated.size);
+  const direct = new Set();
+  const used = new Set();
+  if (S.report) {
+    for (const u of S.report.usage || []) if (u.calls > 0) used.add(u.tier);
+  } else if (S.running) {
+    used.add("nano"); // extraction is the first call of every run
+  }
+  for (const vm of S.verdicts.values()) {
+    for (const v of vm.values()) {
+      if (v.tier === "none") continue;
+      used.add(v.tier);
+      if (v.escalated) {
+        escalated.add(v.claim_id);
+        used.add("super"); // the first pass of a re-checked claim
+      } else direct.add(v.tier);
+    }
+  }
+  $("#fact-models").textContent = modelsLine(used, direct, escalated.size);
   if (S.report) {
     $("#fact-time").textContent = fmtTime(S.report.seconds);
     $("#fact-cost").textContent = fmtCost(S.report.usage.reduce((a, u) => a + (u.cost_usd || 0), 0));
@@ -721,6 +811,24 @@ function renderEvidence() {
   $("#ev-position").textContent = at >= 0 ? `${at + 1} of ${ids.length}` : "";
   $("#ev-prev").disabled = $("#ev-next").disabled = !S.claims.length;
 
+  if (!claim && S.report && !S.claims.length) {
+    body.append(
+      h("div", { class: "ev-empty" },
+        h("div", { class: "ev-empty-art" }, icon("receipt", 28)),
+        h("h3", { text: "Nothing to check" }),
+        h("p", { text: "Receipts did not find a sentence that cites a source. It recognises:" }),
+        h("ul", { class: "formats" },
+          h("li", null, "numeric markers like ", h("code", { text: "[1]" }), " with a numbered reference list"),
+          h("li", null, "footnotes like ", h("code", { text: "[^1]" })),
+          h("li", null, "inline links like ", h("code", { text: "[text](https://…)" })),
+          h("li", null, "author and year, like ", h("code", { text: "(Author, 2020)" }), ", with a reference list"),
+        ),
+        h("button", { type: "button", class: "btn secondary", onclick: newCheck, text: "New check" }),
+      ),
+    );
+    return;
+  }
+
   if (!claim) {
     body.append(
       h("div", { class: "ev-empty" },
@@ -770,7 +878,7 @@ function renderEvidence() {
   if (src) {
     const url = safeUrl((fetched && fetched.url) || src.url);
     const st = sourceStatus(fetched, S.running);
-    const title = (fetched && fetched.title) || src.title || (src.raw || "").slice(0, 120);
+    const title = sourceTitle(src, fetched);
     const sourceBlock = h("div", { class: "ev-source" },
       h("p", { class: "src-title", text: title }),
       h("p", { class: "src-meta" },
@@ -1048,6 +1156,7 @@ function newCheck() {
   resetResult();
   history.replaceState(null, "", location.pathname);
   S.inputError = "";
+  S.emptyHint = false;
   showScreen("input");
   updateInputUi();
   $("#main").focus({ preventScroll: true });
@@ -1059,15 +1168,23 @@ function wire() {
   const ta = $("#doc-input");
   ta.addEventListener("input", () => {
     S.inputError = "";
+    S.emptyHint = false;
     updateInputUi();
   });
   ta.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !$("#check-btn").disabled) $("#input-form").requestSubmit();
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("#input-form").requestSubmit();
   });
   $("#mode").addEventListener("change", updateInputUi);
   $("#input-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    if ($("#check-btn").disabled) return;
+    if ($("#check-btn").getAttribute("aria-disabled") === "true") {
+      if (S.config.live && !ta.value.trim()) {
+        S.emptyHint = true;
+        updateInputUi();
+        ta.focus();
+      }
+      return;
+    }
     startAudit(ta.value, $("#mode").value);
   });
 
