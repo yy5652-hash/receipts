@@ -1,0 +1,398 @@
+{
+ "benchmark": "ReceiptsBench v1",
+ "dataset": {
+  "version": "ReceiptsBench v1",
+  "generator": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+  "seed": 20261020,
+  "built_at": "2026-10-19T20:53:58+00:00",
+  "reports": 30,
+  "items": 300,
+  "by_type": {
+   "supported": 150,
+   "number_swap": 37,
+   "entity_swap": 30,
+   "overclaim": 23,
+   "misattribution": 30,
+   "fabricated": 15,
+   "dead_link": 15
+  },
+  "sources": 35,
+  "sources_by_kind": {
+   "arxiv": 10,
+   "organisation": 9,
+   "wikipedia": 16
+  },
+  "generation": {
+   "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+   "calls": 78,
+   "cached_calls": 77,
+   "prompt_tokens": 169096,
+   "completion_tokens": 77796,
+   "price_per_1m_tokens_usd": {
+    "input": 0.2,
+    "output": 0.6
+   },
+   "usd": 0.0805
+  }
+ },
+ "configs": {
+  "nano": {
+   "items": 300,
+   "reports": 30,
+   "problem_recall": {
+    "rate": 0.9333333333333333,
+    "k": 140,
+    "n": 150
+   },
+   "false_alarm": {
+    "rate": 0.013333333333333334,
+    "k": 2,
+    "n": 150
+   },
+   "supported_pass": {
+    "rate": 0.98,
+    "k": 147,
+    "n": 150
+   },
+   "macro_accuracy": 0.96,
+   "per_type": {
+    "number_swap": {
+     "rate": 0.9459459459459459,
+     "k": 35,
+     "n": 37
+    },
+    "entity_swap": {
+     "rate": 0.9666666666666667,
+     "k": 29,
+     "n": 30
+    },
+    "overclaim": {
+     "rate": 0.6956521739130435,
+     "k": 16,
+     "n": 23
+    },
+    "misattribution": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "fabricated": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    },
+    "dead_link": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    }
+   },
+   "label_accuracy": {
+    "rate": 0.94,
+    "k": 282,
+    "n": 300
+   },
+   "evidence_found": {
+    "rate": 0.9914529914529915,
+    "k": 232,
+    "n": 234
+   },
+   "cost_per_100_claims_usd": 0.025403666666666668,
+   "median_seconds_per_report": 29.880000000000003,
+   "escalated": null,
+   "extraction_coverage": {
+    "rate": 0.9966666666666667,
+    "k": 299,
+    "n": 300
+   }
+  },
+  "super": {
+   "items": 300,
+   "reports": 30,
+   "problem_recall": {
+    "rate": 0.9266666666666666,
+    "k": 139,
+    "n": 150
+   },
+   "false_alarm": {
+    "rate": 0.006666666666666667,
+    "k": 1,
+    "n": 150
+   },
+   "supported_pass": {
+    "rate": 0.9866666666666667,
+    "k": 148,
+    "n": 150
+   },
+   "macro_accuracy": 0.9600000000000001,
+   "per_type": {
+    "number_swap": {
+     "rate": 0.9459459459459459,
+     "k": 35,
+     "n": 37
+    },
+    "entity_swap": {
+     "rate": 0.9,
+     "k": 27,
+     "n": 30
+    },
+    "overclaim": {
+     "rate": 0.7391304347826086,
+     "k": 17,
+     "n": 23
+    },
+    "misattribution": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "fabricated": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    },
+    "dead_link": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    }
+   },
+   "label_accuracy": {
+    "rate": 0.9466666666666667,
+    "k": 284,
+    "n": 300
+   },
+   "evidence_found": {
+    "rate": 1.0,
+    "k": 236,
+    "n": 236
+   },
+   "cost_per_100_claims_usd": 0.07351466666666666,
+   "median_seconds_per_report": 35.915,
+   "escalated": null,
+   "extraction_coverage": {
+    "rate": 0.9966666666666667,
+    "k": 299,
+    "n": 300
+   }
+  },
+  "ultra": {
+   "items": 300,
+   "reports": 30,
+   "problem_recall": {
+    "rate": 0.94,
+    "k": 141,
+    "n": 150
+   },
+   "false_alarm": {
+    "rate": 0.013333333333333334,
+    "k": 2,
+    "n": 150
+   },
+   "supported_pass": {
+    "rate": 0.98,
+    "k": 147,
+    "n": 150
+   },
+   "macro_accuracy": 0.9633333333333333,
+   "per_type": {
+    "number_swap": {
+     "rate": 1.0,
+     "k": 37,
+     "n": 37
+    },
+    "entity_swap": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "overclaim": {
+     "rate": 0.6086956521739131,
+     "k": 14,
+     "n": 23
+    },
+    "misattribution": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "fabricated": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    },
+    "dead_link": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    }
+   },
+   "label_accuracy": {
+    "rate": 0.9433333333333334,
+    "k": 283,
+    "n": 300
+   },
+   "evidence_found": {
+    "rate": 1.0,
+    "k": 234,
+    "n": 234
+   },
+   "cost_per_100_claims_usd": 0.27720333333333336,
+   "median_seconds_per_report": 19.814999999999998,
+   "escalated": null,
+   "extraction_coverage": {
+    "rate": 0.9966666666666667,
+    "k": 299,
+    "n": 300
+   }
+  },
+  "cascade": {
+   "items": 300,
+   "reports": 30,
+   "problem_recall": {
+    "rate": 0.9066666666666666,
+    "k": 136,
+    "n": 150
+   },
+   "false_alarm": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 150
+   },
+   "supported_pass": {
+    "rate": 0.9933333333333333,
+    "k": 149,
+    "n": 150
+   },
+   "macro_accuracy": 0.9533333333333334,
+   "per_type": {
+    "number_swap": {
+     "rate": 0.9459459459459459,
+     "k": 35,
+     "n": 37
+    },
+    "entity_swap": {
+     "rate": 0.8666666666666667,
+     "k": 26,
+     "n": 30
+    },
+    "overclaim": {
+     "rate": 0.6521739130434783,
+     "k": 15,
+     "n": 23
+    },
+    "misattribution": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "fabricated": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    },
+    "dead_link": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    }
+   },
+   "label_accuracy": {
+    "rate": 0.94,
+    "k": 282,
+    "n": 300
+   },
+   "evidence_found": {
+    "rate": 1.0,
+    "k": 236,
+    "n": 236
+   },
+   "cost_per_100_claims_usd": 0.18066566666666664,
+   "median_seconds_per_report": 41.595,
+   "escalated": {
+    "rate": 0.35785953177257523,
+    "k": 107,
+    "n": 299
+   },
+   "extraction_coverage": {
+    "rate": 0.9966666666666667,
+    "k": 299,
+    "n": 300
+   }
+  },
+  "cascade_nano": {
+   "items": 300,
+   "reports": 30,
+   "problem_recall": {
+    "rate": 0.9133333333333333,
+    "k": 137,
+    "n": 150
+   },
+   "false_alarm": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 150
+   },
+   "supported_pass": {
+    "rate": 0.9933333333333333,
+    "k": 149,
+    "n": 150
+   },
+   "macro_accuracy": 0.9566666666666667,
+   "per_type": {
+    "number_swap": {
+     "rate": 0.972972972972973,
+     "k": 36,
+     "n": 37
+    },
+    "entity_swap": {
+     "rate": 0.9333333333333333,
+     "k": 28,
+     "n": 30
+    },
+    "overclaim": {
+     "rate": 0.5652173913043478,
+     "k": 13,
+     "n": 23
+    },
+    "misattribution": {
+     "rate": 1.0,
+     "k": 30,
+     "n": 30
+    },
+    "fabricated": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    },
+    "dead_link": {
+     "rate": 1.0,
+     "k": 15,
+     "n": 15
+    }
+   },
+   "label_accuracy": {
+    "rate": 0.93,
+    "k": 279,
+    "n": 300
+   },
+   "evidence_found": {
+    "rate": 1.0,
+    "k": 232,
+    "n": 232
+   },
+   "cost_per_100_claims_usd": 0.12983699999999998,
+   "median_seconds_per_report": 32.45,
+   "escalated": {
+    "rate": 0.36789297658862874,
+    "k": 110,
+    "n": 299
+   },
+   "extraction_coverage": {
+    "rate": 0.9966666666666667,
+    "k": 299,
+    "n": 300
+   }
+  }
+ }
+}
