@@ -1,0 +1,388 @@
+{
+ "document": "## Related work\n\nThe Transformer replaced recurrence entirely with attention and reached 28.4 BLEU on the WMT 2014 English-to-German task (Vaswani et al., 2017). GPT-3 scaled this architecture to 17.5 billion parameters (Brown et al., 2020). BERT pushed the GLUE benchmark score to 85.5 (Devlin et al., 2019). Retrieval-augmented models were shown to eliminate hallucination entirely in open-domain question answering (Lewis et al., 2020). A later meta-analysis confirmed that attention heads are fully interpretable (Okafor & Lindqvist, 2022).\n\n## References\n\nBrown, T., Mann, B., Ryder, N., et al. (2020). Language models are few-shot learners. Advances in Neural Information Processing Systems, 33.\nDevlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. NAACL-HLT. https://doi.org/10.18653/v1/N19-1423\nLewis, P., Perez, E., Piktus, A., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33.\nOkafor, C., & Lindqvist, E. (2022). A meta-analysis of attention head interpretability in large language models. Transactions on Machine Learning Interpretability, 4(1), 1–29.\nVaswani, A., Shazeer, N., Parmar, N., et al. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30.\n",
+ "mode": "cascade",
+ "sources": [
+  {
+   "id": "s1",
+   "marker": null,
+   "raw": "Brown, T., Mann, B., Ryder, N., et al. (2020). Language models are few-shot learners. Advances in Neural Information Processing Systems, 33.",
+   "url": null,
+   "title": "Language models are few-shot learners",
+   "authors": [
+    "Brown, T.",
+    "Mann, B.",
+    "Ryder, N.",
+    "et al."
+   ],
+   "year": 2020,
+   "doi": null
+  },
+  {
+   "id": "s2",
+   "marker": null,
+   "raw": "Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. NAACL-HLT. https://doi.org/10.18653/v1/N19-1423",
+   "url": "https://doi.org/10.18653/v1/N19-1423",
+   "title": "BERT: Pre-training of deep bidirectional transformers for language understanding",
+   "authors": [
+    "Devlin, J.",
+    "Chang, M.-W.",
+    "Lee, K.",
+    "Toutanova, K."
+   ],
+   "year": 2019,
+   "doi": "10.18653/v1/N19-1423"
+  },
+  {
+   "id": "s3",
+   "marker": null,
+   "raw": "Lewis, P., Perez, E., Piktus, A., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33.",
+   "url": null,
+   "title": "Retrieval-augmented generation for knowledge-intensive NLP tasks",
+   "authors": [
+    "Lewis, P.",
+    "Perez, E.",
+    "Piktus, A.",
+    "et al."
+   ],
+   "year": 2020,
+   "doi": null
+  },
+  {
+   "id": "s4",
+   "marker": null,
+   "raw": "Okafor, C., & Lindqvist, E. (2022). A meta-analysis of attention head interpretability in large language models. Transactions on Machine Learning Interpretability, 4(1), 1–29.",
+   "url": null,
+   "title": "A meta-analysis of attention head interpretability in large language models",
+   "authors": [
+    "Okafor, C.",
+    "Lindqvist, E."
+   ],
+   "year": 2022,
+   "doi": null
+  },
+  {
+   "id": "s5",
+   "marker": null,
+   "raw": "Vaswani, A., Shazeer, N., Parmar, N., et al. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30.",
+   "url": null,
+   "title": "Attention is all you need",
+   "authors": [
+    "Vaswani, A.",
+    "Shazeer, N.",
+    "Parmar, N.",
+    "et al."
+   ],
+   "year": 2017,
+   "doi": null
+  }
+ ],
+ "claims": [
+  {
+   "id": "c1",
+   "sentence": "The Transformer replaced recurrence entirely with attention and reached 28.4 BLEU on the WMT 2014 English-to-German task (Vaswani et al., 2017).",
+   "start": 17,
+   "end": 161,
+   "claim": "The Transformer replaced recurrence entirely with attention and reached 28.4 BLEU on the WMT 2014 English-to-German task.",
+   "source_ids": [
+    "s5"
+   ]
+  },
+  {
+   "id": "c2",
+   "sentence": "GPT-3 scaled this architecture to 17.5 billion parameters (Brown et al., 2020).",
+   "start": 162,
+   "end": 241,
+   "claim": "GPT-3 scaled the Transformer architecture to 17.5 billion parameters.",
+   "source_ids": [
+    "s1"
+   ]
+  },
+  {
+   "id": "c3",
+   "sentence": "BERT pushed the GLUE benchmark score to 85.5 (Devlin et al., 2019).",
+   "start": 242,
+   "end": 309,
+   "claim": "BERT pushed the GLUE benchmark score to 85.5.",
+   "source_ids": [
+    "s2"
+   ]
+  },
+  {
+   "id": "c4",
+   "sentence": "Retrieval-augmented models were shown to eliminate hallucination entirely in open-domain question answering (Lewis et al., 2020).",
+   "start": 310,
+   "end": 439,
+   "claim": "Retrieval-augmented models were shown to eliminate hallucination entirely in open-domain question answering.",
+   "source_ids": [
+    "s3"
+   ]
+  },
+  {
+   "id": "c5",
+   "sentence": "A later meta-analysis confirmed that attention heads are fully interpretable (Okafor & Lindqvist, 2022).",
+   "start": 440,
+   "end": 544,
+   "claim": "A later meta-analysis confirmed that attention heads are fully interpretable.",
+   "source_ids": [
+    "s4"
+   ]
+  }
+ ],
+ "fetched": [
+  {
+   "source_id": "s1",
+   "status": "ok",
+   "url": "https://arxiv.org/pdf/2005.14165",
+   "title": "Language Models are Few-Shot Learners",
+   "text": "",
+   "via": "tavily_extract",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s2",
+   "status": "ok",
+   "url": "https://arxiv.org/abs/1810.04805v2",
+   "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+   "text": "",
+   "via": "arxiv",
+   "note": "checked against the arXiv version",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s3",
+   "status": "ok",
+   "url": "https://arxiv.org/abs/2005.11401v4",
+   "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+   "text": "",
+   "via": "arxiv",
+   "note": "checked against the arXiv version",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s4",
+   "status": "not_found",
+   "url": null,
+   "title": "A meta-analysis of attention head interpretability in large language models",
+   "text": "",
+   "via": "",
+   "note": "no record in OpenAlex and no matching web page",
+   "coverage": "full",
+   "exists": false
+  },
+  {
+   "source_id": "s5",
+   "status": "ok",
+   "url": "https://arxiv.org/abs/1706.03762v7",
+   "title": "Attention Is All You Need",
+   "text": "",
+   "via": "arxiv",
+   "note": "checked against the arXiv abstract",
+   "coverage": "abstract",
+   "exists": true
+  }
+ ],
+ "verdicts": [
+  {
+   "claim_id": "c1",
+   "source_id": "s5",
+   "label": "supported",
+   "confidence": 0.95,
+   "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task.",
+   "quote_found": true,
+   "rationale": "The passage explicitly states that the Transformer dispenses with recurrence entirely and achieves 28.4 BLEU on the WMT 2014 English-to-German task, matching the claim.",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including",
+     "start": 0,
+     "end": 695,
+     "score": 10.2072
+    },
+    {
+     "text": "time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.",
+     "start": 548,
+     "end": 1136,
+     "score": 4.5513
+    }
+   ]
+  },
+  {
+   "claim_id": "c2",
+   "source_id": "s1",
+   "label": "contradicted",
+   "confidence": 0.95,
+   "quote": "ranging over three orders of magnitude from 125 million parameters to 175 billion parameters, with the last being the model we call GPT-3.",
+   "quote_found": true,
+   "rationale": "The passages state GPT-3 has 175 billion parameters, not 17.5 billion.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": [
+    {
+     "text": "6.7B 32 4096 32 128 2M 1.2 × 10−4 GPT-3 13B 13.0B 40 5140 40 128 2M 1.0 × 10−4 GPT-3 175B or “GPT-3” 175.0B 96 12288 96 128 3.2M 0.6 × 10−4 Table 2.1: Sizes, architectures, and learning hyper-parameters (batch size in tokens and learning rate) of the models which we trained. All models were trained for a total of 300 billion tokens.\n2.1 Model and Architectures We use the same model and architecture as GPT-2 [RWC+19], including the modiﬁed initialization, pre-normalization, and reversible tokenization described therein, with the exception that we use alternating dense and locally banded sparse attention patterns in the layers of the transformer, similar to the Sparse Transformer [CGRS19]. To",
+     "start": 24120,
+     "end": 24819,
+     "score": 26.1696
+    },
+    {
+     "text": "we use alternating dense and locally banded sparse attention patterns in the layers of the transformer, similar to the Sparse Transformer [CGRS19]. To study the dependence of ML performance on model size, we train 8 different sizes of model, ranging over three orders of magnitude from 125 million parameters to 175 billion parameters, with the last being the model we call GPT-3. Previous work [KMH+20] suggests that with enough training data, scaling of validation loss should be approximately a smooth power law as a function of size; training models of many different sizes allows us to test this hypothesis both for validation loss and for downstream language tasks.\nTable 2.1 shows the sizes",
+     "start": 24669,
+     "end": 25366,
+     "score": 19.0226
+    },
+    {
+     "text": "requires substantial improvement in order to be viable as a practical method of solving language tasks.\nAnother recent trend in language modeling may offer a way forward. In recent years the capacity of transformer language models has increased substantially, from 100 million parameters [RNSS18], to 300 million parameters [DCLT18], to 1.5 billion parameters [RWC+19], to 8 billion parameters [SPP+19], 11 billion parameters [RSR+19], and ﬁnally 17 billion parameters [Tur20]. Each increase has brought improvements in text synthesis and/or downstream NLP tasks, and there is evidence suggesting that log loss, which correlates well with many downstream tasks, follows a smooth trend of improvement",
+     "start": 10417,
+     "end": 11116,
+     "score": 18.4733
+    },
+    {
+     "text": "may also naturally further increase the efﬁciency of such models over time, similar to trends observed in image recognition and neural machine translation [HB20].\n7 Related Work Several lines of work have focused on increasing parameter count and/or computation in language models as a means to improve generative or task performance. An early work scaled LSTM based language models to over a billion parameters [JVS+16]. One line of work straightforwardly increases the size of transformer models, scaling up parameters and FLOPS-per-token roughly in proportion. Work in this vein has successively increased model size: 213 million parameters [VSP+17] in the original paper, 300 million parameters",
+     "start": 133374,
+     "end": 134072,
+     "score": 16.4664
+    },
+    {
+     "text": "framework [BLC13] and speciﬁcally, the mixture-of-experts method [SMM+17] has been used to produce 100 billion parameter models and more recently 50 billion parameter translation models [AJF19], though only a small fraction of the parameters are actually used on each forward pass. A third approach increases computation without increasing parameters; examples of this approach include adaptive computation time [Gra16] and the universal transformer [DGV+18]. Our work focuses on the ﬁrst approach (scaling compute and parameters together, by straightforwardly making the neural net larger), and increases model size 10x beyond previous models that employ this strategy.\nSeveral efforts have also",
+     "start": 134467,
+     "end": 135163,
+     "score": 15.623
+    }
+   ]
+  },
+  {
+   "claim_id": "c3",
+   "source_id": "s2",
+   "label": "contradicted",
+   "confidence": 0.95,
+   "quote": "It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement).",
+   "quote_found": true,
+   "rationale": "The source explicitly states that BERT pushed the GLUE score to 80.5%, not 85.5%.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": [
+    {
+     "text": "layer, so a minimal num-ber of parameters need to be learned from scratch.\nAmong the tasks, (a) and (b) are sequence-level tasks while (c) and (d) are token-level tasks. In the ﬁgure, E represents the input embedding, Ti represents the contextual representation of token i, [CLS] is the special symbol for classiﬁcation out-put, and [SEP] is the special symbol to separate non-consecutive token sequences.\nB Detailed Experimental Setup B.1 Detailed Descriptions for the GLUE Benchmark Experiments.\nOur GLUE results in Table1 are obtained from https://gluebenchmark.com/ leaderboard and https://blog.\nopenai.com/language-unsupervised.\nThe GLUE benchmark includes the following datasets, the",
+     "start": 56636,
+     "end": 57325,
+     "score": 6.9401
+    },
+    {
+     "text": "A.5.\n4 Experiments In this section, we present BERT ﬁne-tuning re-sults on 11 NLP tasks.\n4.1 GLUE The General Language Understanding Evaluation (GLUE) benchmark (Wang et al., 2018a) is a col-lection of diverse natural language understanding tasks. Detailed descriptions of GLUE datasets are included in Appendix B.1.\nTo ﬁne-tune on GLUE, we represent the input sequence (for single sentence or sentence pairs) as described in Section 3, and use the ﬁnal hid-den vector C ∈RH corresponding to the ﬁrst input token ([CLS]) as the aggregate representa-tion. The only new parameters introduced during ﬁne-tuning are classiﬁcation layer weights W ∈ RK×H, where K is the number of labels. We com-pute a",
+     "start": 19804,
+     "end": 20500,
+     "score": 6.5797
+    },
+    {
+     "text": "BiLSTM+ELMo+Attn 76.4/76.1 64.8 79.8 90.4 36.0 73.3 84.9 56.8 71.0 OpenAI GPT 82.1/81.4 70.3 87.4 91.3 45.4 80.0 82.3 56.0 75.1 BERTBASE 84.6/83.4 71.2 90.5 93.5 52.1 85.8 88.9 66.4 79.6 BERTLARGE 86.7/85.9 72.1 92.7 94.9 60.5 86.5 89.3 70.1 82.1 Table 1: GLUE Test results, scored by the evaluation server (https://gluebenchmark.com/leaderboard).\nThe number below each task denotes the number of training examples. The “Average” column is slightly different than the ofﬁcial GLUE score, since we exclude the problematic WNLI set.8 BERT and OpenAI GPT are single-model, single task. F1 scores are reported for QQP and MRPC, Spearman correlations are reported for STS-B, and accuracy scores are",
+     "start": 20911,
+     "end": 21604,
+     "score": 6.4178
+    },
+    {
+     "text": "For the largest and most widely reported GLUE task, MNLI, BERT obtains a 4.6% absolute accuracy improvement. On the ofﬁcial GLUE leaderboard10, BERTLARGE obtains a score of 80.5, compared to OpenAI GPT, which obtains 72.8 as of the date of writing.\nWe ﬁnd that BERTLARGE signiﬁcantly outper-forms BERTBASE across all tasks, especially those with very little training data. The effect of model size is explored more thoroughly in Section 5.2.\n4.2 SQuAD v1.1 The Stanford Question Answering Dataset (SQuAD v1.1) is a collection of 100k crowd-sourced question/answer pairs (Rajpurkar et al., 2016).\nGiven a question and a passage from 9The GLUE data set distribution does not include the Test labels,",
+     "start": 22557,
+     "end": 23254,
+     "score": 6.2583
+    },
+    {
+     "text": "conditioning on both left and right context in all layers. As a re-sult, the pre-trained BERT model can be ﬁne-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-speciﬁc architecture modiﬁcations.\nBERT is conceptually simple and empirically powerful.\nIt obtains new state-of-the-art re-sults on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answer-ing Test F1 to 93.2 (1.5 point absolute im-provement) and SQuAD v2.0",
+     "start": 548,
+     "end": 1243,
+     "score": 5.1133
+    }
+   ]
+  },
+  {
+   "claim_id": "c4",
+   "source_id": "s3",
+   "label": "not_in_source",
+   "confidence": 0.95,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "The passages discuss retrieval-augmented generation models and their performance on open-domain question answering but do not mention hallucination or its elimination.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": [
+    {
+     "text": "NLP tasks when considered in isolation. Such tasks include open-domain question answering [5, 29], fact checking, fact completion, long-form question answering, Wikipedia article generation, dialogue [41, 65, 9, 13], translation, and language modeling [19, 27]. Our work uniﬁes previous successes in incorporating retrieval into individual tasks, showing that a single retrieval-based architecture is capable of achieving strong performance across several tasks.\n8 General-Purpose Architectures for NLP Prior work on general-purpose architectures for NLP tasks has shown great success without the use of retrieval. A single, pre-trained language model has been shown to achieve strong performance on",
+     "start": 30705,
+     "end": 31404,
+     "score": 11.7882
+    },
+    {
+     "text": "over seq2seq predictions given different documents.\nbut have only explored open-domain extractive question answering. Here, we bring hybrid parametric and non-parametric memory to the “workhorse of NLP,” i.e. sequence-to-sequence (seq2seq) models.\nWe endow pre-trained, parametric-memory generation models with a non-parametric memory through a general-purpose ﬁne-tuning approach which we refer to as retrieval-augmented generation (RAG).\nWe build RAG models where the parametric memory is a pre-trained seq2seq transformer, and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. We combine these components in a probabilistic model",
+     "start": 3822,
+     "end": 4514,
+     "score": 10.4872
+    },
+    {
+     "text": "of the 28th International Conference on Neural Information Processing Systems - Volume 1, NIPS’15, page 190–198, Cam-bridge, MA, USA, 2015. MIT Press.\nURL https://papers.nips.cc/paper/ 5857-inferring-algorithmic-patterns-with-stack-augmented-recurrent-nets.\n Vladimir Karpukhin, Barlas Oguz, Sewon Min, Ledell Wu, Sergey Edunov, Danqi Chen, and Wen-tau Yih. Dense passage retrieval for open-domain question answering. arXiv preprint arXiv:2004.04906, 2020. URL https://arxiv.org/abs/2004.04906.\n Urvashi Khandelwal, Omer Levy, Dan Jurafsky, Luke Zettlemoyer, and Mike Lewis. Generaliza-tion through memorization: Nearest neighbor language models. In International Conference on Learning",
+     "start": 44459,
+     "end": 45145,
+     "score": 9.5148
+    },
+    {
+     "text": "44 NQ Exact Match RAG-Tok RAG-Seq 10 20 30 40 50 K Retrieved Docs 40 50 60 70 80 NQ Answer Recall @ K RAG-Tok RAG-Seq Fixed DPR BM25 10 20 30 40 50 K Retrieved Docs 48 50 52 54 56 Bleu-1 / Rouge-L score RAG-Tok R-L RAG-Tok B-1 RAG-Seq R-L RAG-Seq B-1 Figure 3: Left: NQ performance as more documents are retrieved. Center: Retrieval recall perfor-mance in NQ. Right: MS-MARCO Bleu-1 and Rouge-L as more documents are retrieved.\n5 Related Work Single-Task Retrieval Prior work has shown that retrieval improves performance across a variety of NLP tasks when considered in isolation. Such tasks include open-domain question answering [5, 29], fact checking, fact completion, long-form question",
+     "start": 30163,
+     "end": 30854,
+     "score": 9.0876
+    },
+    {
+     "text": "supervision signals aren’t available, and models that do not require such supervision will be applicable to a wider range of tasks. We explore two variants: the standard 3-way classiﬁcation task (supports/refutes/not enough info) and the 2-way (supports/refutes) task studied in Thorne and Vlachos. In both cases we report label accuracy.\n4 Results 4.1 Open-domain Question Answering Table 1 shows results for RAG along with state-of-the-art models. On all four open-domain QA tasks, RAG sets a new state of the art (only on the T5-comparable split for TQA). RAG combines the generation ﬂexibility of the “closed-book” (parametric only) approaches and the performance of \"open-book\" retrieval-based",
+     "start": 18114,
+     "end": 18812,
+     "score": 8.8823
+    }
+   ]
+  },
+  {
+   "claim_id": "c5",
+   "source_id": "s4",
+   "label": "source_unavailable",
+   "confidence": 1.0,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "The cited source could not be found (no record in OpenAlex and no matching web page); the claim could not be checked.",
+   "model": "",
+   "tier": "none",
+   "escalated": false,
+   "passages": []
+  }
+ ],
+ "usage": [
+  {
+   "tier": "nano",
+   "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+   "calls": 2,
+   "prompt_tokens": 1462,
+   "completion_tokens": 597,
+   "cost_usd": 0.00023099999999999998
+  },
+  {
+   "tier": "super",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "calls": 5,
+   "prompt_tokens": 5741,
+   "completion_tokens": 1905,
+   "cost_usd": 0.0034368000000000003
+  },
+  {
+   "tier": "ultra",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "calls": 3,
+   "prompt_tokens": 4539,
+   "completion_tokens": 2823,
+   "cost_usd": 0.013008
+  }
+ ],
+ "seconds": 13.72
+}

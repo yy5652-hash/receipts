@@ -2,6 +2,7 @@
 
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 from .llm import LLM
 from .models import Claim, Source
@@ -191,18 +192,24 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
     src_payload = [{"id": s.id, "raw": s.raw} for s in sources]
     claims: list[Claim] = []
     contexts: list[str] = []
-    for b in range(0, len(cands), BATCH_SIZE):
-        batch = cands[b : b + BATCH_SIZE]
+
+    def run_batch(b: int) -> dict:
         payload = {
             "sentences": [{"index": b + j, "text": doc[c["start"]:c["end"]], "context": c["context"],
-                           "marker_source_ids": c["ids"]} for j, c in enumerate(batch)],
+                           "marker_source_ids": c["ids"]} for j, c in enumerate(cands[b : b + BATCH_SIZE])],
             "sources": src_payload,
         }
         try:
-            out = llm.complete_json(task="extract_claims", tier="nano", system=EXTRACT_CLAIMS_SYSTEM,
-                                    user=json.dumps(payload, ensure_ascii=False), payload=payload, think=False)
+            return llm.complete_json(task="extract_claims", tier="nano", system=EXTRACT_CLAIMS_SYSTEM,
+                                     user=json.dumps(payload, ensure_ascii=False), payload=payload, think=False)
         except ValueError:
-            out = {}
+            return {}
+
+    starts = list(range(0, len(cands), BATCH_SIZE))
+    with ThreadPoolExecutor(max_workers=4) as pool:  # batches are independent: long reports extract in parallel
+        outputs = list(pool.map(run_batch, starts))
+    for b, out in zip(starts, outputs):
+        batch = cands[b : b + BATCH_SIZE]
         returned = {}
         for item in out.get("claims", []) if isinstance(out, dict) else []:
             if isinstance(item, dict) and isinstance(item.get("index"), int):

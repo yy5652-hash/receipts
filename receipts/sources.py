@@ -68,6 +68,23 @@ def _from_record(s: Source, rec: dict, searcher: Searcher, fallback_url: str | N
                          note="record exists in OpenAlex but no text or abstract is available")
 
 
+_GENERIC_HEADINGS = {"contents", "table of contents", "navigation", "navigation menu", "menu", "search",
+                     "main menu", "references", "abstract", "introduction"}
+
+
+def page_title(text: str) -> str | None:
+    """The page's own title: its first markdown heading, else its first short line."""
+    head = text[:6000]
+    for m in re.finditer(r"^#{1,3}[ \t]+(.{3,150}?)[ \t#]*$", head, re.M):
+        if m.group(1).strip().lower() not in _GENERIC_HEADINGS:
+            return m.group(1).strip()
+    for line in head.splitlines():
+        line = line.strip(" |*_")
+        if 3 <= len(line) <= 150 and not line.lower().startswith(("http", "skip to", "menu", "cookie")):
+            return line
+    return None
+
+
 def _arxiv_text(s: Source, title: str, scholarly: Scholarly | None, searcher: Searcher) -> FetchedSource | None:
     """The arXiv version of a paper: full text from its PDF when Tavily can read it, else the arXiv abstract."""
     finder = getattr(scholarly, "arxiv", None)
@@ -109,6 +126,8 @@ def fetch_sources(
         text = clean_web_text(pages.get(url) or "") if url else ""
         academic = openalex is not None and _looks_academic(s)
         landing = bool(text) and (len(text) < SHORT_PAGE or "doi.org/" in (url or ""))
+        if text and not base["title"]:
+            base["title"] = page_title(text)  # a bare URL in the reference list: name it after the page
         if text and not (landing and academic):
             return FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True)
         reachable = bool(text)  # the link answered; a short landing page may still lead to the paper

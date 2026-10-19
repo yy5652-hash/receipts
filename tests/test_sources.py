@@ -202,3 +202,15 @@ def test_doi_landing_page_is_not_mistaken_for_the_paper():
     (f,), _ = fetch([s], {"https://doi.org/10.5555/attn": "Export citation. Metadata.",
                           ARXIV["pdf_url"]: "Full text from arXiv. " * 10}, openalex=oa)
     assert (f.via, f.coverage) == ("arxiv", "full")
+
+
+def test_page_title_skips_table_of_contents_and_falls_back_to_first_line():
+    from receipts.sources import page_title
+    assert page_title("## Contents\n\n* Intro\n\n# Attention Is All You Need\n\nText") == "Attention Is All You Need"
+    assert page_title("Skip to content\nEnergy and AI: Executive summary\nBody text") == "Energy and AI: Executive summary"
+    assert page_title("") is None
+
+
+def test_bare_url_source_takes_the_page_title():
+    (f,), _ = fetch([src("s1", url="https://a.example/x")], {"https://a.example/x": "# A Real Page Title\n\nBody. " * 3})
+    assert f.title == "A Real Page Title"
