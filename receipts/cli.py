@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
     a = sub.add_parser("audit", help="check every cited sentence against its source")
     a.add_argument("path", help="markdown/text report to audit")
-    a.add_argument("--mode", choices=sorted(MODES), default="cascade")
+    a.add_argument("--mode", choices=sorted(MODES), default="ultra")
     a.add_argument("--json", metavar="OUT.json", help="write the full audit as JSON")
     a.add_argument("--md", metavar="OUT.md", help="write a markdown report")
     a.add_argument("--fake", metavar="FIXTURES.json", help="run offline with fake LLM and search fixtures")

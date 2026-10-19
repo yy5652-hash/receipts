@@ -22,7 +22,7 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("path", help="report to audit (.md)")
     p.add_argument("--fake", metavar="FIXTURES.json", help="offline run with fake LLM and search fixtures")
-    p.add_argument("--mode", choices=sorted(MODES), default="cascade")
+    p.add_argument("--mode", choices=sorted(MODES), default="ultra")
     p.add_argument("--out", help="output file (default: next to the report, .audit.json)")
     args = p.parse_args(argv)
 

@@ -393,7 +393,7 @@ const flat = (s) => s.replace(/\s*\r?\n\s*(?:>[ \t]?)?/g, " "); // soft line bre
 const S = {
   config: { live: false, reason: null, models: {}, limits: { max_chars: 40000 }, examples: [] },
   doc: "",
-  mode: "cascade",
+  mode: "ultra",
   claims: [],
   sources: [],
   fetched: new Map(), // source_id -> FetchedSource (no text)
@@ -485,10 +485,11 @@ function updateInputUi() {
 
   const m = S.config.models || {};
   $("#mode-hint").textContent = {
-    cascade: `${m.super || "Super"} checks every claim; ${m.ultra || "Ultra"} re-checks the ones that come back uncertain, partial, contradicted or not found.`,
-    super: `${m.super || "Super"} checks every claim, with no second opinion.`,
-    ultra: `${m.ultra || "Ultra"} checks every claim. Slowest and most expensive.`,
-    nano: `${m.nano || "Nano"} checks every claim. Fastest and cheapest, least careful.`,
+    ultra: "Most accurate on ReceiptsBench: 99.6% macro accuracy, 0 false alarms in 150 supported sentences, about $0.003 per claim.",
+    nano: "98.6% macro accuracy on ReceiptsBench at about a twelfth of Ultra's cost ($0.0003 per claim).",
+    super: "98.6% macro accuracy on ReceiptsBench, about $0.0007 per claim.",
+    routed: "Nano checks every claim; Ultra re-checks a “supported” verdict only when its quote does not show the claim's figures or absolute words. 98.3% on ReceiptsBench.",
+    cascade: "Super checks every claim; Ultra re-checks the uncertain, partial, contradicted or not-found ones. 98.2% on ReceiptsBench.",
   }[$("#mode").value];
 }
 
@@ -1197,7 +1198,7 @@ function wire() {
   $("#dl-json").addEventListener("click", downloadJson);
   $("#rerun-btn").addEventListener("click", () => {
     $("#doc-input").value = S.doc;
-    startAudit(S.doc, "cascade");
+    startAudit(S.doc, $("#mode").value || "ultra");
   });
 
   const doc = $("#doc");

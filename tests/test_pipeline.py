@@ -19,7 +19,7 @@ FIXTURES = FIX / "sources.json"
 def report():
     searcher, status_fn = load_fixtures(FIXTURES)
     events = []
-    rep = audit(DOC, FakeLLM(), searcher, Settings(), on_event=events.append, status_fn=status_fn)
+    rep = audit(DOC, FakeLLM(), searcher, Settings(), mode="cascade", on_event=events.append, status_fn=status_fn)
     rep._events = events
     return rep
 

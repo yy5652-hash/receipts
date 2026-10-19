@@ -132,7 +132,7 @@ class RateLimiter:
 
 class AuditRequest(BaseModel):
     document: str
-    mode: Literal["cascade", "super", "ultra", "nano"] = "cascade"
+    mode: Literal["ultra", "nano", "super", "routed", "cascade"] = "ultra"
 
 
 def _err(status: int, message: str, **headers) -> JSONResponse:
@@ -310,7 +310,7 @@ def create_app(
         try:
             req = AuditRequest.model_validate_json(await request.body())
         except ValidationError:
-            return _err(400, 'Send JSON like {"document": "...", "mode": "cascade"}.')
+            return _err(400, 'Send JSON like {"document": "...", "mode": "ultra"}.')
         doc = req.document
         if not doc.strip():
             return _err(400, "Paste a report to check.")

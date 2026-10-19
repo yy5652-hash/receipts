@@ -18,7 +18,7 @@ def audit(
     llm: LLM,
     searcher: Searcher,
     settings: Settings,
-    mode: str = "cascade",
+    mode: str = "ultra",
     on_event: Callable[[dict], None] | None = None,
     status_fn: Callable[[str], int | None] = http_status,
     openalex: Scholarly | None = None,

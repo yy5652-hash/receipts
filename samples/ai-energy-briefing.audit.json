@@ -1,6 +1,6 @@
 {
  "document": "# Briefing: how much electricity will AI data centres use?\n\n*Prepared by an AI research assistant for a policy seminar.*\n\n## Where demand stands today\n\nData centres used around 415 terawatt-hours (TWh) of electricity in 2024, about 1.5% of global electricity consumption [2]. Their consumption has grown by roughly 20% per year over the last five years [2]. The United States accounted for 45% of global data centre electricity use in 2024, followed by Europe at 25% and China at 15% [1]. Inside a modern data centre, servers account for around 60% of electricity demand, while cooling ranges from about 7% in efficient hyperscale sites to over 30% in less efficient enterprise sites [2].\n\n## Where it is heading\n\nThe IEA expects data centre electricity consumption to more than double to around 945 TWh by 2030, slightly more than Japan's total electricity consumption today [1]. In the United States, data centres could account for up to 12% of total electricity use by 2030 [1]. Half of the global growth in data centre demand is expected to be met by renewables [1]. Natural gas will supply all of the remaining growth, expanding by 175 TWh [1].\n\n## Why AI changes the picture\n\nGeneral-purpose generative models are far more energy-intensive at inference time than task-specific models built for a single job [3]. A 2024 study in Nature Energy found that a single chatbot query uses ten times the electricity of a web search [4]. Inference can account for up to 90% of a model's lifecycle [5]. Cooling also carries a water cost: a typical data centre uses around 300,000 gallons of water per day [6].\n\n## Sources\n\n[1] International Energy Agency (2025). Energy and AI: Executive summary. https://www.iea.org/reports/energy-and-ai/executive-summary\n[2] International Energy Agency (2025). Energy and AI: Energy demand from AI. https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai\n[3] Luccioni, A. S., Jernite, Y., & Strubell, E. (2024). \"Power Hungry Processing: Watts Driving the Cost of AI Deployment?\" Proceedings of the 2024 ACM Conference on Fairness, Accountability, and Transparency.\n[4] Chen, R., & Alvarez, M. (2024). \"Inference energy budgets of frontier language models.\" Nature Energy, 9, 211–219.\n[5] World Economic Forum (2025). 3 ways data centres can avoid doubling their energy use by 2030. https://www.weforum.org/stories/emerging-technologies/data-centres-and-energy-demand\n[6] International Energy Agency (2025). Energy and AI: Data centre water consumption. https://www.iea.org/reports/energy-and-ai/data-centre-water-consumption\n",
- "mode": "cascade",
+ "mode": "ultra",
  "sources": [
   {
    "id": "s1",
@@ -273,13 +273,14 @@
    "claim_id": "c1",
    "source_id": "s2",
    "label": "supported",
-   "confidence": 0.99,
+   "confidence": 0.95,
    "quote": "Today, electricity consumption from data centres is estimated to amount to around 415 terawatt hours (TWh), or about 1.5% of global electricity consumption in 2024.",
    "quote_found": true,
-   "rationale": "The passage explicitly states that data centre electricity consumption was around 415 TWh in 2024, which corresponds to about 1.5% of global electricity consumption.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passage explicitly states the same electricity consumption figure (415 TWh) and global share (1.5%) for 2024 as the claim.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "IT equipment housed in racks\n\nServers\n\nStorage systems\n\nUPS (uninterruptable power supply)\n\nNetworking equipment\n\nCooling\n\nNetwork connections\n\nGrid connection\n\nBackup generator\n\n### The outlook for energy demand from data centres\n\nData centres – at least at the scale seen today – are relatively new actors in the energy system at the global level. Today, electricity consumption from data centres is estimated to amount to around 415 terawatt hours (TWh), or about 1.5% of global electricity consumption in 2024. It has grown at 12% per year over the last five years.",
@@ -323,7 +324,8 @@
    "rationale": "The passage states data centre electricity consumption grew at 12% per year over the last five years, not roughly 20% as claimed.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "IT equipment housed in racks\n\nServers\n\nStorage systems\n\nUPS (uninterruptable power supply)\n\nNetworking equipment\n\nCooling\n\nNetwork connections\n\nGrid connection\n\nBackup generator\n\n### The outlook for energy demand from data centres\n\nData centres – at least at the scale seen today – are relatively new actors in the energy system at the global level. Today, electricity consumption from data centres is estimated to amount to around 415 terawatt hours (TWh), or about 1.5% of global electricity consumption in 2024. It has grown at 12% per year over the last five years.",
@@ -364,10 +366,11 @@
    "confidence": 0.95,
    "quote": "The United States accounted for the largest share of global data centre electricity consumption in 2024 (45%), followed by China (25%) and Europe (15%).",
    "quote_found": true,
-   "rationale": "The claim states Europe accounted for 25% and China 15%, but the source states China accounted for 25% and Europe 15%.",
+   "rationale": "The passage assigns 25% to China and 15% to Europe, while the claim assigns 25% to Europe and 15% to China.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Data centres accounted for around 1.5% of the world’s electricity consumption in 2024, or 415 terawatt-hours (TWh). The United States accounted for the largest share of global data centre electricity consumption in 2024 (45%), followed by China (25%) and Europe (15%). Globally, data centre electricity consumption has grown by around 12% per year since 2017, more than four times faster than the rate of total electricity consumption. AI-focused data centres can draw as much electricity as power-intensive factories such as aluminium smelters, but they are much more geographically concentrated. Nearly half of data centre capacity in the United States is in five regional clusters. The sector",
@@ -405,13 +408,14 @@
    "claim_id": "c4",
    "source_id": "s2",
    "label": "supported",
-   "confidence": 0.99,
-   "quote": "On average they account for around 60% of electricity demand in modern data centres, although this varies greatly between data centre types.",
+   "confidence": 0.95,
+   "quote": "The share of cooling systems in total data centre consumption varies from about 7% for efficient hyperscale data centres to over 30% for less-efficient enterprise data centres.",
    "quote_found": true,
-   "rationale": "The passages directly state that servers account for around 60% of electricity demand and that cooling share varies from about 7% for efficient hyperscale to over 30% for less-efficient enterprise data centres, matching the claim.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passages explicitly state that servers account for around 60% of electricity demand in modern data centres and that cooling share varies from about 7% for efficient hyperscale data centres to over 30% for less-efficient enterprise data centres, matching the claim exactly.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "* Storage systems are devices used for centralised data storage and backup, and account for around 5% of electricity consumption.\n* Networking equipment include switches to connect devices within the data centre, routers to direct traffic and load balancers to optimise performance. Networking equipment accounts for up to 5% of electricity demand.\n* Cooling and environmental control refers to equipment that regulates temperature and humidity to keep IT equipment operating at optimal conditions. The share of cooling systems in total data centre consumption varies from about 7% for efficient hyperscale data centres to over 30% for less-efficient enterprise data centres.\n* Uninterruptible power",
@@ -449,13 +453,14 @@
    "claim_id": "c5",
    "source_id": "s1",
    "label": "supported",
-   "confidence": 0.95,
+   "confidence": 0.99,
    "quote": "Data centre electricity consumption is set to more than double to around 945 TWh by 2030.",
    "quote_found": true,
-   "rationale": "The passage explicitly states the projected doubling to 945 TWh by 2030 and notes that this is slightly more than Japan's current electricity consumption, matching the claim.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passages directly state that data centre electricity consumption is set to more than double to around 945 TWh by 2030 and that this is slightly more than Japan's total electricity consumption today.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Data centre electricity consumption is set to more than double to around 945 TWh by 2030. This is slightly more than Japan’s total electricity consumption today. AI is the most important driver of this growth, alongside growing demand for other digital services. The United States accounts for by far the largest share of this projected increase, followed by China. In the United States, data centres account for nearly half of electricity demand growth between now and 2030. By the end of the decade, the country is set to consume more electricity for data centres than for the production of aluminium, steel, cement, chemicals and all other energy-intensive goods combined. Uncertainties widen",
@@ -496,10 +501,11 @@
    "confidence": 0.9,
    "quote": "",
    "quote_found": false,
-   "rationale": "The passages discuss data centre electricity demand growth and its share of demand growth, but do not provide a figure for data centres as a percentage of total electricity use in the United States by 2030.",
+   "rationale": "The passages discuss data centres' share of electricity demand growth (e.g., nearly half of US demand growth, over 20% of advanced economies' demand growth) but do not provide a figure for data centres' share of total US electricity use in 2030.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Data centre electricity consumption is set to more than double to around 945 TWh by 2030. This is slightly more than Japan’s total electricity consumption today. AI is the most important driver of this growth, alongside growing demand for other digital services. The United States accounts for by far the largest share of this projected increase, followed by China. In the United States, data centres account for nearly half of electricity demand growth between now and 2030. By the end of the decade, the country is set to consume more electricity for data centres than for the production of aluminium, steel, cement, chemicals and all other energy-intensive goods combined. Uncertainties widen",
@@ -537,13 +543,14 @@
    "claim_id": "c7",
    "source_id": "s1",
    "label": "supported",
-   "confidence": 0.9,
+   "confidence": 0.95,
    "quote": "Half of the global growth in data centre demand is met by renewables, supported by storage and the broader electricity grid.",
    "quote_found": true,
-   "rationale": "The passage explicitly states that half of the global growth in data centre demand is met by renewables, which aligns with the claim.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passage directly states that half of the global growth in data centre demand is met by renewables, which matches the claim.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Renewables and natural gas take the lead in meeting data centre electricity demand, but a range of sources are poised to contribute. Half of the global growth in data centre demand is met by renewables, supported by storage and the broader electricity grid. Renewables generation is projected to grow by over 450 TWh to meet data centre demand to 2035, building on short lead times, economic competitiveness and the procurement strategies of tech companies. Dispatchable sources, led by natural gas, also have a crucial role to play, with the tech sector helping to bring forward new nuclear and geothermal technologies as well. Natural gas expands by 175 TWh to meet growing data centre demand,",
@@ -582,12 +589,13 @@
    "source_id": "s1",
    "label": "contradicted",
    "confidence": 0.95,
-   "quote": "Natural gas expands by 175 TWh to meet growing data centre demand, notably in the United States. Nuclear contributes about the same amount of additional generation to meet data centre demand, notably in China, Japan and the United States.",
+   "quote": "Natural gas expands by 175 TWh to meet growing data centre demand, notably in the United States.",
    "quote_found": true,
-   "rationale": "The passage states that natural gas expands by 175 TWh but also that nuclear contributes about the same amount, so natural gas does not supply all of the remaining growth.",
+   "rationale": "The passages state natural gas expands by 175 TWh but also note nuclear contributes about the same amount, so natural gas does not supply all remaining growth.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Renewables and natural gas take the lead in meeting data centre electricity demand, but a range of sources are poised to contribute. Half of the global growth in data centre demand is met by renewables, supported by storage and the broader electricity grid. Renewables generation is projected to grow by over 450 TWh to meet data centre demand to 2035, building on short lead times, economic competitiveness and the procurement strategies of tech companies. Dispatchable sources, led by natural gas, also have a crucial role to play, with the tech sector helping to bring forward new nuclear and geothermal technologies as well. Natural gas expands by 175 TWh to meet growing data centre demand,",
@@ -624,14 +632,15 @@
   {
    "claim_id": "c9",
    "source_id": "s3",
-   "label": "supported",
+   "label": "partial",
    "confidence": 0.5,
-   "quote": "For the generative task, summarization (represented by the SAMsum, XSum and CNN-Daily Mail datasets), the task-specific and multi-purpose models are closer in terms of emissions: task-specific sequence-to-sequence models generate 4-10g of CO2eq for 1,000 inferences, while multi-purpose models emit 20-30g for the same task.",
+   "quote": "For the generative task, summarization (represented by the SAMsum, XSum and CNN-Daily Mail datasets), the task-specific and multi-purpose models are closer in terms of emissions: task-specific sequence-to-sequence models generate 4-10g of 𝐶𝑂2𝑒𝑞for 1,000 inferences, while multi-purpose models emit 20-30g for the same task.",
    "quote_found": false,
-   "rationale": "The passage directly compares energy emissions for generative summarization tasks, showing multi-purpose (general-purpose) models emit 20-30g CO2eq per 1,000 inferences versus 4-10g for task-specific models, supporting the claim that general-purpose generative models are far more energy-intensive at inference time.",
+   "rationale": "The passages confirm that general-purpose models are more energy-intensive at inference, but for generative tasks like summarization the gap is described as smaller (\"closer in terms of emissions\") and only 2-3x higher, not \"far more\" as the claim states.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "learning (ML) models into technology. However, this ambition of “generality” comes at a steep cost to the environment, given the amount of energy these systems require and the amount of carbon that they emit. In this work, we propose the first systematic comparison of the ongoing inference cost of various categories of ML systems, covering both task-specific (i.e. finetuned models that carry out a single task) and ‘general-purpose’ models, (i.e. those trained for multiple tasks). We measure deployment cost as the amount of energy and carbon required to perform 1,000 inferences on representative benchmark dataset using these models. We find that multi-purpose, generative architectures are",
@@ -676,19 +685,21 @@
    "model": "",
    "tier": "none",
    "escalated": false,
+   "unbacked": [],
    "passages": []
   },
   {
    "claim_id": "c11",
    "source_id": "s5",
    "label": "supported",
-   "confidence": 0.99,
+   "confidence": 1.0,
    "quote": "A recent estimate suggests inference can account for up to 90% of a model’s lifecycle.",
    "quote_found": true,
-   "rationale": "The passage explicitly states that inference can account for up to 90% of a model’s lifecycle, matching the claim.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passage explicitly states that inference can account for up to 90% of a model's lifecycle, matching the claim exactly.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "Training a single large model such as ChatGPT is estimated to have generated 552 tons of carbon dioxide, equivalent to the annual footprint of 121 US households. While training represents the most energy-intensive stage, AI inferencing, the process of running and applying these models, also consumes significant energy at scale.\n\nA recent estimate suggests inference can account for up to 90% of a model’s lifecycle. As more powerful models emerge and usage expands, total energy demand will continue to rise.\n\nHowever, energy cannot be considered in isolation. Energy use affects water, cooling and materials, and so sustainability efforts must consider the whole ecosystem.\n\n## Local impact",
@@ -733,6 +744,7 @@
    "model": "",
    "tier": "none",
    "escalated": false,
+   "unbacked": [],
    "passages": []
   }
  ],
@@ -748,19 +760,19 @@
   {
    "tier": "super",
    "model": "nvidia/nemotron-3-super-120b-a12b",
-   "calls": 11,
-   "prompt_tokens": 11906,
-   "completion_tokens": 4695,
-   "cost_usd": 0.0077973
+   "calls": 1,
+   "prompt_tokens": 370,
+   "completion_tokens": 44,
+   "cost_usd": 0.0001506
   },
   {
    "tier": "ultra",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
-   "calls": 5,
-   "prompt_tokens": 5874,
-   "completion_tokens": 2612,
-   "cost_usd": 0.01371
+   "calls": 10,
+   "prompt_tokens": 12216,
+   "completion_tokens": 9475,
+   "cost_usd": 0.040641
   }
  ],
- "seconds": 15.68
+ "seconds": 24.34
 }

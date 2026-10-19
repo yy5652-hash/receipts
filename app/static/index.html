@@ -51,10 +51,11 @@
         <div class="advanced-body">
           <label for="mode">Checking mode</label>
           <select id="mode">
-            <option value="cascade" selected>Cascade — Super checks, Ultra re-checks hard cases (recommended)</option>
-            <option value="super">Nemotron 3 Super only</option>
-            <option value="ultra">Nemotron 3 Ultra only</option>
-            <option value="nano">Nemotron 3 Nano only</option>
+            <option value="ultra" selected>Thorough — Nemotron 3 Ultra checks every claim (recommended)</option>
+            <option value="nano">Fast — Nemotron 3 Nano checks every claim</option>
+            <option value="super">Nemotron 3 Super checks every claim</option>
+            <option value="routed">Routed — Nano checks, Ultra re-checks unbacked “supported”</option>
+            <option value="cascade">Cascade — Super checks, Ultra re-checks doubts</option>
           </select>
           <p id="mode-hint" class="hint"></p>
         </div>

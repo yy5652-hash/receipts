@@ -1,6 +1,6 @@
 {
  "document": "## Related work\n\nThe Transformer replaced recurrence entirely with attention and reached 28.4 BLEU on the WMT 2014 English-to-German task (Vaswani et al., 2017). GPT-3 scaled this architecture to 17.5 billion parameters (Brown et al., 2020). BERT pushed the GLUE benchmark score to 85.5 (Devlin et al., 2019). Retrieval-augmented models were shown to eliminate hallucination entirely in open-domain question answering (Lewis et al., 2020). A later meta-analysis confirmed that attention heads are fully interpretable (Okafor & Lindqvist, 2022).\n\n## References\n\nBrown, T., Mann, B., Ryder, N., et al. (2020). Language models are few-shot learners. Advances in Neural Information Processing Systems, 33.\nDevlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. NAACL-HLT. https://doi.org/10.18653/v1/N19-1423\nLewis, P., Perez, E., Piktus, A., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33.\nOkafor, C., & Lindqvist, E. (2022). A meta-analysis of attention head interpretability in large language models. Transactions on Machine Learning Interpretability, 4(1), 1–29.\nVaswani, A., Shazeer, N., Parmar, N., et al. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30.\n",
- "mode": "cascade",
+ "mode": "ultra",
  "sources": [
   {
    "id": "s1",
@@ -191,12 +191,13 @@
    "source_id": "s5",
    "label": "supported",
    "confidence": 0.95,
-   "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task.",
+   "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU.",
    "quote_found": true,
-   "rationale": "The passage explicitly states that the Transformer dispenses with recurrence entirely and achieves 28.4 BLEU on the WMT 2014 English-to-German task, matching the claim.",
-   "model": "nvidia/nemotron-3-super-120b-a12b",
-   "tier": "super",
+   "rationale": "The passages confirm the Transformer uses attention mechanisms without recurrence and achieves 28.4 BLEU on the specified task.",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
    "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including",
@@ -219,10 +220,11 @@
    "confidence": 0.95,
    "quote": "ranging over three orders of magnitude from 125 million parameters to 175 billion parameters, with the last being the model we call GPT-3.",
    "quote_found": true,
-   "rationale": "The passages state GPT-3 has 175 billion parameters, not 17.5 billion.",
+   "rationale": "The passages state GPT-3 has 175 billion parameters, while the claim says 17.5 billion parameters.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "6.7B 32 4096 32 128 2M 1.2 × 10−4 GPT-3 13B 13.0B 40 5140 40 128 2M 1.0 × 10−4 GPT-3 175B or “GPT-3” 175.0B 96 12288 96 128 3.2M 0.6 × 10−4 Table 2.1: Sizes, architectures, and learning hyper-parameters (batch size in tokens and learning rate) of the models which we trained. All models were trained for a total of 300 billion tokens.\n2.1 Model and Architectures We use the same model and architecture as GPT-2 [RWC+19], including the modiﬁed initialization, pre-normalization, and reversible tokenization described therein, with the exception that we use alternating dense and locally banded sparse attention patterns in the layers of the transformer, similar to the Sparse Transformer [CGRS19]. To",
@@ -261,12 +263,13 @@
    "source_id": "s2",
    "label": "contradicted",
    "confidence": 0.95,
-   "quote": "It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement).",
+   "quote": "It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement)",
    "quote_found": true,
-   "rationale": "The source explicitly states that BERT pushed the GLUE score to 80.5%, not 85.5%.",
+   "rationale": "The claim states a GLUE score of 85.5, but the source explicitly says the GLUE score was pushed to 80.5% and Table 1 shows BERTLARGE scores of 86.7/85.9, not 85.5.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "layer, so a minimal num-ber of parameters need to be learned from scratch.\nAmong the tasks, (a) and (b) are sequence-level tasks while (c) and (d) are token-level tasks. In the ﬁgure, E represents the input embedding, Ti represents the contextual representation of token i, [CLS] is the special symbol for classiﬁcation out-put, and [SEP] is the special symbol to separate non-consecutive token sequences.\nB Detailed Experimental Setup B.1 Detailed Descriptions for the GLUE Benchmark Experiments.\nOur GLUE results in Table1 are obtained from https://gluebenchmark.com/ leaderboard and https://blog.\nopenai.com/language-unsupervised.\nThe GLUE benchmark includes the following datasets, the",
@@ -304,13 +307,14 @@
    "claim_id": "c4",
    "source_id": "s3",
    "label": "not_in_source",
-   "confidence": 0.95,
+   "confidence": 0.9,
    "quote": "",
    "quote_found": false,
-   "rationale": "The passages discuss retrieval-augmented generation models and their performance on open-domain question answering but do not mention hallucination or its elimination.",
+   "rationale": "The passages discuss retrieval-augmented generation performance on open-domain QA tasks but do not mention hallucination elimination.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
-   "escalated": true,
+   "escalated": false,
+   "unbacked": [],
    "passages": [
     {
      "text": "NLP tasks when considered in isolation. Such tasks include open-domain question answering [5, 29], fact checking, fact completion, long-form question answering, Wikipedia article generation, dialogue [41, 65, 9, 13], translation, and language modeling [19, 27]. Our work uniﬁes previous successes in incorporating retrieval into individual tasks, showing that a single retrieval-based architecture is capable of achieving strong performance across several tasks.\n8 General-Purpose Architectures for NLP Prior work on general-purpose architectures for NLP tasks has shown great success without the use of retrieval. A single, pre-trained language model has been shown to achieve strong performance on",
@@ -355,6 +359,7 @@
    "model": "",
    "tier": "none",
    "escalated": false,
+   "unbacked": [],
    "passages": []
   }
  ],
@@ -370,19 +375,19 @@
   {
    "tier": "super",
    "model": "nvidia/nemotron-3-super-120b-a12b",
-   "calls": 5,
-   "prompt_tokens": 5741,
-   "completion_tokens": 1905,
-   "cost_usd": 0.0034368000000000003
+   "calls": 1,
+   "prompt_tokens": 383,
+   "completion_tokens": 41,
+   "cost_usd": 0.00015179999999999998
   },
   {
    "tier": "ultra",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
-   "calls": 3,
-   "prompt_tokens": 4539,
-   "completion_tokens": 2823,
-   "cost_usd": 0.013008
+   "calls": 4,
+   "prompt_tokens": 5630,
+   "completion_tokens": 4440,
+   "cost_usd": 0.01895
   }
  ],
- "seconds": 13.72
+ "seconds": 17.09
 }
