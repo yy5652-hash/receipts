@@ -87,7 +87,8 @@ class OpenAlex:
         key = f"openalex:title:{title}"
         records = self.cache.get(key, _MISS) if self.cache else _MISS
         if records is _MISS:
-            r = self._get("/works", {"search": title, "per-page": 5})
+            query = re.sub(r"[^\w\s'-]", " ", title)  # OpenAlex rejects wildcards such as ? and *
+            r = self._get("/works", {"search": " ".join(query.split()), "per-page": 5})
             if r is None or r.status_code != 200:
                 return None
             records = [_record(w) for w in r.json().get("results", [])]

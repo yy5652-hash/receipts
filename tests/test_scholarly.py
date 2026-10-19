@@ -135,3 +135,16 @@ def test_doi_prefixes_are_stripped(tmp_path, raw):
     seen = []
     oa(tmp_path, lambda r: seen.append(r.url.path) or httpx.Response(404)).by_doi(raw)
     assert seen == ["/works/doi:10.5555/attn"]
+
+
+def test_by_title_strips_wildcard_characters():
+    seen = {}
+
+    def handler(request):
+        seen["search"] = request.url.params["search"]
+        return httpx.Response(200, json={"results": []})
+
+    oa = OpenAlex(None, client=httpx.Client(transport=httpx.MockTransport(handler)))
+    oa.by_title("Power Hungry Processing: Watts Driving the Cost of AI Deployment?")
+    assert "?" not in seen["search"] and ":" not in seen["search"]
+    assert seen["search"] == "Power Hungry Processing Watts Driving the Cost of AI Deployment"
