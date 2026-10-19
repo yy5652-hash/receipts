@@ -3,6 +3,7 @@
 import difflib
 import re
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
 from .models import FetchedSource, Source
@@ -10,7 +11,19 @@ from .scholarly import Scholarly
 from .search import Searcher, http_status
 from .textutil import clean_web_text, normalize
 
-TITLE_MATCH = 0.6  # minimum difflib ratio between a search hit and the cited title
+TITLE_MATCH = 0.8  # minimum difflib ratio between a search hit and the cited title
+ACADEMIC_TITLE_MATCH = 0.9  # stricter for papers OpenAlex has no record of: a near title is another paper
+SHORT_PAGE = 3000  # a landing page this short is metadata, not the work itself
+_ACADEMIC = re.compile(
+    r"\b(?:journal|proceedings|transactions|conference|symposium|workshop|vol\.|pp\.|arxiv|preprint|"
+    r"neurips|icml|iclr|acl|naacl|emnlp|nature|science|lancet|jama|nejm|advances in|et al)\b"
+    r"|\b\d+\(\d+\)|\(\d{4}[a-z]?\)\.",  # 14(2)   Author, A. (2020).
+    re.I,
+)
+
+
+def _looks_academic(s: Source) -> bool:
+    return bool(s.doi or _ACADEMIC.search(s.raw))
 
 
 def _ratio(a: str, b: str) -> float:
@@ -26,12 +39,12 @@ def _slug(url: str | None) -> str:
     return re.sub(r"[-_]+", " ", re.sub(r"\.\w{2,4}$", "", path))
 
 
-def _title_search(src: Source, searcher: Searcher) -> tuple[dict, str] | None:
+def _title_search(src: Source, searcher: Searcher, min_ratio: float = TITLE_MATCH) -> tuple[dict, str] | None:
     """Best search hit whose title (or URL slug) resembles the cited title, with its text."""
     query = " ".join(filter(None, [
         f'"{src.title}"', _surname(src.authors[0]) if src.authors else None, str(src.year) if src.year else None,
     ]))
-    best, best_score = None, TITLE_MATCH
+    best, best_score = None, min_ratio
     for hit in searcher.search(query, max_results=5):
         text = clean_web_text(hit.get("raw_content") or hit.get("content") or "")
         score = max(_ratio(hit.get("title") or "", src.title), _ratio(_slug(hit.get("url")), src.title))
@@ -53,6 +66,21 @@ def _from_record(s: Source, rec: dict, searcher: Searcher, fallback_url: str | N
         return FetchedSource(**base, status="ok", text=abstract, via="openalex", coverage="abstract", note=ABSTRACT_NOTE)
     return FetchedSource(**base, status="not_found", via="openalex",
                          note="record exists in OpenAlex but no text or abstract is available")
+
+
+def _arxiv_text(s: Source, title: str, scholarly: Scholarly | None, searcher: Searcher) -> FetchedSource | None:
+    """The arXiv version of a paper: full text from its PDF when Tavily can read it, else the arXiv abstract."""
+    finder = getattr(scholarly, "arxiv", None)
+    paper = finder(title) if finder else None
+    if not paper:
+        return None
+    base = dict(source_id=s.id, status="ok", url=paper["abs_url"], title=paper["title"] or title, exists=True)
+    if full := clean_web_text(searcher.extract([paper["pdf_url"]]).get(paper["pdf_url"]) or ""):
+        return FetchedSource(**base, text=full, via="arxiv", note="checked against the arXiv version")
+    if abstract := clean_web_text(paper.get("abstract") or ""):
+        return FetchedSource(**base, text=abstract, via="arxiv", coverage="abstract",
+                             note="checked against the arXiv abstract")
+    return None
 
 
 def fetch_sources(
@@ -79,10 +107,12 @@ def fetch_sources(
         shown = s.url or doi_url[s.id]
         base = dict(source_id=s.id, url=shown, title=s.title)
         text = clean_web_text(pages.get(url) or "") if url else ""
-        if text:
+        academic = openalex is not None and _looks_academic(s)
+        landing = bool(text) and (len(text) < SHORT_PAGE or "doi.org/" in (url or ""))
+        if text and not (landing and academic):
             return FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True)
-        reachable = False  # the link answered, we just could not read it
-        if url:
+        reachable = bool(text)  # the link answered; a short landing page may still lead to the paper
+        if url and not text:
             code = status_fn(url)
             if code in (404, 410) or code is None:
                 note = "link did not resolve" if code is None else f"link returned HTTP {code}"
@@ -92,12 +122,29 @@ def fetch_sources(
         if openalex and s.doi:
             rec = openalex.by_doi(s.doi)
             if rec == "missing":
-                return FetchedSource(**base, status="not_found", note="DOI is not registered", exists=False)
+                if not text:
+                    return FetchedSource(**base, status="not_found", note="DOI is not registered", exists=False)
+                rec = None
         if openalex and rec is None and s.title:
             rec = openalex.by_title(s.title, _surname(s.authors[0]) if s.authors else None, s.year)
+        title = (rec or {}).get("title") or s.title
         if rec:
-            return _from_record(s, rec, searcher, shown)
-        if s.title and (found := _title_search(s, searcher)):
+            found = _from_record(s, rec, searcher, shown)
+            if found.status == "ok" and found.via == "tavily_extract" and len(found.text) >= SHORT_PAGE:
+                return found  # the published version is openly readable
+            if title and (paper := _arxiv_text(s, title, openalex, searcher)) and (
+                    paper.coverage == "full" or found.status != "ok"):
+                return paper
+            if found.status == "ok" and found.via == "openalex" and text:  # abstract + whatever the landing page says
+                found.text, found.via = f"Abstract: {found.text}\n\n{text}", "tavily_extract+openalex"
+            if found.status == "ok" or not text:
+                return found
+        elif title and academic and (paper := _arxiv_text(s, title, openalex, searcher)):
+            return paper
+        if text:
+            return FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True,
+                                 note="only the landing page could be read")
+        if s.title and (found := _title_search(s, searcher, ACADEMIC_TITLE_MATCH if academic else TITLE_MATCH)):
             hit, text = found
             return FetchedSource(source_id=s.id, status="ok", url=hit.get("url") or shown,
                                  title=hit.get("title") or s.title, text=text, via="tavily_search", exists=True)
@@ -110,9 +157,11 @@ def fetch_sources(
         exists = True if reachable else (False if s.title else None)  # a title lookup ran: no hit means no record
         return FetchedSource(**base, status="not_found", note=note, exists=exists)
 
-    out: list[FetchedSource] = []
-    for s in sources:
-        out.append(resolve(s))
+    def resolve_and_emit(s: Source) -> FetchedSource:
+        f = resolve(s)
         if on_event:
-            on_event({"type": "source", "fetched": out[-1].model_dump(mode="json", exclude={"text"})})
-    return out
+            on_event({"type": "source", "fetched": f.model_dump(mode="json", exclude={"text"})})
+        return f
+
+    with ThreadPoolExecutor(max_workers=6) as pool:  # status checks and lookups are network-bound
+        return list(pool.map(resolve_and_emit, sources))

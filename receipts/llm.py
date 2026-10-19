@@ -14,8 +14,9 @@ TASKS = ("parse_sources", "extract_claims", "judge")
 class LLM(Protocol):
     usage: dict[str, Usage]  # keyed by tier
 
-    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict) -> dict:
-        """Run one JSON-returning call. `payload` is the structured input `user` was built from
+    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict,
+                      think: bool | None = None) -> dict:
+        """Run one JSON-returning call; `think` overrides the tier's reasoning setting. `payload` is the structured input `user` was built from
         (fakes use it; the real client ignores it)."""
         ...
 
@@ -65,7 +66,7 @@ class TokenFactoryLLM:
         self._lock = threading.Lock()
         self._json_mode_rejected = False
 
-    def _chat(self, tier: str, system: str, user: str):
+    def _chat(self, tier: str, system: str, user: str, think: bool | None = None):
         from openai import BadRequestError
 
         opts = self.settings.tier_options.get(tier, {})
@@ -77,8 +78,11 @@ class TokenFactoryLLM:
             ],
             temperature=0,
         )
-        if opts.get("extra_body"):
-            kwargs["extra_body"] = opts["extra_body"]
+        extra = dict(opts.get("extra_body") or {})
+        if think is not None:
+            extra["chat_template_kwargs"] = {**extra.get("chat_template_kwargs", {}), "enable_thinking": think}
+        if extra:
+            kwargs["extra_body"] = extra
         if not self._json_mode_rejected:
             try:
                 return self.client.chat.completions.create(
@@ -99,12 +103,13 @@ class TokenFactoryLLM:
             rec.completion_tokens += ct
             rec.cost_usd += (pt * price_in + ct * price_out) / 1e6
 
-    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict) -> dict:
-        resp = self._chat(tier, system, user)
+    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict,
+                      think: bool | None = None) -> dict:
+        resp = self._chat(tier, system, user, think)
         self._record(tier, resp)
         try:
             return parse_json_lenient(resp.choices[0].message.content or "")
         except ValueError:
-            resp = self._chat(tier, system, user + "\n\nReturn only valid JSON.")
+            resp = self._chat(tier, system, user + "\n\nReturn only valid JSON.", think)
             self._record(tier, resp)
             return parse_json_lenient(resp.choices[0].message.content or "")

@@ -3,6 +3,7 @@
 import difflib
 import re
 import time
+import xml.etree.ElementTree as ET
 from typing import Literal, Protocol
 from urllib.parse import quote
 
@@ -12,6 +13,9 @@ from .search import DiskCache
 from .textutil import normalize
 
 OPENALEX_URL = "https://api.openalex.org"
+ARXIV_URL = "https://export.arxiv.org/api/query"
+ARXIV_TITLE_MATCH = 0.9
+_ATOM = {"a": "http://www.w3.org/2005/Atom"}
 TITLE_MATCH = 0.85  # minimum normalised-title ratio for by_title to accept a record
 YEAR_SLACK = 1  # a cited year may be off by one (online-first vs issue year)
 _MISS = object()
@@ -26,11 +30,36 @@ class Scholarly(Protocol):
         """The record whose title matches, or None."""
         ...
 
+    def arxiv(self, title: str) -> dict | None:
+        """The arXiv preprint with this title ({title, abstract, year, abs_url, pdf_url}), or None."""
+        ...
+
 
 def _abstract(index: dict | None) -> str:
-    """Rebuild the abstract from OpenAlex's {word: [positions]} inverted index."""
+    """Rebuild the abstract from OpenAlex's {word: [positions]} inverted index ("" if it is not a real abstract)."""
     words = {pos: word for word, positions in (index or {}).items() for pos in positions}
-    return " ".join(words[p] for p in sorted(words))
+    text = " ".join(words[p] for p in sorted(words))
+    return "" if junk_abstract(text) else text
+
+
+def junk_abstract(text: str) -> bool:
+    """Some records carry a byline instead of an abstract ("A. Author, B. Author. Proceedings of ...")."""
+    words = text.split()
+    byline = re.match(r"^[A-Z][\w.'’-]*(?: [A-Z][\w.'’-]*)*(?:, [A-Z][\w.'’-]*(?: [A-Z][\w.'’-]*)*){2,}\.", text)
+    return len(words) < 6 or bool(byline)
+
+
+def _arxiv_entry(e: ET.Element) -> dict:
+    get = lambda tag: " ".join((e.findtext(f"a:{tag}", "", _ATOM) or "").split())
+    abs_url = get("id")
+    pdf = next((l.get("href") for l in e.findall("a:link", _ATOM) if l.get("title") == "pdf"), None)
+    return {
+        "title": get("title"),
+        "abstract": get("summary"),
+        "year": int(get("published")[:4]) if get("published")[:4].isdigit() else None,
+        "abs_url": abs_url.replace("http://", "https://"),
+        "pdf_url": (pdf or abs_url.replace("/abs/", "/pdf/")).replace("http://", "https://"),
+    }
 
 
 def _record(w: dict) -> dict:
@@ -104,3 +133,25 @@ class OpenAlex:
                 scored.append((ratio, by_author, rec))
         best = max(scored, key=lambda t: t[:2], default=None)
         return best[2] if best else None
+
+    def arxiv(self, title: str) -> dict | None:
+        """arXiv preprint by exact-ish title: most papers cited in AI writing have one, with open full text."""
+        key = f"arxiv:title:{normalize(title)}"
+        entries = self.cache.get(key, _MISS) if self.cache else _MISS
+        if entries is _MISS:
+            words = " ".join(re.sub(r"[^\w\s-]", " ", title).split())
+            try:
+                r = self.client.get(ARXIV_URL, params={"search_query": f'ti:"{words}"', "max_results": 5})
+            except httpx.TransportError:
+                return None
+            if r.status_code != 200:
+                return None
+            try:
+                entries = [_arxiv_entry(e) for e in ET.fromstring(r.text).findall("a:entry", _ATOM)]
+            except ET.ParseError:
+                return None
+            if self.cache:
+                self.cache.set(key, entries)
+        scored = [(difflib.SequenceMatcher(None, normalize(title), normalize(e["title"])).ratio(), e) for e in entries]
+        best = max(scored, key=lambda t: t[0], default=None)
+        return best[1] if best and best[0] >= ARXIV_TITLE_MATCH else None

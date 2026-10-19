@@ -41,7 +41,7 @@ Return ONLY a JSON object of exactly this shape:
 {"claims": [{"index": <the sentence index from the input>, "claim": "<claim text>", \
 "source_ids": ["<source id>", ...]}]}"""
 
-_REF_NUM = re.compile(r"^\s*\[(\d+|\^\w+)\](?::|\s)\s*(.*)$")  # [1] text   [^1]: text
+_REF_NUM = re.compile(r"^\s*\[(\d+|\^[\w-]+)\](?::|\s)\s*(.*)$")  # [1] text   [^1]: text   [^curie]: text
 _REF_DOTTED = re.compile(r"^\s*(\d+)[.)]\s+(.*)$")  # 1. text
 _REF_BULLET = re.compile(r"^\s*[-*+]\s+(.*)$")
 _BULLET_LEAD = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+")
@@ -75,6 +75,13 @@ def _expand(inner: str) -> list[str]:
     return out
 
 
+def _starts_plain_entry(line: str, prev: str) -> bool:
+    """An unnumbered reference line starts a new entry when the previous one looks finished
+    (ends with '.', ')' or a URL/DOI) and this one starts like an author or organisation."""
+    finished = bool(re.search(r"(?:[.)]|https?://\S+|10\.\d{4,9}/\S+)\s*$", prev))
+    return finished and bool(re.match(r"\s*[A-Z0-9\"“'(]", line))
+
+
 def _reference_entries(refs: str, numeric_body: bool) -> list[tuple[str | None, str]]:
     """(marker, raw text) per entry of the reference list."""
     entries: list[list] = []
@@ -93,6 +100,8 @@ def _reference_entries(refs: str, numeric_body: bool) -> list[tuple[str | None, 
         elif m := _REF_BULLET.match(line):
             bullets += 1
             marker, text = (None if numeric_body else f"b{bullets}"), m.group(1).strip()
+        elif prev_blank or not entries or _starts_plain_entry(line, entries[-1][1]):
+            pass  # unnumbered entry (APA, Chicago...): one per paragraph or per complete line
         else:
             new = False
         if new:
@@ -151,7 +160,7 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
         try:
             _merge_parsed(sources, llm.complete_json(
                 task="parse_sources", tier="nano", system=PARSE_SOURCES_SYSTEM,
-                user=json.dumps(payload, ensure_ascii=False), payload=payload))
+                user=json.dumps(payload, ensure_ascii=False), payload=payload, think=False))
         except ValueError:  # unparseable model output: keep the regex fields
             pass
 
@@ -181,6 +190,7 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
     known = {s.id for s in sources}
     src_payload = [{"id": s.id, "raw": s.raw} for s in sources]
     claims: list[Claim] = []
+    contexts: list[str] = []
     for b in range(0, len(cands), BATCH_SIZE):
         batch = cands[b : b + BATCH_SIZE]
         payload = {
@@ -190,7 +200,7 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
         }
         try:
             out = llm.complete_json(task="extract_claims", tier="nano", system=EXTRACT_CLAIMS_SYSTEM,
-                                    user=json.dumps(payload, ensure_ascii=False), payload=payload)
+                                    user=json.dumps(payload, ensure_ascii=False), payload=payload, think=False)
         except ValueError:
             out = {}
         returned = {}
@@ -210,4 +220,37 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
             text = text.strip() if isinstance(text, str) and text.strip() else strip_citations(sentence)
             claims.append(Claim(id=f"c{len(claims) + 1}", sentence=sentence, start=c["start"], end=c["end"],
                                 claim=text, source_ids=list(dict.fromkeys(ids))))
+            contexts.append(c["context"])
+    _repair_vague(claims, contexts, llm)
     return sources, claims
+
+
+# A claim that still leans on its neighbours ("It reached...", "this architecture") cannot be checked alone.
+VAGUE = re.compile(
+    r"^(?:it|its|they|their|them|this|these|those|that|she|he|his|her|such|the (?:study|report|paper|authors|"
+    r"survey|model|company|architecture|former|latter))\b"
+    r"|\b(?:this|these|those) (?:architecture|trend|model|study|approach|method|figure|number|technology|"
+    r"policy|report|paper|system|company|growth|increase)\b",
+    re.I,
+)
+
+
+def _repair_vague(claims: list[Claim], contexts: list[str], llm: LLM) -> None:
+    """Nano extracts every claim; the few it leaves vague are rewritten once by Super without reasoning."""
+    todo = [i for i, c in enumerate(claims) if VAGUE.search(c.claim)]
+    if not todo:
+        return
+    payload = {
+        "sentences": [{"index": i, "text": claims[i].sentence, "context": contexts[i],
+                       "marker_source_ids": claims[i].source_ids} for i in todo],
+        "sources": [],
+    }
+    try:
+        out = llm.complete_json(task="extract_claims", tier="super", system=EXTRACT_CLAIMS_SYSTEM,
+                                user=json.dumps(payload, ensure_ascii=False), payload=payload, think=False)
+    except ValueError:
+        return
+    for item in out.get("claims", []) if isinstance(out, dict) else []:
+        i, text = (item.get("index"), item.get("claim")) if isinstance(item, dict) else (None, None)
+        if i in todo and isinstance(text, str) and text.strip() and not VAGUE.search(text):
+            claims[i].claim = text.strip()

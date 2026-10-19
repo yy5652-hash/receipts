@@ -222,7 +222,7 @@ def chunk(text: str, size: int = 700, overlap: int = 150) -> list[tuple[int, int
 
 # --- citations and numbers ---------------------------------------------------
 
-MARKER_RE = re.compile(r"\[(\^?\d+(?:\s*[,–-]\s*\d+)*)\]")  # [1]  [1, 2]  [3–5]  [^1]
+MARKER_RE = re.compile(r"\[(\^[\w-]+|\d+(?:\s*[,–-]\s*\d+)*)\]")  # [1]  [1, 2]  [3–5]  [^1]  [^curie]
 LINK_RE = re.compile(r"\[([^\]\n]+)\]\((https?://[^)\s]+)\)")  # [text](url)
 _AY_ONE = (
     r"(?!(?:January|February|March|April|May|June|July|August|September|October|November|December"

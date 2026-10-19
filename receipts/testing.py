@@ -60,9 +60,11 @@ class FakeOpenAlex:
     """Scholarly lookup over fixtures: `dois` maps DOI -> record (None = lookup failed; unknown DOIs are "missing"),
     `titles` maps title -> record."""
 
-    def __init__(self, dois: dict[str, dict | None] | None = None, titles: dict[str, dict] | None = None):
+    def __init__(self, dois: dict[str, dict | None] | None = None, titles: dict[str, dict] | None = None,
+                 arxiv_titles: dict[str, dict] | None = None):
         self.dois = dois or {}
         self.titles = titles or {}
+        self.arxiv_titles = arxiv_titles or {}
         self.calls: list[tuple] = []
 
     def by_doi(self, doi: str) -> dict | None | Literal["missing"]:
@@ -72,6 +74,10 @@ class FakeOpenAlex:
     def by_title(self, title: str, first_author: str | None = None, year: int | None = None) -> dict | None:
         self.calls.append(("title", title, first_author, year))
         return self.titles.get(title)
+
+    def arxiv(self, title: str) -> dict | None:
+        self.calls.append(("arxiv", title))
+        return self.arxiv_titles.get(title)
 
 
 def load_fixtures(path: str | Path):
@@ -89,7 +95,8 @@ class FakeLLM:
         self.calls: list[tuple[str, str]] = []  # (task, tier)
         self._lock = threading.Lock()
 
-    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict) -> dict:
+    def complete_json(self, *, task: str, tier: str, system: str, user: str, payload: dict,
+                      think: bool | None = None) -> dict:
         out = getattr(self, f"_{task}")(payload)
         with self._lock:
             self.calls.append((task, tier))

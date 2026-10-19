@@ -91,7 +91,8 @@ def test_doi_found_reads_the_open_full_text_when_tavily_can():
     (f,), searcher = fetch([src("s1", doi="10.5555/attn")], {REC["url"]: "Full **paper** text.[1]"}, openalex=oa)
     assert (f.status, f.via, f.coverage, f.exists, f.url) == ("ok", "tavily_extract", "full", True, REC["url"])
     assert f.text == "Full paper text." and f.title == REC["title"]
-    assert oa.calls == [("doi", "10.5555/attn")]
+    # a short open text also asks arXiv for a fuller version (none here), and keeps the published one
+    assert oa.calls == [("doi", "10.5555/attn"), ("arxiv", REC["title"])]
     assert searcher.extract_calls == [[], [REC["url"]]]  # the DOI itself is not fetched through doi.org
 
 
@@ -114,7 +115,8 @@ def test_title_only_found_in_openalex_before_any_web_search():
     s = src("s1", title=REC["title"], authors=["Vaswani, A."], year=2017)
     (f,), searcher = fetch([s], {REC["url"]: None}, openalex=oa)
     assert (f.status, f.via, f.coverage, f.exists) == ("ok", "openalex", "abstract", True)
-    assert oa.calls == [("title", REC["title"], "Vaswani", 2017)] and searcher.search_calls == []
+    assert oa.calls == [("title", REC["title"], "Vaswani", 2017), ("arxiv", REC["title"])]
+    assert searcher.search_calls == []
 
 
 def test_title_not_in_openalex_falls_back_to_web_search_then_not_found():
@@ -144,8 +146,13 @@ def test_doi_lookup_failure_falls_through_to_title_then_reports_unchecked():
 
 def test_url_extract_wins_and_dead_link_ends_the_search_even_with_openalex():
     oa = FakeOpenAlex(dois={"10.5555/attn": REC})
-    (f,), _ = fetch([src("s1", url="https://a.example/p", doi="10.5555/attn")], {"https://a.example/p": "page"}, openalex=oa)
+    long_page = "full text of the paper. " * 200
+    (f,), _ = fetch([src("s1", url="https://a.example/p", doi="10.5555/attn")], {"https://a.example/p": long_page}, openalex=oa)
     assert (f.via, f.exists, f.coverage, oa.calls) == ("tavily_extract", True, "full", [])
+    # a short landing page is metadata: the OpenAlex abstract is added and coverage says so
+    (f,), _ = fetch([src("s1", url="https://a.example/p", doi="10.5555/attn")], {"https://a.example/p": "page"}, openalex=oa)
+    assert (f.via, f.coverage) == ("tavily_extract+openalex", "abstract") and f.text.startswith("Abstract: ")
+    oa.calls.clear()
     (f,), _ = fetch([src("s1", url="https://gone.example/a", doi="10.5555/attn")], status={"https://gone.example/a": 404}, openalex=oa)
     assert (f.status, f.exists, oa.calls) == ("dead_link", None, [])
 
@@ -168,3 +175,30 @@ def test_order_and_ids_preserved():
     srcs = [src("s1", url="https://a/1"), src("s2"), src("s3", url="https://a/3")]
     out, _ = fetch(srcs, {"https://a/1": "one", "https://a/3": "three"})
     assert [(f.source_id, f.status) for f in out] == [("s1", "ok"), ("s2", "not_found"), ("s3", "ok")]
+
+
+ARXIV = {"title": "Attention Is All You Need", "abstract": "The dominant sequence transduction models are based on "
+         "recurrent networks.", "year": 2017, "abs_url": "https://arxiv.org/abs/1706.03762",
+         "pdf_url": "https://arxiv.org/pdf/1706.03762"}
+
+
+def test_paper_with_only_an_abstract_upgrades_to_the_arxiv_full_text():
+    oa = FakeOpenAlex(titles={REC["title"]: REC}, arxiv_titles={REC["title"]: ARXIV})
+    s = src("s1", title=REC["title"], authors=["Vaswani, A."], year=2017)
+    (f,), _ = fetch([s], {REC["url"]: None, ARXIV["pdf_url"]: "Full text from arXiv. " * 10}, openalex=oa)
+    assert (f.status, f.via, f.coverage, f.url) == ("ok", "arxiv", "full", ARXIV["abs_url"])
+
+
+def test_academic_entry_unknown_to_openalex_is_found_on_arxiv():
+    oa = FakeOpenAlex(arxiv_titles={"Attention Is All You Need": ARXIV})
+    s = src("s1", title="Attention Is All You Need", raw="Vaswani et al. (2017). Attention Is All You Need. NeurIPS.")
+    (f,), searcher = fetch([s], {ARXIV["pdf_url"]: None}, openalex=oa)
+    assert (f.status, f.via, f.coverage) == ("ok", "arxiv", "abstract") and searcher.search_calls == []
+
+
+def test_doi_landing_page_is_not_mistaken_for_the_paper():
+    oa = FakeOpenAlex(dois={"10.5555/attn": dict(REC, url="")}, arxiv_titles={REC["title"]: ARXIV})
+    s = src("s1", url="https://doi.org/10.5555/attn", doi="10.5555/attn", title=REC["title"])
+    (f,), _ = fetch([s], {"https://doi.org/10.5555/attn": "Export citation. Metadata.",
+                          ARXIV["pdf_url"]: "Full text from arXiv. " * 10}, openalex=oa)
+    assert (f.via, f.coverage) == ("arxiv", "full")
