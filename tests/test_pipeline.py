@@ -148,3 +148,29 @@ def test_cli_without_keys_names_the_variables(monkeypatch, capsys):
 
 def test_cli_missing_file(capsys):
     assert cli.main(["audit", "/no/such/report.md"]) == 2
+
+
+def test_streaming_events_carry_claims_sources_and_full_verdicts(report):
+    ev = report._events
+    kinds = [e["type"] for e in ev]
+    assert kinds.index("claims") < kinds.index("verdict")  # highlights can render before any verdict
+    claims_ev = next(e for e in ev if e["type"] == "claims")
+    assert len(claims_ev["claims"]) == len(report.claims) and len(claims_ev["sources"]) == len(report.sources)
+    src_ev = [e["fetched"] for e in ev if e["type"] == "source"]
+    assert [f["source_id"] for f in src_ev] == [f.source_id for f in report.fetched]
+    assert all("text" not in f for f in src_ev)
+    for e in (e for e in ev if e["type"] == "verdict"):
+        assert e["label"] == e["verdict"]["label"] and e["claim_id"] == e["verdict"]["claim_id"]
+    full = {(e["claim_id"], e["source_id"]): e["verdict"] for e in ev if e["type"] == "verdict"}
+    for v in report.verdicts:
+        assert full[(v.claim_id, v.source_id)]["quote"] == v.quote
+
+
+def test_max_claims_drops_extras_with_a_notice():
+    searcher, status_fn = load_fixtures(FIXTURES)
+    events = []
+    rep = audit(DOC, FakeLLM(), searcher, Settings(), on_event=events.append, status_fn=status_fn, max_claims=3)
+    assert [c.id for c in rep.claims] == ["c1", "c2", "c3"]
+    assert {v.claim_id for v in rep.verdicts} <= {"c1", "c2", "c3"}
+    (notice,) = [e for e in events if e["type"] == "notice"]
+    assert "9" in notice["message"] and "3" in notice["message"]

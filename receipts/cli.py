@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .config import load_settings
+from .config import REPO_ROOT, load_settings
 from .judge import MODES
 from .models import LABEL_ORDER, AuditReport
 from .pipeline import audit
@@ -31,6 +31,16 @@ def _print_summary(report: AuditReport) -> None:
     print(f"Sources: {sm['n_sources']} | Cost: ${sm['cost_usd']:.4f} | Time: {report.seconds:.1f}s")
 
 
+def _serve(args) -> int:
+    import uvicorn
+
+    sys.path.insert(0, str(REPO_ROOT))  # the web app lives in app/, next to the package
+    from app.server import create_app
+
+    uvicorn.run(create_app(fake=args.fake), host=args.host, port=args.port, log_level="info")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="receipts", description="Audit the citations of an AI-generated report.")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -40,7 +50,14 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--json", metavar="OUT.json", help="write the full audit as JSON")
     a.add_argument("--md", metavar="OUT.md", help="write a markdown report")
     a.add_argument("--fake", metavar="FIXTURES.json", help="run offline with fake LLM and search fixtures")
+    sv = sub.add_parser("serve", help="start the web app")
+    sv.add_argument("--port", type=int, default=8000)
+    sv.add_argument("--host", default="127.0.0.1")
+    sv.add_argument("--fake", metavar="FIXTURES.json", help="offline dev: fake LLM and search fixtures, no budget")
     args = p.parse_args(argv)
+
+    if args.cmd == "serve":
+        return _serve(args)
 
     try:
         doc = Path(args.path).read_text(encoding="utf-8")

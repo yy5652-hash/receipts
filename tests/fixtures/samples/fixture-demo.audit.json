@@ -1,0 +1,468 @@
+{
+ "document": "# Renewable Energy Outlook 2023\n\nThis note summarises where renewable power stands and what is driving it. The figures below come from public reports.\n\n## Investment and costs\n\nGlobal investment in renewable energy reached $500 billion in 2022.[1] Solar module prices fell 89% between 2010 and 2020 [2]. Heat pumps outsold gas furnaces in the United States in 2022 [2].\n\n## Capacity\n\nOffshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020 [3]. Battery storage additions doubled in 2021, e.g. in grid-scale projects [4]. Utility-scale hydrogen projects reached 3.5 GW of announced capacity by 2022 [5]. According to [the IRENA capacity statistics](https://example.net/irena-capacity), solar PV capacity passed 1,000 GW worldwide in 2022.\n\n## Jobs and prices\n\nEmployment in the solar industry grew faster than in fossil fuels (Chen et al., 2020). Solar was the cheapest source of new electricity in most markets by 2020 [1–2].\n\nThe authors expect these trends to continue.\n\n## References\n\n[1] Smith, J., & Lee, K. (2021). \"Global renewable investment trends.\" Energy Journal. https://example.org/energy-journal/investment-trends\n[2] International Energy Agency. (2021). \"Solar PV module price trends.\" doi:10.5555/iea.solar.2021\n[3] \"Offshore wind in Europe: 2020 statistics,\" WindEurope, 2021.\n[4] Okafor, N. (2022). \"Battery storage additions in 2021.\" Storage Digest. https://example.com/old-report\n[5] Garcia, M. (2022). \"Hydrogen project pipeline review.\" H2 Quarterly. https://example.org/h2-pipeline\n[6] Chen, L., Ortiz, M., & Patel, R. (2020). \"Jobs in the energy transition.\" Labor Economics Review. https://example.edu/jobs-energy-transition\n",
+ "mode": "cascade",
+ "sources": [
+  {
+   "id": "s1",
+   "marker": "1",
+   "raw": "Smith, J., & Lee, K. (2021). \"Global renewable investment trends.\" Energy Journal. https://example.org/energy-journal/investment-trends",
+   "url": "https://example.org/energy-journal/investment-trends",
+   "title": "Global renewable investment trends",
+   "authors": [
+    "Smith, J.",
+    "Lee, K."
+   ],
+   "year": 2021,
+   "doi": null
+  },
+  {
+   "id": "s2",
+   "marker": "2",
+   "raw": "International Energy Agency. (2021). \"Solar PV module price trends.\" doi:10.5555/iea.solar.2021",
+   "url": null,
+   "title": "Solar PV module price trends",
+   "authors": [
+    "International Energy Agency"
+   ],
+   "year": 2021,
+   "doi": "10.5555/iea.solar.2021"
+  },
+  {
+   "id": "s3",
+   "marker": "3",
+   "raw": "\"Offshore wind in Europe: 2020 statistics,\" WindEurope, 2021.",
+   "url": null,
+   "title": "Offshore wind in Europe: 2020 statistics",
+   "authors": [],
+   "year": 2021,
+   "doi": null
+  },
+  {
+   "id": "s4",
+   "marker": "4",
+   "raw": "Okafor, N. (2022). \"Battery storage additions in 2021.\" Storage Digest. https://example.com/old-report",
+   "url": "https://example.com/old-report",
+   "title": "Battery storage additions in 2021",
+   "authors": [
+    "Okafor, N."
+   ],
+   "year": 2022,
+   "doi": null
+  },
+  {
+   "id": "s5",
+   "marker": "5",
+   "raw": "Garcia, M. (2022). \"Hydrogen project pipeline review.\" H2 Quarterly. https://example.org/h2-pipeline",
+   "url": "https://example.org/h2-pipeline",
+   "title": "Hydrogen project pipeline review",
+   "authors": [
+    "Garcia, M."
+   ],
+   "year": 2022,
+   "doi": null
+  },
+  {
+   "id": "s6",
+   "marker": "6",
+   "raw": "Chen, L., Ortiz, M., & Patel, R. (2020). \"Jobs in the energy transition.\" Labor Economics Review. https://example.edu/jobs-energy-transition",
+   "url": "https://example.edu/jobs-energy-transition",
+   "title": "Jobs in the energy transition",
+   "authors": [
+    "Chen, L., Ortiz, M.",
+    "Patel, R."
+   ],
+   "year": 2020,
+   "doi": null
+  },
+  {
+   "id": "s7",
+   "marker": null,
+   "raw": "[the IRENA capacity statistics](https://example.net/irena-capacity)",
+   "url": "https://example.net/irena-capacity",
+   "title": "the IRENA capacity statistics",
+   "authors": [],
+   "year": null,
+   "doi": null
+  }
+ ],
+ "claims": [
+  {
+   "id": "c1",
+   "sentence": "Global investment in renewable energy reached $500 billion in 2022.[1]",
+   "start": 177,
+   "end": 247,
+   "claim": "Global investment in renewable energy reached $500 billion in 2022.",
+   "source_ids": [
+    "s1"
+   ]
+  },
+  {
+   "id": "c2",
+   "sentence": "Solar module prices fell 89% between 2010 and 2020 [2].",
+   "start": 248,
+   "end": 303,
+   "claim": "Solar module prices fell 89% between 2010 and 2020.",
+   "source_ids": [
+    "s2"
+   ]
+  },
+  {
+   "id": "c3",
+   "sentence": "Heat pumps outsold gas furnaces in the United States in 2022 [2].",
+   "start": 304,
+   "end": 369,
+   "claim": "Heat pumps outsold gas furnaces in the United States in 2022.",
+   "source_ids": [
+    "s2"
+   ]
+  },
+  {
+   "id": "c4",
+   "sentence": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020 [3].",
+   "start": 384,
+   "end": 462,
+   "claim": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020.",
+   "source_ids": [
+    "s3"
+   ]
+  },
+  {
+   "id": "c5",
+   "sentence": "Battery storage additions doubled in 2021, e.g. in grid-scale projects [4].",
+   "start": 463,
+   "end": 538,
+   "claim": "Battery storage additions doubled in 2021, e.g. in grid-scale projects.",
+   "source_ids": [
+    "s4"
+   ]
+  },
+  {
+   "id": "c6",
+   "sentence": "Utility-scale hydrogen projects reached 3.5 GW of announced capacity by 2022 [5].",
+   "start": 539,
+   "end": 620,
+   "claim": "Utility-scale hydrogen projects reached 3.5 GW of announced capacity by 2022.",
+   "source_ids": [
+    "s5"
+   ]
+  },
+  {
+   "id": "c7",
+   "sentence": "According to [the IRENA capacity statistics](https://example.net/irena-capacity), solar PV capacity passed 1,000 GW worldwide in 2022.",
+   "start": 621,
+   "end": 755,
+   "claim": "According to the IRENA capacity statistics, solar PV capacity passed 1,000 GW worldwide in 2022.",
+   "source_ids": [
+    "s7"
+   ]
+  },
+  {
+   "id": "c8",
+   "sentence": "Employment in the solar industry grew faster than in fossil fuels (Chen et al., 2020).",
+   "start": 777,
+   "end": 863,
+   "claim": "Employment in the solar industry grew faster than in fossil fuels.",
+   "source_ids": [
+    "s6"
+   ]
+  },
+  {
+   "id": "c9",
+   "sentence": "Solar was the cheapest source of new electricity in most markets by 2020 [1–2].",
+   "start": 864,
+   "end": 943,
+   "claim": "Solar was the cheapest source of new electricity in most markets by 2020.",
+   "source_ids": [
+    "s1",
+    "s2"
+   ]
+  }
+ ],
+ "fetched": [
+  {
+   "source_id": "s1",
+   "status": "ok",
+   "url": "https://example.org/energy-journal/investment-trends",
+   "title": "Global renewable investment trends",
+   "text": "",
+   "via": "tavily_extract",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s2",
+   "status": "ok",
+   "url": "https://doi.org/10.5555/iea.solar.2021",
+   "title": "Solar PV module price trends",
+   "text": "",
+   "via": "tavily_extract",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s3",
+   "status": "ok",
+   "url": "https://windeurope.example/offshore-2020",
+   "title": "Offshore wind in Europe: 2020 statistics",
+   "text": "",
+   "via": "tavily_search",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s4",
+   "status": "dead_link",
+   "url": "https://example.com/old-report",
+   "title": "Battery storage additions in 2021",
+   "text": "",
+   "via": "",
+   "note": "link returned HTTP 404",
+   "coverage": "full",
+   "exists": null
+  },
+  {
+   "source_id": "s5",
+   "status": "not_found",
+   "url": "https://example.org/h2-pipeline",
+   "title": "Hydrogen project pipeline review",
+   "text": "",
+   "via": "",
+   "note": "no matching source found by title search",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s6",
+   "status": "ok",
+   "url": "https://example.edu/jobs-energy-transition",
+   "title": "Jobs in the energy transition",
+   "text": "",
+   "via": "tavily_extract",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  },
+  {
+   "source_id": "s7",
+   "status": "ok",
+   "url": "https://example.net/irena-capacity",
+   "title": "the IRENA capacity statistics",
+   "text": "",
+   "via": "tavily_extract",
+   "note": "",
+   "coverage": "full",
+   "exists": true
+  }
+ ],
+ "verdicts": [
+  {
+   "claim_id": "c1",
+   "source_id": "s1",
+   "label": "contradicted",
+   "confidence": 0.8,
+   "quote": "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": [
+    {
+     "text": "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year. Investment in solar and wind accounted for most of the total. Developing economies received a growing share of the funding.",
+     "start": 0,
+     "end": 219,
+     "score": 3.2056
+    }
+   ]
+  },
+  {
+   "claim_id": "c2",
+   "source_id": "s2",
+   "label": "supported",
+   "confidence": 0.9,
+   "quote": "Solar PV module prices fell 89% between 2010 and 2020, according to the IEA.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "Solar PV module prices fell 89% between 2010 and 2020, according to the IEA. Module price declines were driven by manufacturing scale and technology gains. By 2020 solar was the cheapest source of new electricity in most markets.",
+     "start": 0,
+     "end": 229,
+     "score": 3.5755
+    }
+   ]
+  },
+  {
+   "claim_id": "c3",
+   "source_id": "s2",
+   "label": "not_in_source",
+   "confidence": 0.7,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "token overlap 0.00 with the closest source sentence",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": []
+  },
+  {
+   "claim_id": "c4",
+   "source_id": "s3",
+   "label": "supported",
+   "confidence": 0.9,
+   "quote": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "Offshore wind capacity in Europe grew from 11 GW in 2015 to 25 GW in 2020. Germany and the United Kingdom accounted for most of the additions. New installations slowed in 2020 because of the pandemic.",
+     "start": 0,
+     "end": 200,
+     "score": 4.6851
+    }
+   ]
+  },
+  {
+   "claim_id": "c5",
+   "source_id": "s4",
+   "label": "source_unavailable",
+   "confidence": 1.0,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "The cited link is dead (link returned HTTP 404); the claim could not be checked.",
+   "model": "",
+   "tier": "none",
+   "escalated": false,
+   "passages": []
+  },
+  {
+   "claim_id": "c6",
+   "source_id": "s5",
+   "label": "source_unavailable",
+   "confidence": 1.0,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "The cited source exists, but its text could not be read (no matching source found by title search); the claim could not be checked.",
+   "model": "",
+   "tier": "none",
+   "escalated": false,
+   "passages": []
+  },
+  {
+   "claim_id": "c7",
+   "source_id": "s7",
+   "label": "supported",
+   "confidence": 0.9,
+   "quote": "According to the IRENA capacity statistics, solar PV capacity passed 1,000 GW worldwide in 2022.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "According to the IRENA capacity statistics, solar PV capacity passed 1,000 GW worldwide in 2022. Wind capacity followed closely behind.",
+     "start": 0,
+     "end": 135,
+     "score": 5.466
+    }
+   ]
+  },
+  {
+   "claim_id": "c8",
+   "source_id": "s6",
+   "label": "supported",
+   "confidence": 0.9,
+   "quote": "Employment in the solar industry grew faster than in fossil fuels between 2015 and 2019, the study finds.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "Employment in the solar industry grew faster than in fossil fuels between 2015 and 2019, the study finds. The gap was widest in installation and maintenance roles.",
+     "start": 0,
+     "end": 163,
+     "score": 2.0138
+    }
+   ]
+  },
+  {
+   "claim_id": "c9",
+   "source_id": "s1",
+   "label": "not_in_source",
+   "confidence": 0.7,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "token overlap 0.29 with the closest source sentence",
+   "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+   "tier": "ultra",
+   "escalated": true,
+   "passages": [
+    {
+     "text": "Global investment in renewable energy reached $400 billion in 2022, up 8% on the previous year. Investment in solar and wind accounted for most of the total. Developing economies received a growing share of the funding.",
+     "start": 0,
+     "end": 219,
+     "score": 0.5754
+    }
+   ]
+  },
+  {
+   "claim_id": "c9",
+   "source_id": "s2",
+   "label": "supported",
+   "confidence": 0.9,
+   "quote": "By 2020 solar was the cheapest source of new electricity in most markets.",
+   "quote_found": true,
+   "rationale": "token overlap 1.00 with the closest source sentence",
+   "model": "nvidia/nemotron-3-super-120b-a12b",
+   "tier": "super",
+   "escalated": false,
+   "passages": [
+    {
+     "text": "Solar PV module prices fell 89% between 2010 and 2020, according to the IEA. Module price declines were driven by manufacturing scale and technology gains. By 2020 solar was the cheapest source of new electricity in most markets.",
+     "start": 0,
+     "end": 229,
+     "score": 3.8221
+    }
+   ]
+  }
+ ],
+ "usage": [
+  {
+   "tier": "nano",
+   "model": "fake-nano",
+   "calls": 2,
+   "prompt_tokens": 1308,
+   "completion_tokens": 436,
+   "cost_usd": 0.0
+  },
+  {
+   "tier": "super",
+   "model": "fake-super",
+   "calls": 8,
+   "prompt_tokens": 3833,
+   "completion_tokens": 373,
+   "cost_usd": 0.0
+  },
+  {
+   "tier": "ultra",
+   "model": "fake-ultra",
+   "calls": 3,
+   "prompt_tokens": 1414,
+   "completion_tokens": 117,
+   "cost_usd": 0.0
+  }
+ ],
+ "seconds": 0.01
+}

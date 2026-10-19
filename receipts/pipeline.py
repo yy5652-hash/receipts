@@ -22,6 +22,7 @@ def audit(
     on_event: Callable[[dict], None] | None = None,
     status_fn: Callable[[str], int | None] = http_status,
     openalex: Scholarly | None = None,
+    max_claims: int | None = None,
 ) -> AuditReport:
     if mode not in MODES:
         raise ValueError(f"unknown mode {mode!r}; choose one of {sorted(MODES)}")
@@ -29,8 +30,14 @@ def audit(
     t0 = time.monotonic()
     emit({"type": "stage", "stage": "extract"})
     sources, claims = extract(doc, llm)
+    if max_claims is not None and len(claims) > max_claims:
+        emit({"type": "notice", "message": f"This report has {len(claims)} cited claims; "
+                                           f"only the first {max_claims} are checked."})
+        claims = claims[:max_claims]
+    emit({"type": "claims", "claims": [c.model_dump(mode="json") for c in claims],
+          "sources": [s.model_dump(mode="json") for s in sources]})
     emit({"type": "stage", "stage": "fetch"})
-    fetched = fetch_sources(sources, searcher, status_fn=status_fn, openalex=openalex)
+    fetched = fetch_sources(sources, searcher, status_fn=status_fn, openalex=openalex, on_event=on_event)
     emit({"type": "stage", "stage": "judge"})
     verdicts = judge_all(claims, sources, fetched, llm, mode, settings, on_event=on_event)
     emit({"type": "stage", "stage": "done"})

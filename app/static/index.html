@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Receipts: check the citations in AI-written reports</title>
+<meta name="description" content="Paste an AI-written report. Receipts checks every cited sentence against its source and shows whether the source exists and says it, with the verbatim quote as evidence.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1b17' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 3h14v18l-2.33-1.5L14.33 21 12 19.5 9.67 21 7.33 19.5 5 21z'/%3E%3Cpath d='M8.5 8h7M8.5 11.5h7M8.5 15h4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="/static/app.css">
+<script type="module" src="/static/app.js"></script>
+</head>
+<body data-screen="input">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" id="brand" href="/" aria-label="Receipts, start a new check">
+    <svg class="logo" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18l-2.33-1.5L14.33 21 12 19.5 9.67 21 7.33 19.5 5 21z"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4"/></svg>
+    <span class="wordmark">Receipts</span>
+  </a>
+  <p class="tagline">Check the citations in AI-written reports.</p>
+</header>
+
+<main id="main" tabindex="-1">
+  <noscript><p class="note">Receipts needs JavaScript to run the checker.</p></noscript>
+
+  <!-- 1. Input -->
+  <section id="screen-input" class="screen" aria-labelledby="hero-title">
+    <div class="hero">
+      <h1 id="hero-title">Does the source really say that?</h1>
+      <p class="lede">Receipts reads every cited sentence in an AI-written report, finds the source it points to, and shows, sentence by sentence, whether the source exists and says it. The verbatim quote is the evidence.</p>
+    </div>
+
+    <form id="input-form" class="composer" novalidate>
+      <label for="doc-input" class="sr-only">Report text</label>
+      <textarea id="doc-input" rows="11" spellcheck="false" autocomplete="off"
+        placeholder="Paste a report with its reference list — Markdown or plain text"></textarea>
+      <div class="composer-bar">
+        <span id="char-count" class="counter" aria-live="polite">0 / 40,000</span>
+        <button class="btn primary" id="check-btn" type="submit" disabled>Check citations</button>
+      </div>
+      <p id="live-note" class="note" role="status" hidden></p>
+      <details class="advanced">
+        <summary>Advanced</summary>
+        <div class="advanced-body">
+          <label for="mode">Checking mode</label>
+          <select id="mode">
+            <option value="cascade" selected>Cascade — Super checks, Ultra re-checks hard cases (recommended)</option>
+            <option value="super">Nemotron 3 Super only</option>
+            <option value="ultra">Nemotron 3 Ultra only</option>
+            <option value="nano">Nemotron 3 Nano only</option>
+          </select>
+          <p id="mode-hint" class="hint"></p>
+        </div>
+      </details>
+    </form>
+
+    <section class="examples" aria-labelledby="examples-title">
+      <h2 id="examples-title">Or open a recorded example</h2>
+      <div id="example-list" class="example-grid"></div>
+    </section>
+  </section>
+
+  <!-- 2. Running, then result -->
+  <section id="screen-result" class="screen" aria-label="Audit" hidden>
+    <div id="replay-note" class="replay-note" hidden>
+      <span>Replay of a recorded run</span><span aria-hidden="true">·</span>
+      <button type="button" class="link-btn" id="rerun-btn">Re-run live</button>
+    </div>
+    <div id="banners" class="banners"></div>
+
+    <section class="summary card" aria-label="Audit summary">
+      <div class="summary-top">
+        <div class="summary-head">
+          <h2 id="summary-headline">Reading claims…</h2>
+          <p id="summary-counts" class="counts"></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="dl-md" disabled>Download report (.md)</button>
+          <button type="button" class="btn ghost" id="dl-json" disabled>Download JSON</button>
+          <button type="button" class="btn primary" id="new-check">New check</button>
+        </div>
+      </div>
+      <div id="summary-bar" class="propbar" role="img" aria-label="No claims yet"></div>
+      <ol id="progress" class="steps" aria-label="Progress">
+        <li data-step="extract"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Reading claims</span><span class="step-count"></span></li>
+        <li data-step="fetch"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Finding sources</span><span class="step-count"></span></li>
+        <li data-step="judge"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Checking claims</span><span class="step-count"></span></li>
+      </ol>
+      <dl class="facts">
+        <div><dt>Elapsed</dt><dd id="fact-time">0.0 s</dd></div>
+        <div><dt>Cost</dt><dd id="fact-cost">—</dd></div>
+        <div class="wide"><dt>Models</dt><dd id="fact-models"></dd></div>
+      </dl>
+      <p id="sr-status" class="sr-only" role="status" aria-live="polite"></p>
+    </section>
+
+    <div class="workspace">
+      <div class="doc-pane">
+        <div class="toolbar">
+          <div class="chips" role="group" aria-label="Filter claims">
+            <button type="button" class="chip" data-filter="all" aria-pressed="true">All <span class="n" id="n-all">0</span></button>
+            <button type="button" class="chip" data-filter="problems" aria-pressed="false">Problems only <span class="n" id="n-problems">0</span></button>
+          </div>
+          <p class="kbd-hint" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move between claims <span class="dot">·</span> <kbd>Esc</kbd> clear</p>
+        </div>
+        <article id="doc" class="paper doc" aria-label="Report with checked claims"></article>
+      </div>
+
+      <aside id="evidence" class="evidence card" aria-label="Evidence for the selected claim">
+        <div class="evidence-head">
+          <h2>Evidence</h2>
+          <span id="ev-position" class="ev-position"></span>
+          <div class="ev-nav">
+            <button type="button" class="icon-btn" id="ev-prev" aria-label="Previous claim" title="Previous claim (k)">
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l4-4 4 4"/></svg>
+            </button>
+            <button type="button" class="icon-btn" id="ev-next" aria-label="Next claim" title="Next claim (j)">
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+            </button>
+            <button type="button" class="icon-btn ev-close" id="ev-close" aria-label="Close evidence" title="Close (Esc)">
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="evidence-body" class="evidence-body"></div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>NVIDIA Nemotron on Nebius Token Factory · Search and extraction by Tavily · Paper metadata from OpenAlex</p>
+  <p><a href="https://github.com/" target="_blank" rel="noopener noreferrer">Source on GitHub</a></p>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

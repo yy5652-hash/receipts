@@ -61,49 +61,46 @@ def fetch_sources(
     *,
     status_fn: Callable[[str], int | None] = http_status,
     openalex: Scholarly | None = None,
+    on_event: Callable[[dict], None] | None = None,
 ) -> list[FetchedSource]:
     """One FetchedSource per source, same order.
 
     Order per source: the cited URL (Tavily extract; a dead link ends the search), then the
     OpenAlex record by DOI ("missing" ends it) or by title (full text if open, else the abstract),
     then a Tavily title search. Without `openalex` a DOI is fetched through doi.org instead.
+    `on_event` receives {"type": "source", "fetched": ...} (without the text) as each source resolves.
     """
     doi_url = {s.id: f"https://doi.org/{s.doi}" if s.doi else None for s in sources}
     urls = {s.id: s.url or (None if openalex else doi_url[s.id]) for s in sources}
     pages = searcher.extract(list(dict.fromkeys(u for u in urls.values() if u)))
-    out: list[FetchedSource] = []
-    for s in sources:
+
+    def resolve(s: Source) -> FetchedSource:
         url = urls[s.id]
         shown = s.url or doi_url[s.id]
         base = dict(source_id=s.id, url=shown, title=s.title)
         text = clean_web_text(pages.get(url) or "") if url else ""
         if text:
-            out.append(FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True))
-            continue
+            return FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True)
         reachable = False  # the link answered, we just could not read it
         if url:
             code = status_fn(url)
             if code in (404, 410) or code is None:
                 note = "link did not resolve" if code is None else f"link returned HTTP {code}"
-                out.append(FetchedSource(**base, status="dead_link", note=note))
-                continue
+                return FetchedSource(**base, status="dead_link", note=note)
             reachable = code < 500
         rec = None
         if openalex and s.doi:
             rec = openalex.by_doi(s.doi)
             if rec == "missing":
-                out.append(FetchedSource(**base, status="not_found", note="DOI is not registered", exists=False))
-                continue
+                return FetchedSource(**base, status="not_found", note="DOI is not registered", exists=False)
         if openalex and rec is None and s.title:
             rec = openalex.by_title(s.title, _surname(s.authors[0]) if s.authors else None, s.year)
         if rec:
-            out.append(_from_record(s, rec, searcher, shown))
-            continue
+            return _from_record(s, rec, searcher, shown)
         if s.title and (found := _title_search(s, searcher)):
             hit, text = found
-            out.append(FetchedSource(source_id=s.id, status="ok", url=hit.get("url") or shown,
-                                     title=hit.get("title") or s.title, text=text, via="tavily_search", exists=True))
-            continue
+            return FetchedSource(source_id=s.id, status="ok", url=hit.get("url") or shown,
+                                 title=hit.get("title") or s.title, text=text, via="tavily_search", exists=True)
         if s.title:
             note = "no record in OpenAlex and no matching web page" if openalex else "no matching source found by title search"
         elif reachable:
@@ -111,5 +108,11 @@ def fetch_sources(
         else:
             note = "the DOI could not be looked up" if openalex and s.doi else "no url or title to look up"
         exists = True if reachable else (False if s.title else None)  # a title lookup ran: no hit means no record
-        out.append(FetchedSource(**base, status="not_found", note=note, exists=exists))
+        return FetchedSource(**base, status="not_found", note=note, exists=exists)
+
+    out: list[FetchedSource] = []
+    for s in sources:
+        out.append(resolve(s))
+        if on_event:
+            on_event({"type": "source", "fetched": out[-1].model_dump(mode="json", exclude={"text"})})
     return out
