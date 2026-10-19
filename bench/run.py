@@ -106,6 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--configs", default=",".join(CONFIGS))
     ap.add_argument("--reports", default="", help="comma-separated report ids (default: all)")
     ap.add_argument("--workers", type=int, default=4, help="reports audited in parallel")
+    ap.add_argument("--out", default="results", help="results directory under bench/ (default: results)")
     args = ap.parse_args(argv)
     configs = [c.strip() for c in args.configs.split(",") if c.strip()]
     if bad := [c for c in configs if c not in CONFIGS]:
@@ -117,10 +118,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     gold = json.loads((HERE / "data" / "gold.json").read_text())["reports"]
     ids = [r.strip() for r in args.reports.split(",") if r.strip()] or sorted(gold)
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    runs, rows = load_results()
+    out = HERE / args.out
+    out.mkdir(parents=True, exist_ok=True)
+    runs, rows = load_results(out)
     for name in CONFIGS:  # drop rows of interrupted pairs, keep the file in step with runs.json
-        (RESULTS / f"{name}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows[name]))
+        (out / f"{name}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows[name]))
     todo = {rid: [c for c in configs if c not in runs.get(rid, {})] for rid in ids}
     todo = {rid: cs for rid, cs in todo.items() if cs}
     print(f"{sum(len(c) for c in todo.values())} (report, config) pairs to run over {len(todo)} reports", flush=True)
@@ -138,10 +140,10 @@ def main(argv: list[str] | None = None) -> int:
                                         searcher, openalex, shared=shared)
         with lock:
             for name, r in new_rows.items():
-                with (RESULTS / f"{name}.jsonl").open("a") as f:
+                with (out / f"{name}.jsonl").open("a") as f:
                     f.write("".join(json.dumps(x) + "\n" for x in r))
             runs.setdefault(rid, {}).update(new_runs)
-            (RESULTS / "runs.json").write_text(json.dumps(runs, indent=1, sort_keys=True))
+            (out / "runs.json").write_text(json.dumps(runs, indent=1, sort_keys=True))
             print(f"{rid}: " + ", ".join(f"{n} ${r['cost_usd']:.4f} {r['seconds']:.0f}s" for n, r in new_runs.items()), flush=True)
 
     def safe(rid: str) -> None:
@@ -152,7 +154,7 @@ def main(argv: list[str] | None = None) -> int:
 
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
         list(pool.map(safe, todo))
-    _, rows = load_results()
+    _, rows = load_results(out)
     for name in configs:
         secs = [r[name]["seconds"] for r in runs.values() if name in r]
         print(f"{name}: {len(rows[name])} items, median {statistics.median(secs):.0f}s per report" if secs else f"{name}: no runs")
