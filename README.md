@@ -95,7 +95,7 @@ Full tables, per-type rates, the development/test split, the cost-quality chart 
 Requirements: Python 3.12 and [uv](https://docs.astral.sh/uv/), a [Nebius Token Factory](https://tokenfactory.nebius.com) API key and a [Tavily](https://app.tavily.com) API key.
 
 ```bash
-git clone <this repository> && cd nebius-nvidia-2026
+git clone https://github.com/yy5652-hash/receipts.git && cd receipts
 uv sync
 cp .env.example .env   # then fill in NEBIUS_API_KEY and TAVILY_API_KEY
 ```
