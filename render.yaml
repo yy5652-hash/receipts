@@ -11,6 +11,6 @@ services:
       - key: TAVILY_API_KEY
         sync: false
       - key: RECEIPTS_DAILY_BUDGET_USD
-        value: "2"
+        value: "0.75"
       - key: RECEIPTS_IP_LIMIT_PER_HOUR
         value: "6"
