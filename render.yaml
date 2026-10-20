@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: receipts
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/config
+    envVars:
+      - key: NEBIUS_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: RECEIPTS_DAILY_BUDGET_USD
+        value: "2"
+      - key: RECEIPTS_IP_LIMIT_PER_HOUR
+        value: "6"

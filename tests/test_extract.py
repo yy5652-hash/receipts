@@ -98,3 +98,18 @@ def test_llm_drops_sentences_falls_back_to_markers():
 def test_no_references_no_claims():
     sources, claims, _ = run("Plain text without any citations. Nothing to see.")
     assert sources == [] and claims == []
+
+
+def test_reference_list_without_heading_is_found_at_the_end():
+    from receipts.testing import FakeLLM
+    doc = ("Mount Everest is 8,848.86 metres tall [1]. Marie Curie won two Nobel Prizes [2].\n\n"
+           "[1] https://en.wikipedia.org/wiki/Mount_Everest\n[2] https://en.wikipedia.org/wiki/Marie_Curie\n")
+    sources, claims = extract(doc, FakeLLM())
+    assert [s.url for s in sources] == ["https://en.wikipedia.org/wiki/Mount_Everest", "https://en.wikipedia.org/wiki/Marie_Curie"]
+    assert [c.source_ids for c in claims] == [["s1"], ["s2"]]
+
+
+def test_numbered_list_in_the_body_is_not_mistaken_for_references():
+    from receipts.textutil import split_body_and_references
+    doc = "Steps:\n1. Mix the flour.\n2. Bake it.\n\nThat is all."
+    assert split_body_and_references(doc) == (len(doc), None)

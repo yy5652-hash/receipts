@@ -121,13 +121,33 @@ _REF_HEADING_RE = re.compile(
 )
 
 
+_REF_LINE_RE = re.compile(r"^[ \t]*(?:\[\d+\]|\[\^[\w-]+\]:|\d+[.)])[ \t]+\S")
+
+
+def _trailing_reference_block(doc: str) -> tuple[int, int | None]:
+    """No heading: a run of numbered entries at the very end ("[1] https://...") is the reference list,
+    as in answers copied from chat assistants. Blank lines inside the run are allowed."""
+    lines = doc.splitlines(keepends=True)
+    pos, start, seen = len(doc), None, 0
+    for line in reversed(lines):
+        pos -= len(line)
+        if not line.strip():
+            continue
+        if not _REF_LINE_RE.match(line):
+            break
+        start, seen = pos, seen + 1
+    if start is None or seen < 1 or not doc[:start].strip():
+        return len(doc), None
+    return start, start
+
+
 def split_body_and_references(doc: str) -> tuple[int, int | None]:
     """(body_end, refs_start); the last references-style heading wins."""
     last = None
     for m in _REF_HEADING_RE.finditer(doc):
         last = m
     if last is None:
-        return len(doc), None
+        return _trailing_reference_block(doc)
     refs_start = last.end()
     if refs_start < len(doc) and doc[refs_start] == "\n":
         refs_start += 1
