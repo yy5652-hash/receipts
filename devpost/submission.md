@@ -1,4 +1,6 @@
-# Devpost submission draft: Receipts
+# Devpost submission: Receipts
+
+Submitted 2026-10-21: https://devpost.com/software/receipts-5oqhv6 (editable until 2026-10-30 10:00 PT).
 
 Form fields in order. Everything below is meant to be pasted as is.
 

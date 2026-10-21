@@ -6,6 +6,7 @@ Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) 
 
 - **Live demo:** https://receipts.43-160-214-187.sslip.io (two recorded audits open instantly; paste your own report for a live check)
 - **Demo video:** https://youtu.be/oB10mc6nSxQ (2:50)
+- **Devpost:** https://devpost.com/software/receipts-5oqhv6
 - **Benchmark:** [ReceiptsBench results](bench/RESULTS.md) · [Find a real source results](bench/results_suggest/RESULTS.md)
 
 ## Why
