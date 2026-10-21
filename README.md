@@ -1,12 +1,12 @@
 # Receipts
 
-**Does the source really say that?** Receipts reads an AI-written report, follows every citation to its source, and shows sentence by sentence whether the source exists and actually says what the report claims. Each verdict comes with the verbatim quote from the source as evidence.
+**Does the source really say that?** Receipts reads an AI-written report, follows every citation to its source, and shows sentence by sentence whether the source exists and actually says what the report claims. Each verdict comes with the verbatim quote from the source as evidence, and when a citation fails, Receipts searches the web for a source that does say it.
 
 Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) with **NVIDIA Nemotron 3 Nano, Super and Ultra on Nebius Token Factory** and **Tavily** search and extraction.
 
 - **Live demo:** https://receipts.43-160-214-187.sslip.io (two recorded audits open instantly; paste your own report for a live check)
 - **Demo video:** _link added at upload_
-- **Benchmark:** [ReceiptsBench results](bench/RESULTS.md)
+- **Benchmark:** [ReceiptsBench results](bench/RESULTS.md) · [Find a real source results](bench/results_suggest/RESULTS.md)
 
 ## Why
 
@@ -31,13 +31,25 @@ Receipts is for the person who has to sign off on such a report: a student befor
 
 Every Supported, Partly supported and Contradicted verdict carries a quote that Receipts checks, character for character, against the fetched source. A verdict whose quote cannot be found there is not trusted.
 
+## When a citation fails: find a real source
+
+A flag is only half the job; the writer still needs something to cite. For every sentence whose source is missing or does not say it, Receipts searches the web with **Tavily**, reads the top pages, and has Nemotron 3 Nano judge each one. It then shows the page that states the claim, preferring journals, preprints, agencies and official sites, with the verbatim quote. If the best evidence points the other way, it shows that instead.
+
+In the recorded example, a briefing credits the IEA with a forecast that is not in the IEA report. Receipts traces it to the World Economic Forum, quoting: *"A McKinsey report projects that in the United States, data centres could account for up to 12% of total electricity use by 2030."*
+
+Measured on ReceiptsBench ([details](bench/results_suggest/RESULTS.md)):
+
+- For the 45 true claims cited to the wrong source or to a dead link, Receipts found a page that states the claim for **39 (87%)**, the original page itself for 17, and a primary, official or encyclopedic source for 27.
+- For the 15 claims backed by fabricated papers, it found no supporting page for 12 and a contradicting one for 1. The other 2 turned out to be true facts behind a fake citation, and Receipts found real sources for them, such as an EU Blockchain Observatory report.
+- Cost: about $0.001 and 10 seconds per claim.
+
 ## How it works
 
 ```
-report ──► 1. Extract ──► 2. Find sources ──► 3. Locate passages ──► 4. Judge ──► 5. Verify quote
-           Nemotron 3     Tavily Extract       figure-aware           Nemotron 3     verbatim match
-           Nano           Tavily Search        BM25 over the          Ultra          in the source
-           (+ Super for   OpenAlex, arXiv      full source text       (reasoning)    text
+report ──► 1. Extract ──► 2. Find sources ──► 3. Locate passages ──► 4. Judge ──► 5. Verify quote ──► 6. Find a real source
+           Nemotron 3     Tavily Extract       figure-aware           Nemotron 3     verbatim match       Tavily Search +
+           Nano           Tavily Search        BM25 over the          Ultra          in the source        Nemotron 3 Nano
+           (+ Super for   OpenAlex, arXiv      full source text       (reasoning)    text                 (failed citations)
             vague claims)
 ```
 
@@ -45,7 +57,10 @@ report ──► 1. Extract ──► 2. Find sources ──► 3. Locate passag
 2. **Find sources.** Cited URLs are read with **Tavily Extract** (web pages and PDFs). References that give only a title are found with **Tavily Search**. Papers are checked against OpenAlex and read in full from arXiv when the published version is closed. A reference with no record anywhere is reported as missing; a 404 is reported as a dead link.
 3. **Locate passages.** The full source text is chunked and ranked with BM25 that normalises units and gives extra weight to the exact figures in the claim, so "2,100 km" finds the paragraph that says "21,196 km".
 4. **Judge.** Nemotron 3 Ultra (reasoning on) reads the claim, the source's reference entry and the top passages, and returns a label, a confidence, a verbatim quote and a one-sentence reason.
-5. **Verify.** The quote is matched against the source text. The web app streams every stage live: claims appear as they are found, sources resolve, verdicts land one by one.
+5. **Verify.** The quote is matched against the source text.
+6. **Find a real source.** For citations that failed, Tavily Search finds candidate pages and Nemotron 3 Nano picks one that states the claim (or contradicts it), with a verified quote.
+
+The web app streams every stage live: claims appear as they are found, sources resolve, verdicts land one by one, then real sources appear for the failed citations.
 
 ## NVIDIA Nemotron on Nebius Token Factory
 
@@ -56,6 +71,7 @@ Each model has a job, and the choice for each job is measured on ReceiptsBench (
 | Claim extraction, reference parsing | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, reasoning off | Fast structured output; extracted 299 of 300 benchmark sentences |
 | Rewriting the few vague claims | `nvidia/nemotron-3-super-120b-a12b`, reasoning off | Resolves "it" and "this architecture" reliably in one short call |
 | Judging every claim | `nvidia/Nemotron-3-Ultra-550b-a55b`, reasoning on | Highest accuracy on ReceiptsBench: 99.6%, no false alarms |
+| Checking pages found for failed citations | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, reasoning on | 98.6% as a judge at a twelfth of Ultra's cost; three candidate pages per claim for about $0.001 |
 
 Token Factory features used: the OpenAI-compatible chat API, JSON output, per-request reasoning control (`chat_template_kwargs.enable_thinking`), and three Nemotron sizes behind one endpoint, so switching a job to another tier is a one-line setting. The mode menu in the app exposes the alternatives with their measured accuracy and cost. Token Factory also served the independent model (Qwen3-235B) that wrote the benchmark's test items, so the Nemotron judges never grade their own phrasing.
 
@@ -65,6 +81,7 @@ Tavily does the reading and the finding at runtime:
 
 - **Extract** fetches the full text of every cited URL, including arXiv PDFs and long reports, so the judge sees the whole source rather than a snippet.
 - **Search** locates references that give only a title, which is how Receipts tells a real work cited without a link from a fabricated one (together with OpenAlex and arXiv).
+- **Search** also powers *find a real source*: the claim itself is the query, and the raw content of the hits goes straight to the judge, so a failed citation comes back with a replacement and its quote.
 
 Every call is cached, so one source is fetched once no matter how many claims cite it.
 
@@ -118,13 +135,14 @@ Reproduce the benchmark:
 
 ```bash
 uv run python bench/run.py --out results_final          # all configurations; resumable
+uv run python bench/suggest_eval.py                      # find a real source, on the failed-citation items
 uv run --group bench python bench/report.py --results results_final --baseline results
 ```
 
 ## Project layout
 
 ```
-receipts/   extract.py · sources.py · scholarly.py · locate.py · judge.py · pipeline.py · llm.py · cli.py
+receipts/   extract.py · sources.py · scholarly.py · locate.py · judge.py · suggest.py · pipeline.py · llm.py · cli.py
 app/        server.py (FastAPI, server-sent events) · static/ (the web app, no build step)
 bench/      build.py · run.py · report.py · data/ (frozen dataset) · RESULTS.md
 samples/    recorded example audits shown in the app
