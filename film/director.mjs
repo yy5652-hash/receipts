@@ -360,6 +360,10 @@ const PLANS = {
     const CL = (id, line = 0) => ({ sel: claimSel(id), line });
     const sugg = '#evidence .ev-suggest';
     B.do(0, () => { RUN.abs0 = null; });
+    // "goes looking for a real one": a card catalog (Library of Congress, CC0), a slow push, dissolving into the app (the navigation runs underneath)
+    B.do(0, () => js(`film.photoLoad('http://127.0.0.1:${ART_PORT}/work/photos/loc-serials-card-catalog-2025.jpg')`));
+    B.span(0, 3.3, p => { const u = p * 3.3, a = clamp(u / 0.45) * (1 - clamp((u - 2.8) / 0.5)), e = ease(clamp(u / 3.1));
+      return js(`film.photo(${p >= 1 ? 0 : a}, ${lerp(1.06, 1.24, e)}, ${lerp(0.46, 0.40, e)}, ${lerp(0.56, 0.52, e)})`); });
     camTo(B, 0.0, 0.5, WIDE);
     scrollTo(B, 0.0, 0.5, () => 0);
     cursorTo(B, 0.1, 0.5, () => point('#new-check'));

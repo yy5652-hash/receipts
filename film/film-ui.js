@@ -13,10 +13,12 @@
     #film-cursor { width: 38px; height: 38px; left: 0; top: 0; opacity: 0; transform-origin: 4px 4px; filter: drop-shadow(0 5px 8px rgba(31,29,25,.35)); }
     #film-ripple { width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; border: 4px solid #1f1d19; opacity: 0; }
     #film-caption { left: 50%; bottom: 54px; transform: translateX(-50%); max-width: 1760px; width: max-content; font-weight: 600; font-size: 36px; line-height: 1.36; color: #fbf9f3; text-align: center;
-      background: rgba(31, 29, 25, 0.9); padding: 14px 32px 15px; border-radius: 18px; opacity: 0; box-shadow: 0 14px 34px rgba(31,29,25,.28); letter-spacing: -0.003em; }
+      background: rgba(31, 29, 25, 0.9); padding: 14px 32px 15px; border-radius: 18px; opacity: 0; box-shadow: 0 14px 34px rgba(31,29,25,.28); border: 1px solid rgba(251, 249, 243, 0.16); letter-spacing: -0.003em; }
     #film-key { left: 0; top: 0; font-weight: 600; font-size: 28px; color: #fbf9f3; background: #1f1d19; padding: 8px 18px; border-radius: 12px; opacity: 0; box-shadow: 0 10px 24px rgba(31,29,25,.3); letter-spacing: .02em; }
     #film-stat { left: 48px; top: 40px; font-weight: 600; font-size: 26px; color: #fbf9f3; background: rgba(31, 29, 25, 0.92); padding: 10px 22px 11px; border-radius: 14px; opacity: 0; box-shadow: 0 10px 26px rgba(31,29,25,.25); }
     #film-stat b { color: #8ee0ae; font-weight: 700; }
+    #film-photo { inset: 0; overflow: hidden; opacity: 0; background: #f6f3ec; }
+    #film-photo img { position: absolute; max-width: none; display: block; }
     #film-hud { right: 48px; top: 40px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 25px; color: #1f1d19; background: rgba(255, 254, 251, 0.94); border: 2px solid #1f1d19; padding: 9px 20px 9px 16px; border-radius: 999px; opacity: 0; }
     #film-hud i { width: 14px; height: 14px; border-radius: 50%; background: #d6434a; display: block; }
     .film-ring { position: fixed; z-index: 2147482000; pointer-events: none; border-style: solid; }`;
@@ -27,7 +29,7 @@
   ui.id = 'film-ui';
   ui.innerHTML = `<div id="film-ripple"></div>
     <div id="film-cursor"><svg viewBox="0 0 38 38" width="38" height="38"><path d="M4 3 L4 29 L11 22.5 L16 33.5 L21 31.3 L16 20.5 L26 20.5 Z" fill="#fff" stroke="#1f1d19" stroke-width="2.2" stroke-linejoin="round"/></svg></div>
-    <div id="film-hud"><i></i><span></span></div><div id="film-key"></div><div id="film-stat"></div>
+    <div id="film-photo"><img alt=""></div><div id="film-hud"><i></i><span></span></div><div id="film-key"></div><div id="film-stat"></div>
     <div id="film-caption"></div><div id="film-fade"></div>`;
   document.documentElement.appendChild(ui);
   const $ = id => document.getElementById(id);
@@ -99,6 +101,19 @@
     point(spec, dx = 0.5, dy = 0.5) { const r = rectOf(spec); return r && { x: r.x + r.w * dx, y: r.y + r.h * dy }; },
     caption(text, a) { const c = $('film-caption'); if (c.textContent !== text) c.textContent = text; c.style.opacity = text ? a : 0; return true; },
     hud(text, a) { const h = $('film-hud'); const s = h.querySelector('span'); if (s.textContent !== text) s.textContent = text; h.style.opacity = text ? a : 0; return true; },
+    // A photograph across the whole sheet (Ken Burns by the director): s = how many sheet widths wide it is drawn, (fx, fy) the point of the
+    // picture, as fractions of it, that sits at (0.5, 0.5) of the frame.
+    photoLoad(url) { const img = $('film-photo').firstChild; img.dataset.src = url; img.src = url; return img.decode().then(() => true); },
+    photo(a, s, fx, fy) {
+      const box = $('film-photo'), img = box.firstChild;
+      box.style.opacity = a;
+      if (a <= 0 || !img.naturalWidth) return true;
+      const W = 1920 * s, H = W * (img.naturalHeight / img.naturalWidth);
+      img.style.width = `${W}px`;
+      img.style.left = `${Math.min(0, Math.max(1920 - W, 960 - fx * W))}px`;
+      img.style.top = `${Math.min(0, Math.max(1080 - H, 540 - fy * H))}px`;
+      return true;
+    },
     stat(html, a) { const e = $('film-stat'); if (e.innerHTML !== html) e.innerHTML = html; e.style.opacity = html ? a : 0; return true; },
     cursor(x, y, show) { cur = { x, y, show }; layout(); return true; },
     cursorShow(show) { cur.show = show; layout(); return true; },

@@ -29,4 +29,5 @@ ReceiptsBench (300 cited sentences from 35 real sources, half with planted error
 2:15 ReceiptsBench
 2:42 Try it
 
+Photography: Main Reading Room of the Library of Congress and columns of the Byron R. White U.S. Courthouse by Carol M. Highsmith (public domain, Library of Congress); Serials Card Catalog by Shawn Miller / Library of Congress (CC0). Details in film/CREDITS.md.
 Narration voice: Kokoro-82M (Apache-2.0). Music and sound: synthesised for this video. The app scenes are the real Receipts app; the live audit is a recorded real run, sped up where the on-screen tag says so.
