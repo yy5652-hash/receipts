@@ -244,3 +244,37 @@ def test_the_settings_cap_applies_to_the_pipeline():
     searcher, status_fn = load_fixtures(FIXTURES)
     rep = audit(DOC, FakeLLM(), searcher, Settings(suggest_max_claims=1), status_fn=status_fn)
     assert [s.claim_id for s in rep.suggestions] == ["c3"]
+
+
+def test_render_markdown_has_a_suggested_source_block_under_each_such_claim(suggested):
+    md = render_markdown(suggested)
+    section = lambda cid: md.split(f"## {cid}:")[1].split("\n## ")[0]  # noqa: E731
+    heat = section("c3")
+    assert "**Suggested source (states the claim):** US heat pump sales overtake gas furnaces" in heat
+    assert "<https://hvac.example/heat-pump-sales>" in heat
+    assert "> Heat pumps outsold gas furnaces in the United States in 2022" in heat
+    assert "Found with Tavily · checked by nano (nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B)" in heat
+    assert "**Suggested source (says otherwise):** Grid storage additions, annual review" in section("c5")
+    assert "**Web search:** no page found that states this claim." in section("c6")
+    assert "Suggested source" not in section("c1")
+
+
+def test_render_without_suggestions_is_unchanged(report):
+    assert "Suggested source" not in render_markdown(report) and "Web search" not in render_markdown(report)
+
+
+def test_cli_prints_a_line_under_claims_with_a_suggestion(capsys):
+    assert cli.main(["audit", str(FIX / "report_basic.md"), "--fake", str(FIXTURES), "--mode", "super"]) == 0
+    out = capsys.readouterr().out
+    assert "→ found: US heat pump sales overtake gas furnaces" in out
+    assert "→ others say otherwise: Grid storage additions, annual review" in out
+    assert out.count("→") == 2  # the claim with no suggestion that holds gets no line
+
+
+def test_cli_no_suggest_skips_the_stage(tmp_path, capsys):
+    out_json = tmp_path / "a.json"
+    assert cli.main(["audit", str(FIX / "report_basic.md"), "--fake", str(FIXTURES), "--mode", "super",
+                     "--no-suggest", "--json", str(out_json)]) == 0
+    captured = capsys.readouterr()
+    assert "→" not in captured.out and "[suggest]" not in captured.err
+    assert json.loads(out_json.read_text())["suggestions"] == []

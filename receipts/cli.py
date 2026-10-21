@@ -25,6 +25,9 @@ def _print_summary(report: AuditReport) -> None:
         how = "-" if v is None or v.tier == "none" else v.tier + ("*" if v.escalated else "")
         sentence = " ".join(c.sentence.split())
         print(f"{c.id:<4} {report.claim_label(c.id):<19} {how:<7} {sentence[:80]}")
+        if (s := report.claim_suggestion(c.id)) and s.status != "none":
+            lead = "found" if s.status == "supported" else "others say otherwise"
+            print(f"     → {lead}: {s.title or s.url}")
     sm = report.summary()
     counts = " | ".join(f"{label} {sm['counts'][label]}" for label in LABEL_ORDER)
     print(f"Claims: {sm['n_claims']} | {counts}")
@@ -50,6 +53,8 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--json", metavar="OUT.json", help="write the full audit as JSON")
     a.add_argument("--md", metavar="OUT.md", help="write a markdown report")
     a.add_argument("--fake", metavar="FIXTURES.json", help="run offline with fake LLM and search fixtures")
+    a.add_argument("--no-suggest", action="store_true",
+                   help="do not search the web for a real source of the claims their own source did not back")
     sv = sub.add_parser("serve", help="start the web app")
     sv.add_argument("--port", type=int, default=8000)
     sv.add_argument("--host", default="127.0.0.1")
@@ -84,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
         searcher, status_fn, openalex = TavilySearcher(settings.tavily_api_key, cache), http_status, OpenAlex(cache)
 
     report = audit(doc, llm, searcher, settings, mode=args.mode, on_event=_progress,
-                   status_fn=status_fn, openalex=openalex)
+                   status_fn=status_fn, openalex=openalex, suggest=not args.no_suggest)
     _print_summary(report)
     for out, text in ((args.json, lambda: report.model_dump_json(indent=2)), (args.md, lambda: render_markdown(report))):
         if out:
