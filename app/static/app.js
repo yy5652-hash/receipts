@@ -264,7 +264,8 @@ export function attachReferences(doc, blocks, sources, layout) {
       continue;
     }
     const b = blocks[i];
-    if (pos > b.start && doc.slice(b.start, pos).trim()) {
+    const lead = doc.slice(b.start, pos);
+    if (pos > b.start && lead.trim() && !/^\s*(?:\[[^\]\n]+\]:?|\d+[.)])\s*$/.test(lead)) {  // not just the entry's own marker
       let headEnd = pos;
       while (headEnd > b.start && /\s/.test(doc[headEnd - 1])) headEnd--;
       blocks.splice(i, 1, { ...b, end: headEnd }, { type: "ref", start: pos, end: b.end, sourceId: s.id });
