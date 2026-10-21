@@ -21,7 +21,7 @@ Best Apps and Agents
 
 ## Video demo
 
-_YouTube link added after upload_
+https://youtu.be/oB10mc6nSxQ
 
 ## Built with
 

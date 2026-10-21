@@ -5,7 +5,7 @@
 Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) with **NVIDIA Nemotron 3 Nano, Super and Ultra on Nebius Token Factory** and **Tavily** search and extraction.
 
 - **Live demo:** https://receipts.43-160-214-187.sslip.io (two recorded audits open instantly; paste your own report for a live check)
-- **Demo video:** _link added at upload_
+- **Demo video:** https://youtu.be/oB10mc6nSxQ (2:50)
 - **Benchmark:** [ReceiptsBench results](bench/RESULTS.md) · [Find a real source results](bench/results_suggest/RESULTS.md)
 
 ## Why

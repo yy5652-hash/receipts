@@ -1,12 +1,14 @@
 # YouTube upload: Receipts demo
 
+Published 2026-10-21, public: https://youtu.be/oB10mc6nSxQ
+
 File: `film/out/receipts-demo.mp4` (copied to the Desktop as `receipts-demo.mp4`), 2:50, 1920×1080.
 Visibility: **Public** (the hackathon rules require a public video). Captions: upload `film/out/receipts-demo.srt` as English subtitles.
 Audience: not made for kids. Thumbnail (optional): `devpost/images/thumbnail.png`.
 
 ## Title
 
-Receipts: does the source really say that? Citation audits with NVIDIA Nemotron on Nebius Token Factory
+Receipts: does the source really say that? Nemotron on Nebius Token Factory + Tavily
 
 ## Description
 
