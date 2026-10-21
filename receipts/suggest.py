@@ -17,8 +17,17 @@ from .textutil import clean_web_text
 log = logging.getLogger("receipts.suggest")
 
 TARGET_LABELS = ("not_in_source", "source_unavailable")  # claim-level labels that get a web search
-SEARCH_RESULTS = 5  # hits requested per claim
+SEARCH_RESULTS = 8  # hits requested per claim (some are skipped below)
 JUDGED = 3  # hits with readable text that are judged per claim
+# Not citable as evidence: user posts, social media and Q&A sites.
+SKIP_HOSTS = ("medium.com", "reddit.com", "quora.com", "linkedin.com", "facebook.com", "x.com", "twitter.com",
+              "pinterest.com", "youtube.com", "tiktok.com", "instagram.com", "substack.com", "github.com",
+              "scribd.com", "slideshare.net", "coursehero.com", "studocu.com")
+# Primary and official sources first, then encyclopedias, then everything else.
+PRIMARY_HOSTS = ("arxiv.org", "doi.org", "who.int", "un.org", "oecd.org", "worldbank.org", "imf.org", "iea.org",
+                 "nasa.gov", "noaa.gov", "nature.com", "science.org", "sciencedirect.com", "springer.com", "wiley.com",
+                 "ncbi.nlm.nih.gov", "nih.gov", "acm.org", "ieee.org", "aclanthology.org", "neurips.cc", "openreview.net",
+                 "ourworldindata.org", "europa.eu", "cdc.gov", "nber.org")
 MAX_QUERY = 400  # Tavily rejects longer queries
 TARGET_WORKERS = 4  # claims searched in parallel
 
@@ -48,6 +57,23 @@ def cited_urls(claim: Claim, sources: list[Source], fetched: list[FetchedSource]
     return {normalize_url(u) for u in urls}
 
 
+def _host(url: str) -> str:
+    h = urlsplit(url).netloc.lower().split(":")[0]
+    return h[4:] if h.startswith("www.") else h
+
+
+def _matches(host: str, domains: tuple[str, ...]) -> bool:
+    return any(host == d or host.endswith("." + d) for d in domains)
+
+
+def source_rank(url: str | None) -> int:
+    """0 primary or official (journals, preprints, .gov, .edu, agencies), 1 encyclopedia, 2 anything else."""
+    host = _host(url or "")
+    if _matches(host, PRIMARY_HOSTS) or any(p in host.split(".") for p in ("gov", "edu", "ac")) or host.endswith(".int"):
+        return 0
+    return 1 if host.endswith("wikipedia.org") else 2
+
+
 def _query(claim: Claim) -> str:
     q = " ".join(claim.claim.split())
     return q if len(q) <= MAX_QUERY else q[:MAX_QUERY].rsplit(" ", 1)[0]
@@ -58,7 +84,7 @@ def _candidates(hits: list[dict], exclude: set[str]) -> list[tuple[Source, Fetch
     out: list[tuple[Source, FetchedSource]] = []
     for hit in hits:
         url = hit.get("url")
-        if not url or normalize_url(url) in exclude:
+        if not url or normalize_url(url) in exclude or _matches(_host(url), SKIP_HOSTS):
             continue
         text = clean_web_text(hit.get("raw_content") or hit.get("content") or "")
         if not text:
@@ -75,12 +101,12 @@ def _candidates(hits: list[dict], exclude: set[str]) -> list[tuple[Source, Fetch
 
 
 def pick(judged: list[tuple[Verdict, Source]]) -> tuple[Verdict, Source] | None:
-    """The supported verdict with a verified quote and the highest confidence; failing that, the best contradicted one.
-    Ties go to the higher-ranked search hit (the list is in rank order)."""
+    """A supported verdict with a verified quote, preferring primary sources, then higher confidence; failing that,
+    the best contradicted one. Ties go to the higher-ranked search hit (the list is in rank order)."""
     for label in ("supported", "contradicted"):
         ok = [(v, s) for v, s in judged if v.label == label and v.quote_found]
         if ok:
-            return max(ok, key=lambda vs: vs[0].confidence)  # max keeps the first (best-ranked) of equals
+            return min(ok, key=lambda vs: (source_rank(vs[1].url), -vs[0].confidence))  # min keeps the first of equals
     return None
 
 

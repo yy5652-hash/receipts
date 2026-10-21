@@ -1,0 +1,187 @@
+{
+ "tier": "nano",
+ "items": 60,
+ "true_claims": {
+  "all": {
+   "supported": {
+    "rate": 0.8666666666666667,
+    "k": 39,
+    "n": 45
+   },
+   "contradicted": {
+    "rate": 0.08888888888888889,
+    "k": 4,
+    "n": 45
+   },
+   "none": {
+    "rate": 0.044444444444444446,
+    "k": 2,
+    "n": 45
+   },
+   "origin_page": {
+    "rate": 0.37777777777777777,
+    "k": 17,
+    "n": 45
+   },
+   "supported_origin_page": {
+    "rate": 0.37777777777777777,
+    "k": 17,
+    "n": 45
+   },
+   "supported_other_page": {
+    "rate": 0.4888888888888889,
+    "k": 22,
+    "n": 45
+   },
+   "supported_primary": {
+    "rate": 0.35555555555555557,
+    "k": 16,
+    "n": 45
+   },
+   "supported_primary_or_encyclopedia": {
+    "rate": 0.6,
+    "k": 27,
+    "n": 45
+   }
+  },
+  "misattribution": {
+   "supported": {
+    "rate": 0.9,
+    "k": 27,
+    "n": 30
+   },
+   "contradicted": {
+    "rate": 0.06666666666666667,
+    "k": 2,
+    "n": 30
+   },
+   "none": {
+    "rate": 0.03333333333333333,
+    "k": 1,
+    "n": 30
+   },
+   "origin_page": {
+    "rate": 0.3333333333333333,
+    "k": 10,
+    "n": 30
+   },
+   "supported_origin_page": {
+    "rate": 0.3333333333333333,
+    "k": 10,
+    "n": 30
+   },
+   "supported_other_page": {
+    "rate": 0.5666666666666667,
+    "k": 17,
+    "n": 30
+   },
+   "supported_primary": {
+    "rate": 0.26666666666666666,
+    "k": 8,
+    "n": 30
+   },
+   "supported_primary_or_encyclopedia": {
+    "rate": 0.5333333333333333,
+    "k": 16,
+    "n": 30
+   }
+  },
+  "dead_link": {
+   "supported": {
+    "rate": 0.8,
+    "k": 12,
+    "n": 15
+   },
+   "contradicted": {
+    "rate": 0.13333333333333333,
+    "k": 2,
+    "n": 15
+   },
+   "none": {
+    "rate": 0.06666666666666667,
+    "k": 1,
+    "n": 15
+   },
+   "origin_page": {
+    "rate": 0.4666666666666667,
+    "k": 7,
+    "n": 15
+   },
+   "supported_origin_page": {
+    "rate": 0.4666666666666667,
+    "k": 7,
+    "n": 15
+   },
+   "supported_other_page": {
+    "rate": 0.3333333333333333,
+    "k": 5,
+    "n": 15
+   },
+   "supported_primary": {
+    "rate": 0.5333333333333333,
+    "k": 8,
+    "n": 15
+   },
+   "supported_primary_or_encyclopedia": {
+    "rate": 0.7333333333333333,
+    "k": 11,
+    "n": 15
+   }
+  }
+ },
+ "fabricated": {
+  "supported": {
+   "rate": 0.13333333333333333,
+   "k": 2,
+   "n": 15
+  },
+  "contradicted": {
+   "rate": 0.06666666666666667,
+   "k": 1,
+   "n": 15
+  },
+  "none": {
+   "rate": 0.8,
+   "k": 12,
+   "n": 15
+  }
+ },
+ "cost": {
+  "all": {
+   "mean_usd": 0.00091435,
+   "median_usd": 0.0008424999999999999,
+   "total_usd": 0.054861,
+   "model_calls_per_claim": 3.0,
+   "tokens_per_claim": 6695.416666666667,
+   "searches_per_claim": 1.0,
+   "median_seconds": 9.765
+  },
+  "misattribution": {
+   "mean_usd": 0.0009208333333333333,
+   "median_usd": 0.000852,
+   "total_usd": 0.027625,
+   "model_calls_per_claim": 3.0,
+   "tokens_per_claim": 6736.433333333333,
+   "searches_per_claim": 1.0,
+   "median_seconds": 9.765
+  },
+  "dead_link": {
+   "mean_usd": 0.0009374666666666666,
+   "median_usd": 0.000899,
+   "total_usd": 0.014062,
+   "model_calls_per_claim": 3.0,
+   "tokens_per_claim": 6971.333333333333,
+   "searches_per_claim": 1.0,
+   "median_seconds": 9.5
+  },
+  "fabricated": {
+   "mean_usd": 0.0008782666666666667,
+   "median_usd": 0.000778,
+   "total_usd": 0.013174,
+   "model_calls_per_claim": 3.0,
+   "tokens_per_claim": 6337.466666666666,
+   "searches_per_claim": 1.0,
+   "median_seconds": 10.14
+  }
+ }
+}

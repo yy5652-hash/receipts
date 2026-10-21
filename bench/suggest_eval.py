@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from receipts.config import TIERS, Settings, load_settings  # noqa: E402
 from receipts.models import Claim, FetchedSource, Source, Verdict  # noqa: E402
 from receipts.search import DiskCache, Searcher, TavilySearcher  # noqa: E402
-from receipts.suggest import normalize_url, suggest_sources  # noqa: E402
+from receipts.suggest import normalize_url, source_rank, suggest_sources  # noqa: E402
 from receipts.textutil import strip_citations  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -117,6 +117,7 @@ def run_item(item: dict, searcher: Searcher, make_llm, settings: Settings) -> di
         "report": item["report"], "start": item["start"], "type": item["type"], "tier": settings.suggest_tier,
         "claim": item["claim"], "cited_url": cited, "origin_url": item["origin_url"],
         "status": s.status if s else "error", "url": s.url if s else None, "title": s.title if s else None,
+        "quote": s.quote if s else "", "source_rank": source_rank(s.url) if s and s.url else None,
         "quote_found": bool(s and s.quote_found), "candidates": s.candidates if s else 0,
         "origin_match": bool(s and same_page(s.url, item["origin_url"])),
         "cost_usd": round(sum(u.cost_usd for u in usage), 6),
@@ -157,7 +158,10 @@ def summarise(rows: list[dict], tier: str) -> dict:
         return {**distribution(rs),
                 "origin_page": rate(sum(r["origin_match"] for r in rs), len(rs)),
                 "supported_origin_page": rate(sum(r["origin_match"] and r["status"] == "supported" for r in rs), len(rs)),
-                "supported_other_page": rate(sum(not r["origin_match"] and r["status"] == "supported" for r in rs), len(rs))}
+                "supported_other_page": rate(sum(not r["origin_match"] and r["status"] == "supported" for r in rs), len(rs)),
+                "supported_primary": rate(sum(r["status"] == "supported" and r.get("source_rank") == 0 for r in rs), len(rs)),
+                "supported_primary_or_encyclopedia": rate(
+                    sum(r["status"] == "supported" and r.get("source_rank") in (0, 1) for r in rs), len(rs))}
 
     return {
         "tier": tier, "items": len(rows),
@@ -186,7 +190,9 @@ def render_results(summary: dict) -> str:
         L.append(f"| {name} | {n} | {_pct(m['supported'])} | {_pct(m['origin_page'])} | {_pct(m['contradicted'])} | {_pct(m['none'])} |")
     m = tc["all"]
     L += ["", f"Supported suggestions: {_pct(m['supported_origin_page'])} are the origin page, "
-          f"{_pct(m['supported_other_page'])} another page that states the claim.", "",
+          f"{_pct(m['supported_other_page'])} another page that states the claim. "
+          f"{_pct(m['supported_primary'])} are primary or official sources (journals, preprints, agencies, .gov/.edu), "
+          f"{_pct(m['supported_primary_or_encyclopedia'])} primary, official or encyclopedic.", "",
           "## The cited paper does not exist: fabricated items", "",
           "The claim itself may or may not be true, so there is no target; the distribution is descriptive.", "",
           "| n | Supported | Contradicted | None |", "|---|---|---|---|",
