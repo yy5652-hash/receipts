@@ -67,6 +67,22 @@ class Verdict(BaseModel):
     passages: list[Passage] = []
 
 
+class Suggestion(BaseModel):
+    """What a web search found for a claim whose own source did not back it (see receipts/suggest.py)."""
+
+    claim_id: str
+    status: Literal["supported", "contradicted", "none"]
+    url: str | None = None
+    title: str | None = None
+    quote: str = ""
+    quote_found: bool = False  # quote verified to occur (normalised) in the page text
+    rationale: str = ""
+    model: str = ""
+    tier: str = ""
+    query: str = ""
+    candidates: int = 0  # how many search hits were judged
+
+
 class Usage(BaseModel):
     tier: str
     model: str
@@ -74,6 +90,14 @@ class Usage(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
     cost_usd: float = 0.0
+
+
+def best_label(verdicts: list[Verdict], claim_id: str) -> Label:
+    """Best verdict label across the claim's sources; a claim with no verdict counts as unavailable."""
+    labels = [v.label for v in verdicts if v.claim_id == claim_id]
+    if not labels:
+        return "source_unavailable"
+    return min(labels, key=LABEL_ORDER.index)
 
 
 class AuditReport(BaseModel):
@@ -85,13 +109,14 @@ class AuditReport(BaseModel):
     verdicts: list[Verdict]
     usage: list[Usage]
     seconds: float
+    suggestions: list[Suggestion] = []  # real sources found on the web for unsupported claims; empty in older reports
 
     def claim_label(self, claim_id: str) -> Label:
         """Best verdict label across the claim's sources."""
-        labels = [v.label for v in self.verdicts if v.claim_id == claim_id]
-        if not labels:
-            return "source_unavailable"
-        return min(labels, key=LABEL_ORDER.index)
+        return best_label(self.verdicts, claim_id)
+
+    def claim_suggestion(self, claim_id: str) -> Suggestion | None:
+        return next((s for s in self.suggestions if s.claim_id == claim_id), None)
 
     def claim_verdict(self, claim_id: str) -> Verdict | None:
         """The verdict that determines the claim's label (first best one)."""

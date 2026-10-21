@@ -19,6 +19,18 @@
       "title": "Hydrogen strategy overview",
       "content": "A general overview of national hydrogen strategies and policy goals.",
       "raw_content": "A general overview of national hydrogen strategies and policy goals."
+    },
+    {
+      "url": "https://hvac.example/heat-pump-sales",
+      "title": "US heat pump sales overtake gas furnaces",
+      "content": "Heat pumps outsold gas furnaces in the United States in 2022.",
+      "raw_content": "# US heat pump sales overtake gas furnaces\n\nHeat pumps outsold gas furnaces in the United States in 2022, the first time the two have been compared on shipments alone. Manufacturers expect the gap to widen as incentives take effect."
+    },
+    {
+      "url": "https://gridwatch.example/storage-additions",
+      "title": "Grid storage additions, annual review",
+      "content": "Battery storage additions doubled in 2022, e.g. in grid-scale projects.",
+      "raw_content": "# Grid storage additions, annual review\n\nBattery storage additions doubled in 2022, e.g. in grid-scale projects. Residential installations grew more slowly over the same period."
     }
   ],
   "status": {

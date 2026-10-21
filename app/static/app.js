@@ -17,7 +17,9 @@ export const LABELS = {
 };
 const SHOWN = [...ORDER, "checking", "unchecked"];
 const TIER_NAME = { nano: "Nemotron 3 Nano", super: "Nemotron 3 Super", ultra: "Nemotron 3 Ultra" };
-const STAGES = ["extract", "fetch", "judge", "done"];
+const STAGES = ["extract", "fetch", "judge", "suggest", "done"];
+// Claims whose own source did not back them get a web search for a source that does (receipts/suggest.py).
+export const SUGGEST_LABELS = new Set(["not_in_source", "source_unavailable"]);
 
 const ICON_PATHS = {
   check: '<path d="M3.5 8.5l3 3 6-7"/>',
@@ -66,16 +68,19 @@ export const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many
 
 /**
  * The "Models" fact: only the tiers that were used, in the order nano, super, ultra, each with its role.
- * used: Set of tiers with calls; direct: Set of tiers that gave a first-pass verdict; escalatedClaims: claims Ultra re-checked.
+ * used: Set of tiers with calls; direct: Set of tiers that gave a first-pass verdict; escalatedClaims: claims Ultra re-checked;
+ * finding: Set of tiers that read the web pages found for unsupported claims.
  */
-export function modelsLine(used, direct, escalatedClaims = 0) {
+export function modelsLine(used, direct, escalatedClaims = 0, finding = new Set()) {
   const parts = [];
-  if (used.has("nano")) parts.push(`${TIER_NAME.nano} (${direct.has("nano") ? "extraction and checking" : "extraction"})`);
-  if (used.has("super")) parts.push(`${parts.length ? "Super" : TIER_NAME.super} (${direct.has("super") || escalatedClaims ? "checking" : "extraction repair"})`);
+  const finds = (t) => (finding.has(t) ? ", finding real sources" : "");
+  if (used.has("nano")) parts.push(`${TIER_NAME.nano} (${direct.has("nano") ? "extraction and checking" : "extraction"}${finds("nano")})`);
+  if (used.has("super")) parts.push(`${parts.length ? "Super" : TIER_NAME.super} (${direct.has("super") || escalatedClaims ? "checking" : "extraction repair"}${finds("super")})`);
   if (used.has("ultra")) {
     const roles = [];
     if (direct.has("ultra") || !escalatedClaims) roles.push("checking");
     if (escalatedClaims) roles.push(`re-check, ${plural(escalatedClaims, "claim")}`);
+    if (finding.has("ultra")) roles.push("finding real sources");
     parts.push(`${parts.length ? "Ultra" : TIER_NAME.ultra} (${roles.join("; ")})`);
   }
   return parts.join(" · ") || "—";
@@ -398,6 +403,7 @@ const S = {
   sources: [],
   fetched: new Map(), // source_id -> FetchedSource (no text)
   verdicts: new Map(), // claim_id -> Map(source_id -> Verdict)
+  suggestions: new Map(), // claim_id -> Suggestion (a source found on the web for an unsupported claim)
   stage: "idle",
   running: false,
   report: null,
@@ -429,6 +435,9 @@ const setSources = (sources) => {
 const labelOf = (claim) => claimLabel(claim, S.verdicts.get(claim.id), S.running, S.known, !!S.error);
 const claimById = (id) => S.claims.find((c) => c.id === id);
 const sourceById = (id) => S.sources.find((s) => s.id === id);
+/** Ids of the claims the server searches the web for: the first `suggest_max` whose source did not back them. */
+const suggestTargetIds = () =>
+  S.claims.filter((c) => SUGGEST_LABELS.has(labelOf(c))).slice(0, S.config.limits.suggest_max ?? 8).map((c) => c.id);
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isNarrow = () => window.matchMedia("(max-width: 899px)").matches;
 
@@ -436,7 +445,7 @@ function resetResult() {
   if (S.abort) S.abort.abort();
   clearInterval(S.timer);
   Object.assign(S, {
-    doc: "", claims: [], sources: [], fetched: new Map(), verdicts: new Map(), stage: "idle", running: false,
+    doc: "", claims: [], sources: [], fetched: new Map(), verdicts: new Map(), suggestions: new Map(), stage: "idle", running: false,
     report: null, replayId: null, selected: null, selSource: null, filter: "all", notices: [], error: null,
     abort: null, spans: new Map(), flags: new Map(), chips: new Map(), titles: new Map(), dirtyEvidence: false, known: new Set(),
     renderedClaims: -1,
@@ -687,6 +696,13 @@ function renderSummary() {
   } else if (S.running) {
     used.add("nano"); // extraction is the first call of every run
   }
+  const finding = new Set();
+  for (const sg of S.suggestions.values()) {
+    if (sg.candidates > 0) {
+      finding.add(sg.tier);
+      used.add(sg.tier);
+    }
+  }
   for (const vm of S.verdicts.values()) {
     for (const v of vm.values()) {
       if (v.tier === "none") continue;
@@ -697,13 +713,20 @@ function renderSummary() {
       } else direct.add(v.tier);
     }
   }
-  $("#fact-models").textContent = modelsLine(used, direct, escalated.size);
+  $("#fact-models").textContent = modelsLine(used, direct, escalated.size, finding);
   if (S.report) {
     $("#fact-time").textContent = fmtTime(S.report.seconds);
     $("#fact-cost").textContent = fmtCost(S.report.usage.reduce((a, u) => a + (u.cost_usd || 0), 0));
   } else {
     $("#fact-cost").textContent = "—";
   }
+  const targets = suggestTargetIds();
+  const showFind = !!targets.length || S.suggestions.size > 0 || S.stage === "suggest";
+  const searched = S.report ? S.suggestions.size : targets.length;
+  const found = [...S.suggestions.values()].filter((sg) => sg.status === "supported").length;
+  // While the run is on, the slot is already there ("—", like the cost) so the card does not grow when the first result lands.
+  $("#fact-sources-box").hidden = !(S.suggestions.size || (S.running && showFind));
+  $("#fact-sources").textContent = S.suggestions.size ? `${found} of ${plural(searched, "unsupported claim")}` : "—";
 
   // progress
   const prog = $("#progress");
@@ -714,8 +737,10 @@ function renderSummary() {
     n ? plural(n, "claim") : "",
     S.sources.length ? `${S.fetched.size}/${S.sources.length} sources` : "",
     n && idx >= 2 ? `${checked}/${n} claims` : "",
+    idx >= 3 ? `${S.suggestions.size}/${targets.length} claims` : "",
   ];
   $$("li", prog).forEach((li, i) => {
+    li.hidden = i === 3 && !showFind;
     li.dataset.state = i < idx ? "done" : i === idx ? "active" : "pending";
     $(".step-count", li).textContent = i <= idx || i === 0 ? counters[i] : "";
   });
@@ -801,6 +826,36 @@ function badge(label, big = false) {
 
 function section(title, ...kids) {
   return h("section", { class: "ev-section" }, h("h3", { class: "ev-label", text: title }), ...kids);
+}
+
+/** Below "Why": what the web search found for a claim its own source did not back. */
+function suggestionSection(claim) {
+  const sg = S.suggestions.get(claim.id);
+  if (!sg) {
+    if (S.running && S.stage === "suggest" && suggestTargetIds().includes(claim.id)) {
+      return section("Real source", h("div", { class: "pending" }, h("span", { class: "shimmer-line" }), h("p", { class: "muted", text: "Looking for a real source…" })));
+    }
+    return null;
+  }
+  if (sg.status === "none") {
+    return h("section", { class: "ev-section" }, h("p", { class: "muted ev-nosource", text: "Receipts searched the web and found no source that states this." }));
+  }
+  const ok = sg.status === "supported";
+  const url = safeUrl(sg.url);
+  const title = (sg.title || "").replace(/\s+/g, " ").trim() || readableUrl(sg.url) || "Untitled page";
+  return h("section", { class: "ev-section" },
+    h("div", { class: "ev-suggest", dataset: { label: sg.status } },
+      h("h3", { class: "ev-label suggest-label" }, icon(ok ? "check" : "cross", 13), ok ? "A source that does say this" : "Other sources say otherwise"),
+      h("p", { class: "src-title" }, url ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, title) : title),
+      h("p", { class: "src-meta" },
+        url ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, domainOf(url) || "Open page", icon("external", 12)) : null),
+      sg.quote ? h("blockquote", { class: "ev-quote", dataset: { label: sg.status } }, h("p", { text: sg.quote })) : null,
+      sg.quote ? (sg.quote_found
+        ? h("p", { class: "quote-check ok" }, icon("check", 13), "Quote found in source")
+        : h("p", { class: "quote-check warn" }, icon("question", 13), "Quote not found verbatim")) : null,
+      h("p", { class: "suggest-by", text: `Found with Tavily · checked by ${TIER_NAME[sg.tier] || sg.tier}` }),
+    ),
+  );
 }
 
 function renderEvidence() {
@@ -912,6 +967,8 @@ function renderEvidence() {
   body.append(section("Evidence", ...ev));
 
   if (verdict.rationale) body.append(section("Why", h("p", { class: "ev-why", text: verdict.rationale })));
+  const real = suggestionSection(claim);
+  if (real) body.append(real);
   body.append(h("p", { class: "checked-by" }, h("span", { class: "ev-label inline", text: "Checked by" }), " ", checkedBy(verdict)));
 
   if (verdict.passages && verdict.passages.length) {
@@ -931,7 +988,8 @@ function applyEvent(e) {
   switch (e.type) {
     case "stage":
       S.stage = e.stage;
-      srSay({ extract: "Reading claims.", fetch: `Found ${plural(S.claims.length, "claim")}. Finding sources.`, judge: "Checking claims.", done: "" }[e.stage] || "");
+      srSay({ extract: "Reading claims.", fetch: `Found ${plural(S.claims.length, "claim")}. Finding sources.`, judge: "Checking claims.",
+        suggest: "Looking for real sources of the unsupported claims.", done: "" }[e.stage] || "");
       scheduleRender();
       break;
     case "notice":
@@ -957,6 +1015,11 @@ function applyEvent(e) {
       scheduleRender();
       break;
     }
+    case "suggestion":
+      S.suggestions.set(e.suggestion.claim_id, e.suggestion);
+      if (S.selected === e.suggestion.claim_id) S.dirtyEvidence = true;
+      scheduleRender();
+      break;
     case "done":
       finish(e.report);
       break;
@@ -976,6 +1039,7 @@ function loadFromReport(report) {
     if (!S.verdicts.has(v.claim_id)) S.verdicts.set(v.claim_id, new Map());
     S.verdicts.get(v.claim_id).set(v.source_id, v);
   }
+  S.suggestions = new Map((report.suggestions || []).map((sg) => [sg.claim_id, sg]));
   S.report = report;
   S.mode = report.mode;
 }
@@ -993,7 +1057,9 @@ function finish(report) {
   renderEvidence();
   const counts = countLabels(S.claims.map(labelOf));
   const problems = ORDER.filter((l) => PROBLEMS.has(l)).reduce((a, l) => a + counts[l], 0);
-  srSay(`Done. ${plural(S.claims.length, "claim")} checked, ${counts.supported} supported, ${problems} with problems.`);
+  const real = [...S.suggestions.values()].filter((sg) => sg.status === "supported").length;
+  srSay(`Done. ${plural(S.claims.length, "claim")} checked, ${counts.supported} supported, ${problems} with problems.`
+    + (S.suggestions.size ? ` Real sources found for ${real} of ${plural(S.suggestions.size, "unsupported claim")}.` : ""));
 }
 
 function fail(message) {

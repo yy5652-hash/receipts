@@ -133,6 +133,7 @@ class RateLimiter:
 class AuditRequest(BaseModel):
     document: str
     mode: Literal["ultra", "nano", "super", "routed", "cascade"] = "ultra"
+    suggest: bool = True  # search the web for a real source of the claims their own source did not back
 
 
 def _err(status: int, message: str, **headers) -> JSONResponse:
@@ -277,7 +278,8 @@ def create_app(
             "reason": reason,
             "fake": fake is not None,
             "models": dict(settings.models),
-            "limits": {"max_chars": cfg.max_doc_chars, "max_claims": cfg.max_claims, "per_ip_per_hour": cfg.per_ip_per_hour},
+            "limits": {"max_chars": cfg.max_doc_chars, "max_claims": cfg.max_claims, "per_ip_per_hour": cfg.per_ip_per_hour,
+                       "suggest_max": settings.suggest_max_claims},
             "examples": [{k: e[k] for k in ("id", "title", "blurb")} for e in examples],
         }
 
@@ -332,7 +334,8 @@ def create_app(
             try:
                 llm, searcher, status_fn, openalex = get_factory()()
                 report = audit(doc, llm, searcher, settings, mode=req.mode, on_event=events.put,
-                               status_fn=status_fn, openalex=openalex, max_claims=cfg.max_claims)
+                               status_fn=status_fn, openalex=openalex, max_claims=cfg.max_claims,
+                               suggest=req.suggest)
                 events.put({"type": "done", "report": public_report(report)})
             except Exception as exc:  # noqa: BLE001 - reported to the client in a safe form
                 log.warning("audit failed: %s", type(exc).__name__)

@@ -19,6 +19,16 @@ FIXTURES = FIX / "sources.json"
 def report():
     searcher, status_fn = load_fixtures(FIXTURES)
     events = []
+    rep = audit(DOC, FakeLLM(), searcher, Settings(), mode="cascade", on_event=events.append, status_fn=status_fn,
+                suggest=False)
+    rep._events = events
+    return rep
+
+
+@pytest.fixture(scope="module")
+def suggested():
+    searcher, status_fn = load_fixtures(FIXTURES)
+    events = []
     rep = audit(DOC, FakeLLM(), searcher, Settings(), mode="cascade", on_event=events.append, status_fn=status_fn)
     rep._events = events
     return rep
@@ -174,3 +184,97 @@ def test_max_claims_drops_extras_with_a_notice():
     assert {v.claim_id for v in rep.verdicts} <= {"c1", "c2", "c3"}
     (notice,) = [e for e in events if e["type"] == "notice"]
     assert "9" in notice["message"] and "3" in notice["message"]
+
+
+# --- find-a-real-source stage ------------------------------------------------------------
+
+def test_suggestions_for_the_unsupported_claims(suggested):
+    by_prefix = {c.claim.split(" ")[0] + " " + c.claim.split(" ")[1]: suggested.claim_suggestion(c.id) for c in suggested.claims}
+    assert {k: v.status for k, v in by_prefix.items() if v} == {
+        "Heat pumps": "supported", "Battery storage": "contradicted", "Utility-scale hydrogen": "none"}
+    heat = by_prefix["Heat pumps"]
+    assert heat.url == "https://hvac.example/heat-pump-sales" and heat.quote_found and heat.title
+    assert [s.claim_id for s in suggested.suggestions] == ["c3", "c5", "c6"]  # document order
+    assert suggested.claim_suggestion("c1") is None  # a contradicted claim is not a target: its source answered
+
+
+def test_suggest_stage_comes_between_judge_and_done(suggested):
+    ev = suggested._events
+    assert [e["stage"] for e in ev if e["type"] == "stage"] == ["extract", "fetch", "judge", "suggest", "done"]
+    kinds = [e["type"] for e in ev]
+    last_verdict = max(i for i, k in enumerate(kinds) if k == "verdict")
+    first_sugg = kinds.index("suggestion")
+    assert last_verdict < ev.index({"type": "stage", "stage": "suggest"}) < first_sugg < kinds.index("stage", first_sugg)
+    assert sum(k == "suggestion" for k in kinds) == len(suggested.suggestions) == 3
+    for e in (e for e in ev if e["type"] == "suggestion"):
+        assert AuditReport.model_validate(
+            {"document": "", "mode": "x", "sources": [], "claims": [], "fetched": [], "verdicts": [], "usage": [],
+             "seconds": 0, "suggestions": [e["suggestion"]]}).suggestions[0].claim_id == e["suggestion"]["claim_id"]
+
+
+def test_suggest_calls_are_counted_in_usage(report, suggested):
+    nano = lambda r: next(u for u in r.usage if u.tier == "nano").calls  # noqa: E731
+    assert nano(suggested) > nano(report)  # extraction calls plus the judge calls on the pages found
+
+
+def test_suggest_false_skips_the_stage(report):
+    assert report.suggestions == []
+    assert "suggest" not in [e["stage"] for e in report._events if e["type"] == "stage"]
+    assert not any(e["type"] == "suggestion" for e in report._events)
+
+
+def test_no_unsupported_claims_means_no_suggest_stage():
+    doc = "# T\n\nSolar module prices fell 89% between 2010 and 2020 [1].\n\n## References\n\n" \
+          "[1] International Energy Agency. (2021). \"Solar PV module price trends.\" doi:10.5555/iea.solar.2021\n"
+    searcher, status_fn = load_fixtures(FIXTURES)
+    events = []
+    rep = audit(doc, FakeLLM(), searcher, Settings(), on_event=events.append, status_fn=status_fn)
+    assert rep.claim_label("c1") == "supported" and rep.suggestions == []
+    assert [e["stage"] for e in events if e["type"] == "stage"] == ["extract", "fetch", "judge", "done"]
+
+
+def test_a_report_json_without_suggestions_still_loads(report):
+    data = report.model_dump(mode="json")
+    del data["suggestions"]
+    old = AuditReport.model_validate(data)
+    assert old.suggestions == [] and old.claim_suggestion("c1") is None
+
+
+def test_the_settings_cap_applies_to_the_pipeline():
+    searcher, status_fn = load_fixtures(FIXTURES)
+    rep = audit(DOC, FakeLLM(), searcher, Settings(suggest_max_claims=1), status_fn=status_fn)
+    assert [s.claim_id for s in rep.suggestions] == ["c3"]
+
+
+def test_render_markdown_has_a_suggested_source_block_under_each_such_claim(suggested):
+    md = render_markdown(suggested)
+    section = lambda cid: md.split(f"## {cid}:")[1].split("\n## ")[0]  # noqa: E731
+    heat = section("c3")
+    assert "**Suggested source (states the claim):** US heat pump sales overtake gas furnaces" in heat
+    assert "<https://hvac.example/heat-pump-sales>" in heat
+    assert "> Heat pumps outsold gas furnaces in the United States in 2022" in heat
+    assert "Found with Tavily · checked by nano (nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B)" in heat
+    assert "**Suggested source (says otherwise):** Grid storage additions, annual review" in section("c5")
+    assert "**Web search:** no page found that states this claim." in section("c6")
+    assert "Suggested source" not in section("c1")
+
+
+def test_render_without_suggestions_is_unchanged(report):
+    assert "Suggested source" not in render_markdown(report) and "Web search" not in render_markdown(report)
+
+
+def test_cli_prints_a_line_under_claims_with_a_suggestion(capsys):
+    assert cli.main(["audit", str(FIX / "report_basic.md"), "--fake", str(FIXTURES), "--mode", "super"]) == 0
+    out = capsys.readouterr().out
+    assert "→ found: US heat pump sales overtake gas furnaces" in out
+    assert "→ others say otherwise: Grid storage additions, annual review" in out
+    assert out.count("→") == 2  # the claim with no suggestion that holds gets no line
+
+
+def test_cli_no_suggest_skips_the_stage(tmp_path, capsys):
+    out_json = tmp_path / "a.json"
+    assert cli.main(["audit", str(FIX / "report_basic.md"), "--fake", str(FIXTURES), "--mode", "super",
+                     "--no-suggest", "--json", str(out_json)]) == 0
+    captured = capsys.readouterr()
+    assert "→" not in captured.out and "[suggest]" not in captured.err
+    assert json.loads(out_json.read_text())["suggestions"] == []

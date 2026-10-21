@@ -36,6 +36,8 @@ class Settings:
     max_workers: int = 8
     cascade: tuple[str, str] = ("super", "ultra")  # first-pass tier, escalation tier of the "cascade" mode
     route: tuple[str, str] = ("nano", "ultra")  # checking tier, second-look tier of the "routed" mode
+    suggest_tier: str = "nano"  # tier that reads the web pages found for an unsupported claim
+    suggest_max_claims: int = 8  # at most this many unsupported claims get a web search
 
     def __post_init__(self):
         for t in TIERS:
@@ -69,6 +71,18 @@ def _cascade(raw: str | None, default: tuple[str, str] = ("super", "ultra")) -> 
     return parts if len(parts) == 2 and all(p in TIERS for p in parts) else default  # type: ignore[return-value]
 
 
+def _tier(raw: str | None, default: str = "nano") -> str:
+    raw = (raw or "").strip().lower()
+    return raw if raw in TIERS else default
+
+
+def _int(raw: str | None, default: int) -> int:
+    try:
+        return max(0, int(raw)) if raw else default
+    except ValueError:
+        return default
+
+
 def load_settings() -> Settings:
     load_dotenv(REPO_ROOT / ".env")
     env = os.environ.get
@@ -76,6 +90,8 @@ def load_settings() -> Settings:
     return Settings(
         cascade=_cascade(env("RECEIPTS_CASCADE")),
         route=_cascade(env("RECEIPTS_ROUTE"), ("nano", "ultra")),
+        suggest_tier=_tier(env("RECEIPTS_SUGGEST_TIER")),
+        suggest_max_claims=_int(env("RECEIPTS_SUGGEST_MAX"), 8),
         nebius_api_key=env("NEBIUS_API_KEY") or None,
         tavily_api_key=env("TAVILY_API_KEY") or None,
         models={t: env(f"RECEIPTS_MODEL_{up[t]}") or DEFAULT_MODELS[t] for t in TIERS},

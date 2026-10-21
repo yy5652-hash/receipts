@@ -93,10 +93,12 @@
         <li data-step="extract"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Reading claims</span><span class="step-count"></span></li>
         <li data-step="fetch"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Finding sources</span><span class="step-count"></span></li>
         <li data-step="judge"><span class="step-dot" aria-hidden="true"></span><span class="step-name">Checking claims</span><span class="step-count"></span></li>
+        <li data-step="suggest" hidden><span class="step-dot" aria-hidden="true"></span><span class="step-name">Finding real sources</span><span class="step-count"></span></li>
       </ol>
       <dl class="facts">
         <div><dt>Elapsed</dt><dd id="fact-time">0.0 s</dd></div>
         <div><dt>Cost</dt><dd id="fact-cost">—</dd></div>
+        <div id="fact-sources-box" hidden><dt>Real sources found</dt><dd id="fact-sources"></dd></div>
         <div class="wide"><dt>Models</dt><dd id="fact-models"></dd></div>
       </dl>
       <p id="sr-status" class="sr-only" role="status" aria-live="polite"></p>

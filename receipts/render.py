@@ -2,7 +2,7 @@
 
 import re
 
-from .models import LABEL_ORDER, AuditReport, FetchedSource, Verdict
+from .models import LABEL_ORDER, AuditReport, FetchedSource, Suggestion, Verdict
 
 BADGES = {
     "supported": "✅ supported",
@@ -29,6 +29,21 @@ def _record_note(f: FetchedSource | None) -> str:
     if f is None or f.status != "not_found" or f.exists is None:
         return ""
     return "a record of the source exists, but its text could not be read" if f.exists else "no record of the source was found"
+
+
+def _suggestion_block(s: Suggestion) -> list[str]:
+    """What the web search found for an unsupported claim."""
+    if s.status == "none":
+        return ["**Web search:** no page found that states this claim.", ""]
+    says = "states the claim" if s.status == "supported" else "says otherwise"
+    title = s.title or s.url or "untitled page"
+    lines = [f"**Suggested source ({says}):** {title}" + (f" · <{s.url}>" if s.url else "")]
+    if s.quote:
+        lines += ["", f"> {_one_line(s.quote)}"]
+    if s.rationale:
+        lines += ["", s.rationale]
+    model = f"{s.tier}" + (f" ({s.model})" if s.model else "")
+    return lines + ["", f"Found with Tavily · checked by {model}" + ("" if s.quote_found or not s.quote else ", quote not verified"), ""]
 
 
 def render_markdown(report: AuditReport) -> str:
@@ -65,4 +80,6 @@ def render_markdown(report: AuditReport) -> str:
             if v.rationale:
                 lines += ["", v.rationale]
             lines.append("")
+        if suggestion := report.claim_suggestion(c.id):
+            lines += _suggestion_block(suggestion)
     return "\n".join(lines).rstrip() + "\n"

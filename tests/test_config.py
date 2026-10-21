@@ -28,3 +28,19 @@ def test_load_settings_defaults_and_overrides(monkeypatch):
     assert s.models["super"] == "nvidia/real-super" and s.prices["ultra"] == (1.5, 4.0)
     assert s.tier_options["super"] == {"system_prefix": "/think ", "extra_body": {"chat_template_kwargs": {"thinking": True}}}
     assert s.tier_options["nano"]["extra_body"] == config.NO_THINKING  # invalid JSON keeps the default
+
+
+def test_suggest_settings(monkeypatch):
+    monkeypatch.setattr(config, "load_dotenv", lambda *a, **k: None)
+    for k in ("RECEIPTS_SUGGEST_TIER", "RECEIPTS_SUGGEST_MAX"):
+        monkeypatch.delenv(k, raising=False)
+    s = config.load_settings()
+    assert (s.suggest_tier, s.suggest_max_claims) == ("nano", 8)
+    monkeypatch.setenv("RECEIPTS_SUGGEST_TIER", "Super")
+    monkeypatch.setenv("RECEIPTS_SUGGEST_MAX", "3")
+    s = config.load_settings()
+    assert (s.suggest_tier, s.suggest_max_claims) == ("super", 3)
+    monkeypatch.setenv("RECEIPTS_SUGGEST_TIER", "mega")
+    monkeypatch.setenv("RECEIPTS_SUGGEST_MAX", "many")
+    s = config.load_settings()
+    assert (s.suggest_tier, s.suggest_max_claims) == ("nano", 8)  # invalid values keep the defaults
