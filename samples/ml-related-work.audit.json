@@ -191,9 +191,9 @@
    "source_id": "s5",
    "label": "supported",
    "confidence": 0.95,
-   "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU.",
+   "quote": "Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including",
    "quote_found": true,
-   "rationale": "The passages confirm the Transformer uses attention mechanisms without recurrence and achieves 28.4 BLEU on the specified task.",
+   "rationale": "The abstract states the Transformer is based solely on attention mechanisms, dispensing with recurrence entirely, and achieves 28.4 BLEU on the WMT 2014 English-to-German task.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
    "escalated": false,
@@ -218,9 +218,9 @@
    "source_id": "s1",
    "label": "contradicted",
    "confidence": 0.95,
-   "quote": "ranging over three orders of magnitude from 125 million parameters to 175 billion parameters, with the last being the model we call GPT-3.",
+   "quote": "we train 8 different sizes of model, ranging over three orders of magnitude from 125 million parameters to 175 billion parameters, with the last being the model we call GPT-3.",
    "quote_found": true,
-   "rationale": "The passages state GPT-3 has 175 billion parameters, while the claim says 17.5 billion parameters.",
+   "rationale": "The source states GPT-3 has 175 billion parameters, not 17.5 billion.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
    "escalated": false,
@@ -265,7 +265,7 @@
    "confidence": 0.95,
    "quote": "It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement)",
    "quote_found": true,
-   "rationale": "The claim states a GLUE score of 85.5, but the source explicitly says the GLUE score was pushed to 80.5% and Table 1 shows BERTLARGE scores of 86.7/85.9, not 85.5.",
+   "rationale": "The source explicitly states that BERT pushed the GLUE score to 80.5%, not 85.5%.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
    "escalated": false,
@@ -310,7 +310,7 @@
    "confidence": 0.9,
    "quote": "",
    "quote_found": false,
-   "rationale": "The passages discuss retrieval-augmented generation performance on open-domain QA tasks but do not mention hallucination elimination.",
+   "rationale": "The passages discuss retrieval-augmented generation (RAG) models achieving state-of-the-art results on open-domain question answering tasks but do not mention hallucination or its elimination.",
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "tier": "ultra",
    "escalated": false,
@@ -367,10 +367,10 @@
   {
    "tier": "nano",
    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
-   "calls": 2,
-   "prompt_tokens": 1462,
-   "completion_tokens": 597,
-   "cost_usd": 0.00023099999999999998
+   "calls": 8,
+   "prompt_tokens": 9036,
+   "completion_tokens": 4788,
+   "cost_usd": 0.0016912799999999999
   },
   {
    "tier": "super",
@@ -385,9 +385,37 @@
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "calls": 4,
    "prompt_tokens": 5630,
-   "completion_tokens": 4440,
-   "cost_usd": 0.01895
+   "completion_tokens": 5074,
+   "cost_usd": 0.020852
   }
  ],
- "seconds": 17.09
+ "seconds": 17.92,
+ "suggestions": [
+  {
+   "claim_id": "c4",
+   "status": "none",
+   "url": null,
+   "title": null,
+   "quote": "",
+   "quote_found": false,
+   "rationale": "None of the 3 pages checked states the claim or says otherwise.",
+   "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+   "tier": "nano",
+   "query": "Retrieval-augmented models were shown to eliminate hallucination entirely in open-domain question answering.",
+   "candidates": 3
+  },
+  {
+   "claim_id": "c5",
+   "status": "contradicted",
+   "url": "https://maartjeth.github.io/assets/documents/interpretability_mha_abstractive_summarization.pdf",
+   "title": "Interpreting Multi-Head Attention in Abstractive ...",
+   "quote": "heads should not be readily used for transparency.",
+   "quote_found": true,
+   "rationale": "The passage explicitly states that heads should not be readily used for transparency, indicating they are not fully interpretable.",
+   "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+   "tier": "nano",
+   "query": "A later meta-analysis confirmed that attention heads are fully interpretable.",
+   "candidates": 3
+  }
+ ]
 }
