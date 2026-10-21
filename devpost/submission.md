@@ -74,9 +74,9 @@ We built a benchmark to choose each model on evidence: 30 reports with 300 cited
 | Nemotron 3 Super | 138 / 142 | 0 / 150 | 98.6% | $0.074 |
 | Nemotron 3 Nano | 139 / 142 | 1 / 150 | 98.6% | $0.026 |
 
-**Find a real source**, measured on the same benchmark: for the 45 true claims cited to the wrong source or a dead link, Receipts found a page that states the claim for 39 (87%), the original page for 17, at about $0.001 and 10 seconds per claim. For the 15 claims behind fabricated papers it found no supporting page for 12; the other 2 were true facts behind fake citations, and Receipts found real sources for them.
-
 Ultra caught every changed number (37/37) and every overclaim (15/15) for about three tenths of a cent per claim, so it is the default judge; Nano reaches 98.6% at a twelfth of the cost and is one click away in the mode menu. The full tables, two-tier variants, development/test split and label audit are in the repository's `bench/RESULTS.md`, generated from the raw result files.
+
+**Find a real source**, measured on the same benchmark: for the 45 true claims cited to the wrong source or a dead link, Receipts found a page that states the claim for 39 (87%), the original page for 17, at about $0.001 and 10 seconds per claim. For the 15 claims behind fabricated papers it found no supporting page for 12; the other 2 were true facts behind fake citations, and Receipts found real sources for them.
 
 ### Challenges we ran into
 
