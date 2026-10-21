@@ -174,7 +174,8 @@ button, select, textarea { font: inherit; color: inherit; }
 .seg { background: var(--c-line); min-width: 6px; flex-basis: 0; transition: flex-grow 0.35s ease; }
 .seg[data-label="checking"] { background: linear-gradient(100deg, var(--chk-bg) 30%, var(--chk-hi) 50%, var(--chk-bg) 70%) 0 0 / 250% 100%; animation: shimmer 1.5s linear infinite; }
 
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; list-style: none; margin: 16px 0 0; padding: 0; }
+.steps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; list-style: none; margin: 16px 0 0; padding: 0; }
+.steps li[hidden] { display: none; }
 .steps li { display: grid; gap: 2px; padding-top: 10px; border-top: 3px solid var(--rule-strong); font-size: 14px; position: relative; }
 .steps .step-dot { display: none; }
 .steps .step-name { font-weight: 600; color: var(--ink-3); }
@@ -288,6 +289,13 @@ kbd { font: 500 11.5px/1 var(--mono); padding: 2px 6px; border: 1px solid var(--
 .quote-check.ok { color: var(--sup-ink); }
 .quote-check.warn { color: var(--par-ink); }
 .ev-why { font-size: 14.5px; line-height: 1.6; }
+.ev-suggest { display: grid; gap: 8px; padding: 14px 16px 14px; border: 1px solid var(--c-line); border-radius: 12px; background: color-mix(in srgb, var(--c-bg) 45%, var(--surface)); }
+.ev-suggest .ev-label { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 2px; color: var(--c-ink); }
+.ev-suggest .src-title a { color: inherit; text-decoration: underline; text-decoration-color: var(--c-line); text-underline-offset: 3px; }
+.ev-suggest .ev-quote { font-size: 17px; margin-top: 4px; }
+.ev-suggest .quote-check { margin-top: 2px; }
+.suggest-by { font-size: 13px; color: var(--ink-2); }
+.ev-nosource { font-size: 14px; line-height: 1.5; }
 .checked-by { font-size: 13.5px; color: var(--ink-2); padding-top: 12px; border-top: 1px solid var(--rule); }
 .passages { border-top: 1px solid var(--rule); padding-top: 10px; }
 .passages summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
@@ -339,8 +347,7 @@ kbd { font: 500 11.5px/1 var(--mono); padding: 2px 6px; border: 1px solid var(--
 
 @media (max-width: 520px) {
   .actions .btn { flex: 1 1 auto; }
-  .steps { grid-template-columns: 1fr; gap: 4px; }
-  .steps li { grid-template-columns: auto 1fr; padding-top: 8px; gap: 2px 10px; }
+  .steps { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
   .composer-bar { flex-wrap: wrap; }
   .composer-bar .btn { flex: 1 1 100%; }
   #doc-input { min-height: 160px; }

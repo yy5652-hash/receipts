@@ -67,6 +67,7 @@ def test_config_lists_models_limits_and_examples(client):
     assert cfg["live"] is True and cfg["fake"] is True and cfg["reason"] is None
     assert set(cfg["models"]) == {"nano", "super", "ultra"}
     assert cfg["limits"]["max_chars"] == 40_000
+    assert cfg["limits"]["suggest_max"] == 8  # how many unsupported claims get a web search; the page uses it for its progress
     (ex,) = [e for e in cfg["examples"] if e["id"] == "fixture-demo"]
     assert ex["title"] and ex["blurb"]
 

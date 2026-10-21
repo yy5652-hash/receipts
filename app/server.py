@@ -278,7 +278,8 @@ def create_app(
             "reason": reason,
             "fake": fake is not None,
             "models": dict(settings.models),
-            "limits": {"max_chars": cfg.max_doc_chars, "max_claims": cfg.max_claims, "per_ip_per_hour": cfg.per_ip_per_hour},
+            "limits": {"max_chars": cfg.max_doc_chars, "max_claims": cfg.max_claims, "per_ip_per_hour": cfg.per_ip_per_hour,
+                       "suggest_max": settings.suggest_max_claims},
             "examples": [{k: e[k] for k in ("id", "title", "blurb")} for e in examples],
         }
 
