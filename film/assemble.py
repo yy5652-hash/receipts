@@ -160,7 +160,7 @@ def arranged(timeline, holds):
     at = lambda t: next((s["id"] for s in scenes if s["start"] <= t < s["end"]), scenes[-1]["id"])
     end_start = next(s["start"] for s in scenes if s["id"] == "end")
     pads, keys, drums = B.Stem(total + 4), B.Stem(total + 4), B.Stem(total + 4)
-    PULSE = {"paste": 1, "findings": 1, "papers": 1, "how": 2, "bench": 1}
+    PULSE = {"paste": 1, "findings": 1, "papers": 1, "fix": 1, "how": 2, "bench": 1}
     BRIGHT = {"title", "bench", "end", "how"}
     C_MAJOR = [48, 52, 55, 60]
     b = 0

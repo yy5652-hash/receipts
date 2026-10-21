@@ -160,9 +160,10 @@ const ring = (B, at, dur, key, spec, color) => B.span(at, dur, p => js(`film.rin
 const attr = (B, at, fn) => B.do(at, fn);
 
 // ---------------------------------------------------------------- the recorded run on the film clock
-// Recorded seconds r (since the request) against film seconds d since the click: 4x while the claims are being read,
-// 2x after that. The tag on screen says which.
-const RUN = { abs0: null, segs: [[facts.live.times.claims, 4], [Infinity, 2]], pushed: 0, doneAt: facts.live.times.done };
+// Recorded seconds r (since the request) against film seconds d since the click: 2x while the claims are being read,
+// real time while the sources are read and the claims judged (the part to watch), 4x while the real sources are searched.
+// The tag on screen says which.
+const RUN = { abs0: null, segs: [[facts.live.times.claims, 2], [facts.live.times.lastVerdict, 1], [Infinity, 4]], pushed: 0, doneAt: facts.live.times.done };
 function recordedAt(abs) {
   if (RUN.abs0 === null || abs < RUN.abs0) return { r: -1, speed: 0 };
   let d = abs - RUN.abs0, prev = 0;
@@ -173,6 +174,7 @@ function recordedAt(abs) {
   }
 }
 let absStart = 0, tNow = 0;
+const STAT = { from: 0, until: 0, html: '' };          // the benchmark tag of the fix scene
 const absNow = () => absStart + tNow;
 
 async function appScene(sc, plan, { fadeIn = false, fadeOut = false } = {}) {
@@ -181,6 +183,7 @@ async function appScene(sc, plan, { fadeIn = false, fadeOut = false } = {}) {
   const L = Object.fromEntries(sc.lines.map(l => [l.id, l.start - sc.start]));
   const E = Object.fromEntries(sc.lines.map(l => [l.id, l.end - sc.start]));
   const B = beats();
+  STAT.html = ''; STAT.from = STAT.until = 0;
   plan(B, L, E, sc.end - sc.start);
   B.list.sort((a, b) => a.at - b.at);
   const n = Math.round((sc.end - sc.start) * FPS);
@@ -208,8 +211,9 @@ async function appScene(sc, plan, { fadeIn = false, fadeOut = false } = {}) {
     if (pushed || r >= 0) await settle();
     const c = captionAt(sc, t);
     const fade = Math.max(fadeIn ? 1 - clamp(t / 0.5) : 0, fadeOut ? clamp((t - (sc.end - sc.start - 0.5)) / 0.5) : 0);
-    const hud = r >= 0 && r <= RUN.doneAt + 0.3 ? `Recorded run · ${speed}× speed` : '';
-    await js(`film.setCam(${cam.x}, ${cam.y}, ${cam.w}); film.cursor(${cursor.x}, ${cursor.y}, ${cursor.show}); film.press(${pressP}); film.fade(${fade}); film.caption(${JSON.stringify(c.text)}, ${c.a}); film.hud(${JSON.stringify(hud)}, 1)`);
+    const hud = r >= 0 && r <= RUN.doneAt + 0.3 ? `Recorded run · ${speed === 1 ? 'real time' : speed + '× speed'}` : '';
+    const stat = STAT.until > t && t >= STAT.from ? STAT.html : '';
+    await js(`film.setCam(${cam.x}, ${cam.y}, ${cam.w}); film.cursor(${cursor.x}, ${cursor.y}, ${cursor.show}); film.press(${pressP}); film.fade(${fade}); film.caption(${JSON.stringify(c.text)}, ${c.a}); film.hud(${JSON.stringify(hud)}, 1); film.stat(${JSON.stringify(stat)}, ${clamp((t - STAT.from) / 0.4)})`);
     if (cursor.show) await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: cursor.x, y: cursor.y });
     scroll = await js(`film.frame(${abs})`);
     await capture();
@@ -241,7 +245,7 @@ async function finishedAudit() {
 const claimSel = id => `.claim[data-claim="${id}"]`;
 const claimLine = (id, line = 0) => ({ sel: claimSel(id), line });
 const PLANS = {
-  paste(B, L, E) {
+  paste(B, L, E, END) {
     const TA = '#doc-input';
     const click0 = L.p1 - 0.15;                       // the click on "Check citations" lands as the voice says "Nemotron Nano"
     B.do(0, async () => { cam = fit(await union('.hero h1', '#input-form'), { pad: 36, minW: 1000, ay: 0.46 }); cursor = { x: VW * 0.78, y: VH * 0.72, show: false }; });
@@ -259,97 +263,129 @@ const PLANS = {
     cursorTo(B, 4.5, 0.7, () => point('#check-btn'));
     click(B, click0, '#check-btn');
     B.do(click0 + 0.1, () => { RUN.abs0 = absNow(); });
-    // the run: the progress strip and the model line while the claims are read
+    // The recorded run, on the film clock (see RUN): claims land at recorded 12.0 s, the last verdict at 22.3 s, done at 31.5 s.
+    const T = facts.live.times, run0 = click0 + 0.1;
+    const landed = run0 + T.claims / 2;
+    const judged = landed + (T.lastVerdict - T.claims);              // real time
+    const done = judged + (T.done - T.lastVerdict) / 4;
+    const toDoc = 96;
+    // while the claims are read: the progress strip and the model line
     camTo(B, click0 + 0.4, 1.0, async () => fit(await rect('.summary'), { pad: 26, minW: 1000, ay: 0.46 }));
     cursorShow(B, click0 + 0.6, false);
     ring(B, click0 + 0.8, 3.4, 'models', '#fact-models', COLORS.amber);
-    // the claims land (recorded second 34): the document, with the progress and the first sentences in one view
-    const landed = click0 + 0.1 + facts.live.times.claims / 4;
-    const toDoc = 96;
+    // the claims land: down to the reference list, where each source chip turns from "looking up" into what was found
     camTo(B, landed - 0.4, 1.0, WIDE);
-    scrollTo(B, landed - 0.4, 1.0, () => toDoc);
-    // sources: down to the reference list, where each chip turns from "looking up" into what was found
-    const srcAt = landed + 0.9;
-    scrollTo(B, srcAt, 1.4, async () => { const r = await rect('.refs'); return clamp(Math.round(r.y + scroll - 120), 0, await js('document.documentElement.scrollHeight - innerHeight')); });
-    scrollTo(B, landed + 4.0, 1.4, async () => clamp(scroll + 230, 0, await js('document.documentElement.scrollHeight - innerHeight')));
-    // the judge: back up to the sentences while the verdicts land
-    const judgeAt = landed + (facts.live.times.judge - facts.live.times.claims) / 2;
-    scrollTo(B, judgeAt - 0.2, 1.3, () => toDoc);
-    const doneAt = judgeAt + (facts.live.times.done - facts.live.times.judge) / 2;
-    ring(B, doneAt + 0.1, 1.6, 'bar', '#summary-bar', COLORS.amber);
+    scrollTo(B, landed + 0.3, 1.1, async () => { const r = await rect('.refs'); return clamp(Math.round(r.y + scroll - 100), 0, await js('document.documentElement.scrollHeight - innerHeight')); });
+    // the judge: back up to the sentences, where the verdicts are landing
+    scrollTo(B, L.p3 - 0.5, 1.1, () => toDoc);
+    // then the fourth step: a real source for what failed
+    scrollTo(B, judged + 0.1, 0.8, () => 0);
+    ring(B, judged + 0.7, done - judged, 'step4', '[data-step="suggest"]', COLORS.amber);
+    ring(B, done + 0.1, Math.max(0.4, END - done - 0.35), 'real', '#fact-sources-box', COLORS.green);
   },
   findings(B, L, E, END) {
     const CL = (id, line = 0) => ({ sel: claimSel(id), line });
     const evQuote = '#evidence .ev-quote', evCheck = '#evidence .quote-check';
     const quoteCam = async () => { const q = await union('#evidence .ev-source', evQuote, evCheck), a = await rect('#evidence'); return fit({ x: a.x, w: a.w, y: q.y - 24, h: q.h + 24 }, { pad: 24, minW: 640, ay: 0.44 }); };
     const pickClaim = (at, id, dx = 0.3, move = 0.5) => { cursorTo(B, at - move - 0.05, move, () => point(CL(id), dx)); click(B, at, CL(id), { dx }); };
-    // c2: the briefing says 20%, the IEA says 12%
     const chip = id => `.refs .src-chip[data-source="${id}"]`;
     // a close view of the document column only (the evidence panel starts to its right, so no half-cut text)
-    const docCam = async spec => { const r = await rect(spec), w = 820, h = (w * 9) / 16; return { x: 20, y: clamp(r.y + r.h / 2 - 0.4 * h, 0, VH - h), w }; };
+    const docCam = async spec => { const r = await rect(spec), d = await rect('#doc'), w = 820, h = (w * 9) / 16; return { x: clamp(d.x + d.w + 8 - w, 0, VW - w), y: clamp(r.y + r.h / 2 - 0.4 * h, 0, VH - h), w }; };
+    // c2: the briefing says 20%, the IEA says 12%
     B.do(0, () => { cam = { ...WIDE }; cursor = { x: VW * 0.5, y: VH * 0.55, show: false }; });
-    scrollTo(B, 0.0, 0.55, scrollFor(CL('c2'), 300));
-    cursorShow(B, 0.1, true);
-    pickClaim(0.75, 'c2', 0.3, 0.12);
-    ring(B, 2.7, 2.2, 'c2-claim', { sel: claimSel('c2'), text: facts.wrong_growth }, COLORS.red);
-    camTo(B, 4.8, 0.8, quoteCam);
-    ring(B, 5.8, 2.3, 'c2-quote', { sel: evQuote, text: facts.real_growth }, COLORS.red);
-    ring(B, 7.1, 1.6, 'c2-check', evCheck, COLORS.green);
-    camTo(B, 8.6, 0.7, WIDE);
+    scrollTo(B, 0.0, 0.5, scrollFor(CL('c2'), 300));
+    cursorShow(B, 0.05, true);
+    pickClaim(L.f1 - 0.05, 'c2', 0.3, 0.12);
+    ring(B, L.f1 + 1.9, 2.2, 'c2-claim', { sel: claimSel('c2'), text: facts.wrong_growth }, COLORS.red);
+    camTo(B, E.f1 + 0.1, 0.8, quoteCam);
+    ring(B, L.f2 + 0.2, 2.3, 'c2-quote', { sel: evQuote, text: facts.real_growth }, COLORS.red);
+    ring(B, L.f2 + 1.5, 1.6, 'c2-check', evCheck, COLORS.green);
+    camTo(B, E.f2 + 0.3, 0.7, WIDE);
     // c3: China and Europe swapped
-    pickClaim(9.4, 'c3', 0.3, 0.5);
-    ring(B, 9.8, 1.7, 'c3-claim', { sel: claimSel('c3'), text: 'Europe at 25% and China at 15%' }, COLORS.red);
-    ring(B, 10.1, 1.6, 'c3-quote', { sel: evQuote, text: 'China (25%) and Europe (15%)' }, COLORS.red);
+    pickClaim(L.f3 - 0.1, 'c3', 0.3, 0.45);
+    ring(B, L.f3 + 0.3, 1.7, 'c3-claim', { sel: claimSel('c3'), text: 'Europe at 25% and China at 15%' }, COLORS.red);
+    ring(B, L.f3 + 0.6, 1.6, 'c3-quote', { sel: evQuote, text: 'China (25%) and Europe (15%)' }, COLORS.red);
     // c6: a forecast that is not in the report
-    scrollTo(B, 11.1, 0.6, scrollFor(CL('c6'), 300));
-    pickClaim(12.1, 'c6', 0.3, 0.3);
-    ring(B, 13.2, 2.4, 'c6-claim', { sel: claimSel('c6'), text: 'up to 12% of total electricity use by 2030' }, COLORS.slate);
-    ring(B, 15.0, 2.5, 'c6-src', '#evidence .ev-source .src-chip', COLORS.green);
+    scrollTo(B, E.f3 + 0.0, 0.5, scrollFor(CL('c6'), 300));
+    pickClaim(L.f4 - 0.1, 'c6', 0.3, 0.3);
+    ring(B, L.f4 + 1.0, 2.4, 'c6-claim', { sel: claimSel('c6'), text: 'up to 12% of total electricity use by 2030' }, COLORS.slate);
+    ring(B, L.f4 + 2.8, 2.5, 'c6-src', '#evidence .ev-source .src-chip', COLORS.green);
     // c10: a paper that has no record anywhere; its reference chip says so
-    scrollTo(B, 17.5, 0.8, scrollFor(CL('c10'), 100));
-    pickClaim(18.8, 'c10', 0.3, 0.5);
-    scrollTo(B, 19.5, 1.0, scrollFor(chip('s4'), 380));
-    ring(B, 20.4, 2.1, 'c10-ref', chip('s4'), COLORS.violet);
-    camTo(B, 20.5, 0.8, () => docCam(chip('s4')));
-    camTo(B, 22.0, 0.5, WIDE);
+    scrollTo(B, E.f4 - 0.4, 0.7, scrollFor(CL('c10'), 100));
+    pickClaim(L.f5 - 0.15, 'c10', 0.3, 0.45);
+    scrollTo(B, L.f5 + 0.45, 0.9, scrollFor(chip('s4'), 380));
+    ring(B, L.f5 + 1.35, 2.1, 'c10-ref', chip('s4'), COLORS.violet);
+    camTo(B, L.f5 + 1.45, 0.7, () => docCam(chip('s4')));
+    camTo(B, E.f5 - 0.3, 0.5, WIDE);
     // c12: and a dead link
-    scrollTo(B, 22.3, 0.8, scrollFor(CL('c12'), 150));
-    pickClaim(23.65, 'c12', 0.3, 0.5);
-    scrollTo(B, 23.95, 0.9, scrollFor(chip('s6'), 380));
-    ring(B, 24.85, 1.3, 'c12-ref', chip('s6'), COLORS.violet);
-    camTo(B, 24.9, 0.7, () => docCam(chip('s6')));
-    camTo(B, 25.55, 0.5, WIDE);
+    scrollTo(B, E.f5 - 0.35, 0.65, scrollFor(CL('c12'), 150));
+    pickClaim(L.f6 - 0.15, 'c12', 0.3, 0.45);
+    scrollTo(B, L.f6 + 0.15, 0.8, scrollFor(chip('s6'), 380));
+    ring(B, L.f6 + 0.9, 1.3, 'c12-ref', chip('s6'), COLORS.violet);
+    camTo(B, L.f6 + 1.0, 0.6, () => docCam(chip('s6')));
+    camTo(B, E.f6 + 0.2, 0.5, WIDE);
     // every verdict carries a quote that was found in the source
-    scrollTo(B, 25.4, 0.7, scrollFor(CL('c7'), 300));
-    pickClaim(26.6, 'c7', 0.3, 0.4);
-    camTo(B, 27.3, 0.8, quoteCam);
-    ring(B, 28.2, 2.4, 'c7-check', evCheck, COLORS.green);
-    cursorShow(B, 27.2, false);
+    scrollTo(B, E.f6 + 0.2, 0.5, scrollFor(CL('c7'), 300));
+    pickClaim(L.f7 - 0.1, 'c7', 0.3, 0.4);
+    camTo(B, L.f7 + 0.6, 0.8, quoteCam);
+    ring(B, L.f7 + 1.4, 2.4, 'c7-check', evCheck, COLORS.green);
+    cursorShow(B, L.f7 + 0.5, false);
   },
   papers(B, L, E, END) {
     const CL = (id, line = 0) => ({ sel: claimSel(id), line });
     const evQuote = '#evidence .ev-quote', evCheck = '#evidence .quote-check';
     B.do(0, () => { cam = { ...WIDE }; });
-    scrollTo(B, 0.0, 0.8, () => 0);
-    cursorTo(B, 0.2, 0.7, () => point('#new-check'));
-    cursorShow(B, 0.2, true);
-    click(B, 1.0, '#new-check');
+    scrollTo(B, 0.0, 0.7, () => 0);
+    cursorTo(B, 0.1, 0.65, () => point('#new-check'));
+    cursorShow(B, 0.1, true);
+    click(B, 0.9, '#new-check');
     scrollTo(B, 1.3, 0.8, async () => { const r = await rect('.example-card'); return clamp(Math.round(r.y + scroll - 380), 0, await js('document.documentElement.scrollHeight - innerHeight')); });
-    cursorTo(B, 2.15, 0.5, () => point('.example-card[data-id="ml-related-work"]', 0.4, 0.4));
-    click(B, 2.7, '.example-card[data-id="ml-related-work"]', { dx: 0.4, dy: 0.4, settleMs: 300 });
-    B.do(2.8, () => { cam = { ...WIDE }; });
-    scrollTo(B, 2.9, 0.8, scrollFor(CL('c2'), 330));
-    cursorTo(B, 3.75, 0.5, () => point(CL('c2'), 0.3));
-    click(B, 4.3, CL('c2'), { dx: 0.3 });
-    ring(B, 4.8, 1.9, 'gpt-claim', { sel: claimSel('c2'), text: '17.5 billion' }, COLORS.red);
-    ring(B, 5.2, 1.7, 'gpt-quote', { sel: evQuote, text: '175 billion' }, COLORS.red);
-    cursorTo(B, 6.2, 0.6, () => point(CL('c3'), 0.3));
-    click(B, 6.9, CL('c3'), { dx: 0.3 });
-    ring(B, 7.4, 1.7, 'bert-claim', { sel: claimSel('c3'), text: '85.5' }, COLORS.red);
-    ring(B, 7.7, 1.8, 'bert-quote', { sel: evQuote, text: '80.5%' }, COLORS.red);
-    cursorShow(B, 8.3, false);
-    camTo(B, 10.2, 1.0, async () => { const q = await union('#evidence .ev-source', evQuote, evCheck), a = await rect('#evidence'); return fit({ x: a.x, w: a.w, y: q.y, h: q.h }, { pad: 40, minW: 640, ay: 0.42 }); });
-    ring(B, 11.9, 2.4, 'bert-note', '#evidence .src-note', COLORS.amber);
+    cursorTo(B, 1.45, 0.7, () => point('.example-card[data-id="ml-related-work"]', 0.4, 0.4));
+    click(B, 2.3, '.example-card[data-id="ml-related-work"]', { dx: 0.4, dy: 0.4 });
+    B.do(2.5, () => { cam = { ...WIDE }; });
+    scrollTo(B, 2.55, 0.65, scrollFor(CL('c2'), 330));
+    cursorTo(B, 3.25, 0.45, () => point(CL('c2'), 0.3));
+    click(B, L.r2, CL('c2'), { dx: 0.3 });
+    ring(B, L.r2 + 0.6, 1.9, 'gpt-claim', { sel: claimSel('c2'), text: '17.5 billion' }, COLORS.red);
+    ring(B, L.r2 + 1.1, 1.7, 'gpt-quote', { sel: evQuote, text: '175 billion' }, COLORS.red);
+    cursorTo(B, L.r2 + 2.1, 0.55, () => point(CL('c3'), 0.3));
+    click(B, L.r2 + 2.8, CL('c3'), { dx: 0.3 });
+    ring(B, L.r2 + 3.3, 1.7, 'bert-claim', { sel: claimSel('c3'), text: '85.5' }, COLORS.red);
+    ring(B, L.r2 + 3.6, 1.8, 'bert-quote', { sel: evQuote, text: '80.5%' }, COLORS.red);
+    cursorShow(B, L.r2 + 4.3, false);
+    camTo(B, E.r2 + 0.8, 1.0, async () => { const q = await union('#evidence .ev-source', evQuote, evCheck), a = await rect('#evidence'); return fit({ x: a.x, w: a.w, y: q.y, h: q.h }, { pad: 40, minW: 640, ay: 0.42 }); });
+    ring(B, L.r3 + 0.1, 2.4, 'bert-note', '#evidence .src-note', COLORS.amber);
+  },
+  fix(B, L, E, END) {
+    const CL = (id, line = 0) => ({ sel: claimSel(id), line });
+    const sugg = '#evidence .ev-suggest';
+    B.do(0, () => { RUN.abs0 = null; });
+    camTo(B, 0.0, 0.5, WIDE);
+    scrollTo(B, 0.0, 0.5, () => 0);
+    cursorTo(B, 0.1, 0.5, () => point('#new-check'));
+    cursorShow(B, 0.1, true);
+    click(B, 0.8, '#new-check');
+    scrollTo(B, 1.0, 0.6, async () => { const r = await rect('.example-card'); return clamp(Math.round(r.y + scroll - 380), 0, await js('document.documentElement.scrollHeight - innerHeight')); });
+    cursorTo(B, 1.65, 0.55, () => point('.example-card[data-id="ai-energy-briefing"]', 0.4, 0.4));
+    click(B, 2.3, '.example-card[data-id="ai-energy-briefing"]', { dx: 0.4, dy: 0.4 });
+    scrollTo(B, 2.55, 0.6, scrollFor(CL('c6'), 300));
+    cursorTo(B, 3.2, 0.45, () => point(CL('c6'), 0.3));
+    click(B, 3.75, CL('c6'), { dx: 0.3 });
+    // the evidence panel scrolls to "A source that does say this"
+    B.span(4.0, 0.8, async p => { await js(`(() => { const ev = document.querySelector('#evidence'), s = document.querySelector('.ev-suggest'); if (!s) return 0; if (window.__ev0 === undefined) window.__ev0 = ev.scrollTop; const to = ev.scrollTop + s.getBoundingClientRect().top - ev.getBoundingClientRect().top - 90; if (window.__evTo === undefined) window.__evTo = to; ev.scrollTop = window.__ev0 + (window.__evTo - window.__ev0) * ${ease(p)}; return 1; })()`); });
+    cursorShow(B, 4.2, false);
+    // x2 in the wide view (the selected claim in the document, the real source beside it), then closer on the block
+    ring(B, L.x2 + 0.1, 2.3, 'sg-label', '#evidence .suggest-label', COLORS.green);
+    camTo(B, L.x2 + 2.2, 0.8, async () => { const q = await rect(sugg), a = await rect('#evidence'); return fit({ x: a.x, w: a.w, y: q.y, h: q.h }, { pad: 26, minW: 640, ay: 0.45 }); });
+    ring(B, L.x2 + 3.2, 1.9, 'sg-by', '#evidence .suggest-by', COLORS.amber);
+    // the WEF title and the McKinsey quote
+    camTo(B, L.x3 - 0.2, 0.8, async () => { const t = await union('#evidence .ev-suggest .src-title', '#evidence .ev-suggest .ev-quote'), a = await rect('#evidence'); return fit({ x: a.x, w: a.w, y: t.y, h: t.h }, { pad: 30, minW: 640, ay: 0.45 }); });
+    ring(B, L.x3 + 0.1, 2.6, 'sg-title', '#evidence .ev-suggest .src-title', COLORS.green);
+    ring(B, L.x3 + 3.0, 3.4, 'sg-quote', { sel: '#evidence .ev-suggest .ev-quote', text: 'A McKinsey report projects' }, COLORS.amber);
+    // the benchmark
+    camTo(B, L.x4 + 1.0, 0.9, WIDE);
+    B.do(L.x4 - 0.1, () => { STAT.html = `ReceiptsBench: <b>${facts.suggest_k} of ${facts.suggest_n}</b> misattributed or dead-link claims got a supporting source (${facts.suggest_pct}%)`; STAT.from = absNow() - absStart; STAT.until = END; });
+    ring(B, L.x4 + 0.2, 3.0, 'sg-check', '#evidence .ev-suggest .quote-check', COLORS.green);
   },
 };
 const plan = id => PLANS[id] || (() => {});
@@ -360,10 +396,12 @@ for (const sc of timeline.scenes) {
   if (ONLY && !ONLY.includes(sc.id)) continue;
   if (sc.kind === 'art') { await artScene(sc); appOpen = false; continue; }
   if (!appOpen) {
-    if (sc.id === 'paste' || !ONLY) await loadApp(); else await finishedAudit();
+    if (sc.id === 'paste' || !ONLY) await loadApp();
+    else if (sc.id === 'fix') { await loadApp('#example=ml-related-work'); await until(() => js("document.querySelectorAll('.claim').length > 0"), 'the recorded example'); }
+    else await finishedAudit();
     appOpen = true;
   }
-  await appScene(sc, plan(sc.id), { fadeIn: sc.id === 'paste', fadeOut: sc.id === 'papers' });
+  await appScene(sc, plan(sc.id), { fadeIn: sc.id === 'paste', fadeOut: sc.id === 'fix' });
 }
 if (PATCH) {
   const old = JSON.parse(readFileSync(join(HERE, 'work/events.json'), 'utf8'));

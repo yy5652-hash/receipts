@@ -7,8 +7,8 @@
       "id": "hook",
       "kind": "art",
       "page": "art/hook.html",
-      "lead": 0.7,
-      "tail": 1.6,
+      "lead": 0.6,
+      "tail": 1.0,
       "lines": [
         {
           "id": "h1",
@@ -18,13 +18,13 @@
         {
           "id": "h2",
           "text": "But does the source really say that?",
-          "gap": 0.7
+          "gap": 0.55
         },
         {
           "id": "h3",
           "text": "Courts have already ruled on {cases} cases where filings relied on hallucinated content.",
           "spoken": "Courts have already ruled on {cases_words} cases where filings relied on hallucinated content.",
-          "gap": 1.2
+          "gap": 1.0
         }
       ]
     },
@@ -32,13 +32,13 @@
       "id": "title",
       "kind": "art",
       "page": "art/title.html",
-      "lead": 0.9,
-      "tail": 1.0,
+      "lead": 0.8,
+      "tail": 0.7,
       "lines": [
         {
           "id": "t1",
           "text": "Receipts checks every cited sentence, against the source itself.",
-          "gap": 0.9
+          "gap": 0.8
         }
       ]
     },
@@ -46,7 +46,7 @@
       "id": "paste",
       "kind": "app",
       "lead": 0.5,
-      "tail": 1.2,
+      "tail": 2.4,
       "lines": [
         {
           "id": "p0",
@@ -62,20 +62,20 @@
           "id": "p2",
           "text": "Tavily reads every cited page in full, and OpenAlex and arXiv track down the papers.",
           "spoken": "Tavily reads every cited page in full, and Open Alex and archive track down the papers.",
-          "gap": 2.9
+          "gap": 0.55
         },
         {
           "id": "p3",
           "text": "Then Nemotron Ultra judges each claim against the passages that matter.",
-          "gap": 1.4
+          "gap": 0.75
         }
       ]
     },
     {
       "id": "findings",
       "kind": "app",
-      "lead": 0.8,
-      "tail": 1.4,
+      "lead": 0.7,
+      "tail": 1.0,
       "lines": [
         {
           "id": "f1",
@@ -87,33 +87,33 @@
           "id": "f2",
           "text": "The IEA says {real_growth}.",
           "spoken": "The I.E.A. says {real_growth_words}.",
-          "gap": 0.9
+          "gap": 0.8
         },
         {
           "id": "f3",
           "text": "It swaps China and Europe.",
-          "gap": 1.5
+          "gap": 1.2
         },
         {
           "id": "f4",
           "text": "It credits the IEA with a forecast that is not in the IEA report.",
           "spoken": "It credits the I.E.A. with a forecast that is not in the I.E.A. report.",
-          "gap": 1.1
+          "gap": 1.0
         },
         {
           "id": "f5",
           "text": "It cites a Nature Energy paper that has no record anywhere.",
-          "gap": 1.3
+          "gap": 1.1
         },
         {
           "id": "f6",
           "text": "And one of its links is dead.",
-          "gap": 1.3
+          "gap": 1.1
         },
         {
           "id": "f7",
           "text": "Every verdict carries a quote, matched word for word against the source.",
-          "gap": 1.5
+          "gap": 1.3
         }
       ]
     },
@@ -121,7 +121,7 @@
       "id": "papers",
       "kind": "app",
       "lead": 0.5,
-      "tail": 1.6,
+      "tail": 1.0,
       "lines": [
         {
           "id": "r1",
@@ -132,12 +132,42 @@
           "id": "r2",
           "text": "This related-work paragraph shrinks GPT-3 tenfold and inflates a BERT score.",
           "spoken": "This related-work paragraph shrinks G.P.T. three tenfold, and inflates a Bert score.",
-          "gap": 1.9
+          "gap": 1.6
         },
         {
           "id": "r3",
           "text": "Receipts quotes the real numbers from the full papers.",
-          "gap": 2.4
+          "gap": 2.0
+        }
+      ]
+    },
+    {
+      "id": "fix",
+      "kind": "app",
+      "lead": 0.3,
+      "tail": 1.2,
+      "lines": [
+        {
+          "id": "x1",
+          "text": "And when a citation fails, Receipts goes looking for a real one.",
+          "gap": 0.2
+        },
+        {
+          "id": "x2",
+          "text": "Tavily searches the web with the claim itself, and Nemotron Nano checks each page.",
+          "gap": 0.9
+        },
+        {
+          "id": "x3",
+          "text": "This forecast was never the IEA's: it comes from McKinsey, by way of the World Economic Forum.",
+          "spoken": "This forecast was never the I.E.A.'s: it comes from McKinsey, by way of the World Economic Forum.",
+          "gap": 0.6
+        },
+        {
+          "id": "x4",
+          "text": "On our benchmark, it found a real source for {suggest_k} of {suggest_n} misattributed or dead-link claims.",
+          "spoken": "On our benchmark, it found a real source for {suggest_k_words} of {suggest_n_words} misattributed or dead-link claims.",
+          "gap": 0.6
         }
       ]
     },
@@ -145,8 +175,8 @@
       "id": "how",
       "kind": "art",
       "page": "art/how.html",
-      "lead": 0.8,
-      "tail": 1.4,
+      "lead": 0.6,
+      "tail": 0.8,
       "lines": [
         {
           "id": "w1",
@@ -179,8 +209,8 @@
       "id": "bench",
       "kind": "art",
       "page": "art/bench.html",
-      "lead": 0.8,
-      "tail": 1.5,
+      "lead": 0.6,
+      "tail": 0.8,
       "lines": [
         {
           "id": "b1",
@@ -197,13 +227,13 @@
           "id": "b3",
           "text": "Nemotron Ultra caught {ultra_k} of {ultra_n} problems with no false alarms, for about {ultra_cost} per claim.",
           "spoken": "Nemotron Ultra caught {ultra_k_words} of {ultra_n_words} problems with no false alarms, for about {ultra_cost_words} per claim.",
-          "gap": 0.9
+          "gap": 0.7
         },
         {
           "id": "b4",
           "text": "Nano reaches {nano_macro} at a {nano_fraction_word} of the cost, one click away.",
           "spoken": "Nano reaches {nano_macro_words} at a {nano_fraction_word} of the cost, one click away.",
-          "gap": 0.8
+          "gap": 0.6
         }
       ]
     },
@@ -211,8 +241,8 @@
       "id": "end",
       "kind": "art",
       "page": "art/end.html",
-      "lead": 1.2,
-      "tail": 5.0,
+      "lead": 1.0,
+      "tail": 3.2,
       "lines": [
         {
           "id": "z1",

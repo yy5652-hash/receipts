@@ -1,19 +1,19 @@
 {
- "recorded_at": "2026-10-21T15:43:11+00:00",
+ "recorded_at": "2026-10-21T18:11:04+00:00",
  "document": "samples/ai-energy-briefing.md",
  "document_sha256": "91d230ace0c3bf28df1a88d1d7f786ee7a8a2ace9d0c3fecebe00b77377238fd",
  "mode": "ultra",
- "request_to_last_event_s": 56.748,
- "report_seconds": 56.28,
- "model_cost_usd": 0.039556,
+ "request_to_last_event_s": 31.472,
+ "report_seconds": 31.07,
+ "model_cost_usd": 0.039742,
  "usage": [
   {
    "tier": "nano",
    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
-   "calls": 2,
-   "prompt_tokens": 2056,
-   "completion_tokens": 987,
-   "cost_usd": 0.00036023999999999995
+   "calls": 11,
+   "prompt_tokens": 13716,
+   "completion_tokens": 7924,
+   "cost_usd": 0.0027247199999999995
   },
   {
    "tier": "super",
@@ -28,11 +28,12 @@
    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
    "calls": 10,
    "prompt_tokens": 12216,
-   "completion_tokens": 8942,
-   "cost_usd": 0.03904199999999999
+   "completion_tokens": 8216,
+   "cost_usd": 0.036863999999999994
   }
  ],
- "events": 24,
- "cache_entries_created": 12,
- "note": "cold cache: sources fetched live (Tavily Extract/Search, OpenAlex, arXiv); events are stored with their arrival times"
+ "events": 28,
+ "cache_entries_created": 15,
+ "note": "Second recording, made with the current code (sixth stage: find a real source). The six cited pages and papers were already in the on-disk cache from the first recording, so the 'Finding sources' stage took 0.4 s; the extraction, judging and the three Tavily searches that look for real sources were live. Events are stored with their arrival times.",
+ "suggestions": 3
 }

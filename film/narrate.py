@@ -63,6 +63,8 @@ def values_from(facts):
         "ultra_cost": f"${facts['ultra_cost_per_claim']:.3f}", "ultra_cost_words": tenths[round(cents * 10)] + " of a cent",
         "nano_macro": f"{facts['nano_macro']}%", "nano_macro_words": decimal_words(facts["nano_macro"]) + " percent",
         "nano_fraction_word": ORD[facts["nano_fraction"]],
+        "suggest_k": facts["suggest_k"], "suggest_k_words": words(facts["suggest_k"]),
+        "suggest_n": facts["suggest_n"], "suggest_n_words": words(facts["suggest_n"]),
     }
 
 
