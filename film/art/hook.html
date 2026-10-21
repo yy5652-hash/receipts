@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>hook</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .doc { position: absolute; left: 400px; top: 80px; width: 1120px; padding: 52px 72px 44px; background: var(--surface); border: 1px solid var(--rule); border-radius: 22px; box-shadow: var(--shadow); transform-origin: 50% 40%; }
+  .doc .kicker { font-size: 16px; margin-bottom: 22px; }
+  .doc h1 { font: 600 46px/1.16 var(--serif); letter-spacing: -0.015em; margin: 0; }
+  .doc .by { font: italic 400 25px/1.4 var(--serif); color: var(--ink-3); margin: 12px 0 28px; }
+  .doc p.body { font: 400 30px/1.6 var(--serif); margin: 0 0 18px; color: var(--ink); font-variant-numeric: oldstyle-nums; }
+  .s { background-image: linear-gradient(var(--c, transparent), var(--c, transparent)); background-repeat: no-repeat; background-size: 100% 2px; background-position: 0 100%; padding-bottom: 1px; }
+  .cite { display: inline-block; font: 600 19px/1 var(--sans); padding: 4px 9px 3px; margin: 0 3px 0 5px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--rule-strong); color: var(--ink); vertical-align: 5px; min-width: 50px; text-align: center; }
+  .veil2 { position: absolute; inset: 0; background: var(--bg); opacity: 0; }
+  .stat { position: absolute; left: 0; right: 0; top: 222px; text-align: center; opacity: 0; }
+  .stat .num { font: 700 300px/1 var(--serif); letter-spacing: -0.04em; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
+  .stat .rule { width: 160px; height: 6px; margin: 4px auto 30px; background: var(--con-line); border-radius: 3px; }
+  .stat .what { font: 500 44px/1.3 var(--serif); color: var(--ink); }
+  .stat .src { margin-top: 26px; font: 600 22px/1.4 var(--sans); letter-spacing: 0.06em; color: var(--ink-3); }
+  .stat .src b { color: var(--ink-2); font-weight: 600; }
+</style></head>
+<body>
+<div class="doc" id="doc">
+  <div class="kicker">Draft report · written by an AI research assistant</div>
+  <h1>Briefing: how much electricity will AI data centres use?</h1>
+  <p class="by">Prepared by an AI research assistant for a policy seminar.</p>
+  <p class="body">
+    <span class="s">Data centres used around 415 terawatt-hours (TWh) of electricity in 2024, about 1.5% of global electricity consumption<span class="cite">[2]</span>.</span>
+    <span class="s">Their consumption has grown by roughly 20% per year over the last five years<span class="cite">[2]</span>.</span>
+    <span class="s">The United States accounted for 45% of global data centre electricity use in 2024, followed by Europe at 25% and China at 15%<span class="cite">[1]</span>.</span>
+  </p>
+  <p class="body">
+    <span class="s">The IEA expects data centre electricity consumption to more than double to around 945 TWh by 2030<span class="cite">[1]</span>.</span>
+    <span class="s">In the United States, data centres could account for up to 12% of total electricity use by 2030<span class="cite">[1]</span>.</span>
+  </p>
+</div>
+<div class="veil2" id="veil2"></div>
+<div class="stat" id="stat">
+  <div class="num" id="num">0</div>
+  <div class="rule"></div>
+  <div class="what">court decisions in which a party relied on hallucinated content</div>
+  <div class="src">AI Hallucination Cases database · <b id="srcname">damiencharlotin.com/hallucinations</b> · as of <span id="asof">19 Oct 2026</span></div>
+</div>
+<div class="grain"></div>
+<div class="veil" id="veil"></div>
+<script type="module">
+import { $, $$, prog, lerp, clamp, line, easeOut, easeBack, easeInOut, hash } from "./common.js";
+const F = await (await fetch("../work/facts.json")).json();
+$("#srcname").textContent = F.casesSource; $("#asof").textContent = F.casesAsOf;
+const cites = $$(".cite"), sentences = $$(".s");
+const text = cites.map(c => c.textContent);
+const L = () => ({ h1: line("h1", [0.7, 5.2]), h2: line("h2", [5.9, 7.7]), h3: line("h3", [8.9, 15.6]) });
+window.hitTimes = () => [L().h3[0] + 1.55];
+window.render = t => {
+  const l = L(), end = window.SCENE_END || 17.2;
+  $("#veil").style.opacity = Math.max(1 - prog(t, 0, 0.5), prog(t, end - 0.6, end));
+  const enter = prog(t, 0.05, 0.9, easeOut);
+  // the report arrives; its citation markers land one by one, confident
+  const doc = $("#doc");
+  const out = prog(t, l.h3[0] - 0.1, l.h3[0] + 0.9);
+  doc.style.opacity = enter;
+  doc.style.transform = `translateY(${lerp(34, 0, enter) - out * 10}px) scale(${1 - 0.04 * out})`;
+  doc.style.filter = `blur(${out * 3}px)`;
+  cites.forEach((c, i) => {
+    const t0 = l.h1[0] + 0.45 + i * 0.52;
+    const p = prog(t, t0, t0 + 0.4, easeBack);
+    let label = text[i], color = "var(--ink)", bg = "var(--surface-2)", border = "var(--rule-strong)";
+    // "But does the source really say that?": the markers flicker between a confident number and a question
+    const flick = clamp((t - l.h2[0]) / 0.25) * (1 - clamp((t - (l.h3[0] - 0.2)) / 0.4));
+    if (flick > 0) {
+      const k = hash(Math.floor(t * 7) + 3, i + 11) % 5;
+      if (k === 0) { label = "?"; color = "var(--par-ink)"; bg = "var(--par-bg)"; border = "var(--par-line)"; }
+      else if (k === 1) { label = "[?]"; color = "var(--nis-ink)"; bg = "var(--nis-bg)"; border = "var(--nis-line)"; }
+      else if (k === 2) { color = "var(--con-ink)"; bg = "var(--con-bg)"; border = "var(--con-line)"; }
+    }
+    c.textContent = label;
+    Object.assign(c.style, { opacity: p, transform: `scale(${lerp(0.5, 1, p)})`, color, background: bg, borderColor: border });
+  });
+  sentences.forEach((s, i) => {
+    const q = clamp((t - l.h2[0] - i * 0.12) / 0.3) * (1 - clamp((t - (l.h3[0] - 0.2)) / 0.4));
+    s.style.setProperty("--c", `rgba(178, 122, 5, ${0.75 * q})`);
+  });
+  // the number
+  $("#veil2").style.opacity = 0.9 * prog(t, l.h3[0] - 0.15, l.h3[0] + 0.7);
+  const s = prog(t, l.h3[0] + 0.1, l.h3[0] + 0.9, easeOut);
+  $("#stat").style.opacity = s;
+  $("#stat").style.transform = `translateY(${lerp(30, 0, s)}px)`;
+  const count = prog(t, l.h3[0] + 0.35, l.h3[0] + 1.55, easeOut);
+  $("#num").textContent = Math.round(F.cases * count).toLocaleString("en-US");
+  $("#stat .rule").style.transform = `scaleX(${prog(t, l.h3[0] + 1.2, l.h3[0] + 1.9, easeOut)})`;
+  $(".stat .what").style.opacity = prog(t, l.h3[0] + 0.9, l.h3[0] + 1.6);
+  $(".stat .src").style.opacity = prog(t, l.h3[0] + 1.4, l.h3[0] + 2.1);
+};
+window.render(0);
+window.ready = document.fonts.ready.then(() => true);
+</script></body></html>

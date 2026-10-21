@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>bench</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .card { position: absolute; background: var(--surface); border: 1px solid var(--rule); border-radius: 24px; box-shadow: var(--shadow); }
+  #bcard { left: 95px; top: 84px; width: 660px; height: 790px; padding: 44px 48px; }
+  #bcard h1 { font: 600 76px/1.05 var(--serif); letter-spacing: -0.025em; margin: 14px 0 6px; }
+  #bcard .sub { font: 400 24px/1.4 var(--sans); color: var(--ink-2); }
+  .stats { display: flex; gap: 40px; margin: 28px 0 24px; }
+  .stats div { font: 400 21px/1.3 var(--sans); color: var(--ink-2); }
+  .stats b { display: block; font: 700 68px/1 var(--serif); color: var(--ink); letter-spacing: -0.02em; margin-bottom: 4px; font-variant-numeric: lining-nums tabular-nums; }
+  .bar { display: flex; height: 40px; border-radius: 12px; overflow: hidden; gap: 3px; background: var(--surface-2); }
+  .bar i { display: block; height: 100%; transform-origin: 0 50%; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 26px; margin-top: 22px; font: 500 21px/1.25 var(--sans); color: var(--ink); }
+  .legend span { display: flex; align-items: center; gap: 12px; }
+  .legend em { font-style: normal; color: var(--ink-3); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .legend u { width: 16px; height: 16px; border-radius: 5px; flex: none; }
+  .fine { position: absolute; left: 48px; right: 48px; bottom: 36px; font: 400 20px/1.45 var(--sans); color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 18px; }
+  #ccard { left: 800px; top: 84px; width: 1025px; height: 790px; }
+  #ccard .ttl { position: absolute; left: 44px; top: 36px; }
+  #ccard .ttl h2 { font: 600 38px/1.15 var(--serif); margin: 10px 0 0; letter-spacing: -0.01em; }
+  svg.plot { position: absolute; left: 0; top: 0; width: 1025px; height: 800px; overflow: visible; }
+  .pt text { font: 600 21px/1 var(--sans); fill: var(--ink-2); }
+  .pt.minor text { font-weight: 500; fill: var(--ink-3); font-size: 19px; }
+  .tick { font: 500 19px/1 var(--sans); fill: var(--ink-3); }
+  .axis-t { font: 600 18px/1 var(--sans); fill: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; }
+  .callout { position: absolute; background: var(--ink); color: var(--bg); border-radius: 18px; padding: 20px 26px 20px; box-shadow: 0 18px 40px -16px rgba(31,29,25,.55); }
+  .callout h3 { font: 600 28px/1.1 var(--serif); margin: 0 0 12px; color: #fff; }
+  .callout div { font: 500 23px/1.4 var(--sans); color: #e9e4d7; }
+  .callout div b { color: #fff; font-weight: 700; }
+  .callout div.good b { color: #8ee0ae; }
+  .callout div.mode { color: var(--ink); }
+  .mode { display: inline-block; margin-top: 12px; font: 500 20px/1.3 var(--sans); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 10px 14px; }
+</style></head>
+<body>
+<div class="card" id="bcard">
+  <div class="kicker">Benchmark</div>
+  <h1>ReceiptsBench</h1>
+  <div class="sub" id="sub">Real reports, real sources, planted errors.</div>
+  <div class="stats" id="stats">
+    <div><b id="n-items">300</b>cited sentences</div>
+    <div><b id="n-sources">35</b>real sources</div>
+    <div><b id="n-reports">30</b>reports</div>
+  </div>
+  <div class="bar" id="bar"></div>
+  <div class="legend" id="legend"></div>
+  <div class="fine" id="fine">Test items were written by <span id="gen">Qwen3-235B</span>, a model independent of the Nemotron judges, and checked against the source text.</div>
+</div>
+<div class="card" id="ccard">
+  <div class="ttl"><div class="kicker">Six ways to run the judge</div><h2>Accuracy against cost</h2></div>
+  <svg class="plot" id="plot"></svg>
+  <div class="callout" id="co-ultra" style="left:470px;top:128px;width:330px"><h3>Nemotron 3 Ultra</h3>
+    <div id="u1"><b id="u-caught">141 of 142</b> problems caught</div>
+    <div id="u2" class="good"><b>0 of 150</b> false alarms</div>
+    <div id="u3"><b id="u-cost">$0.003</b> per claim</div></div>
+  <div class="callout" id="co-nano" style="left:130px;top:150px;width:300px"><h3>Nemotron 3 Nano</h3>
+    <div id="n1"><b id="n-macro">98.6%</b> macro accuracy</div>
+    <div id="n2" class="good"><b id="n-frac">1/12</b> of the cost</div>
+    <div id="n3" class="mode">Mode: Fast — Nemotron 3 Nano checks every claim</div></div>
+</div>
+<div class="grain"></div>
+<div class="veil" id="veil"></div>
+<script type="module">
+import { $, $$, prog, lerp, clamp, line, easeOut, easeBack, easeInOut } from "./common.js";
+const F = await (await fetch("../work/facts.json")).json();
+const ns = "http://www.w3.org/2000/svg";
+// ---- left card: the dataset
+const BT = F.byType;
+const TYPES = [["supported", "faithful to the source", "#2f9e63"], ["number_swap", "changed number", "#d6434a"], ["entity_swap", "swapped name or date", "#e08a8f"],
+  ["overclaim", "overclaim", "#d9a21b"], ["misattribution", "misattribution", "#7e8aa0"], ["fabricated", "fabricated reference", "#8d63d6"], ["dead_link", "dead link", "#b9a2e6"]].map(([id, name, c]) => [id, name, c, BT[id]]);
+$("#gen").textContent = F.generator.split("/").pop().replace(/-A22B.*/, "");
+const total = TYPES.reduce((a, t) => a + t[3], 0);
+if (total !== F.items) throw new Error(`type counts ${total} != items ${F.items}`);
+$("#n-items").dataset.v = F.items; $("#n-sources").dataset.v = F.sources; $("#n-reports").dataset.v = F.reports;
+$("#bar").innerHTML = TYPES.map(([id, , c, n]) => `<i style="width:calc(${n / total * 100}% - 3px);background:${c}" data-id="${id}"></i>`).join("");
+$("#legend").innerHTML = TYPES.map(([, name, c, n]) => `<span><u style="background:${c}"></u>${name}<em>${n}</em></span>`).join("");
+// ---- right card: the plot
+const W = 1025, L = 120, R = 985, T = 150, B = 650;
+const X0 = Math.log10(0.015), X1 = Math.log10(0.45);
+const px = c => L + (Math.log10(c) - X0) / (X1 - X0) * (R - L);
+const py = a => T + (100 - a) / 2.0 * (B - T);
+const el = (tag, attrs, parent) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const plot = $("#plot");
+const grid = el("g", {}, plot);
+[98, 98.5, 99, 99.5, 100].forEach(a => { el("line", { x1: L, x2: R, y1: py(a), y2: py(a), stroke: "#e3ddcf", "stroke-width": 1.5 }, grid); const t = el("text", { x: L - 16, y: py(a) + 7, "text-anchor": "end", class: "tick" }, grid); t.textContent = `${a}%`; });
+[0.02, 0.05, 0.1, 0.2, 0.4].forEach(c => { el("line", { x1: px(c), x2: px(c), y1: T, y2: B, stroke: "#eee9dc", "stroke-width": 1.5 }, grid); const t = el("text", { x: px(c), y: B + 38, "text-anchor": "middle", class: "tick" }, grid); t.textContent = `$${c}`; });
+el("text", { x: (L + R) / 2, y: B + 84, "text-anchor": "middle", class: "axis-t" }, grid).textContent = "Cost per 100 claims (log scale)";
+el("text", { x: 0, y: 0, class: "axis-t", transform: `translate(52 ${(T + B) / 2}) rotate(-90)`, "text-anchor": "middle" }, grid).textContent = "Macro accuracy";
+const SHORT = { ultra: "Ultra", super: "Super", nano: "Nano", routed: "Routed", cascade_nano: "Cascade (Nano)", cascade: "Cascade (Super)" };
+const MAJOR = new Set(["ultra", "super", "nano"]);
+const OFFS = { ultra: [0, -32, "middle"], super: [0, -30, "middle"], nano: [0, 44, "middle"], routed: [-4, 40, "middle"], cascade_nano: [0, -30, "middle"], cascade: [0, 42, "middle"] };
+const pts = F.configs.map((c, i) => {
+  const g = el("g", { class: "pt" + (MAJOR.has(c.id) ? "" : " minor") }, plot);
+  const x = px(c.cost100), y = py(c.macro);
+  const halo = el("circle", { cx: x, cy: y, r: 30, fill: "none", stroke: "#1f1d19", "stroke-width": 3 }, g);
+  const dot = el("circle", { cx: x, cy: y, r: MAJOR.has(c.id) ? 15 : 11, fill: MAJOR.has(c.id) ? "#1f1d19" : "#9a9487" }, g);
+  const o = OFFS[c.id];
+  const label = el("text", { x: x + o[0], y: y + o[1], "text-anchor": o[2] }, g); label.textContent = SHORT[c.id];
+  return { id: c.id, g, dot, halo, label, x, y, i };
+});
+const pt = id => pts.find(p => p.id === id);
+// the "a twelfth of the cost" bracket along the cost axis
+const brk = el("g", {}, plot);
+const bx0 = px(F.configs.find(c => c.id === "nano").cost100), bx1 = px(F.configs.find(c => c.id === "ultra").cost100), by = B - 4 - 0;
+el("path", { d: `M${bx0},${B - 16} V${B + 4} H${bx1} V${B - 16}`, fill: "none", stroke: "#1f1d19", "stroke-width": 3, "stroke-linejoin": "round" }, brk);
+const brkText = el("text", { x: (bx0 + bx1) / 2, y: B - 26, "text-anchor": "middle", style: "font:700 23px Inter,sans-serif;fill:#1f1d19" }, brk);
+brkText.textContent = `1/${F.nano_fraction} the cost`;
+$("#u-caught").textContent = `${F.ultra_k} of ${F.ultra_n}`;
+$("#u2 b").textContent = `${F.ultra_fa_k} of ${F.ultra_fa_n}`;
+$("#u-cost").textContent = `$${F.ultra_cost_per_claim.toFixed(3)}`;
+$("#n-macro").textContent = `${F.nano_macro}%`;
+$("#n-frac").textContent = `1/${F.nano_fraction}`;
+
+window.render = t => {
+  const end = window.SCENE_END || 28;
+  const [b1] = line("b1", [0.8, 2.3]), [b2, b2e] = line("b2", [2.6, 11]), [b3, b3e] = line("b3", [11.9, 21.1]), [b4, b4e] = line("b4", [21.9, 26.6]);
+  $("#veil").style.opacity = Math.max(1 - prog(t, 0, 0.5), prog(t, end - 0.6, end));
+  // left card: title first, then the numbers and the bar
+  const c1 = prog(t, b1 - 0.2, b1 + 0.7, easeOut);
+  $("#bcard").style.opacity = c1; $("#bcard").style.transform = `translateY(${lerp(30, 0, c1)}px)`;
+  const s = prog(t, b2 + 0.1, b2 + 1.0);
+  $("#sub").style.opacity = prog(t, b1 + 0.3, b1 + 1.0);
+  $("#stats").style.opacity = s;
+  const cnt = prog(t, b2 + 0.2, b2 + 1.8, easeOut);
+  for (const id of ["n-items", "n-sources", "n-reports"]) $("#" + id).textContent = Math.round(+$("#" + id).dataset.v * cnt);
+  let acc = 0;
+  $$("#bar i").forEach((b, i) => { const p = prog(t, b2 + 1.3 + i * 0.12, b2 + 1.9 + i * 0.12, easeOut); b.style.transform = `scaleX(${p})`; b.style.opacity = p > 0 ? 1 : 0; });
+  $$("#legend span").forEach((l, i) => { l.style.opacity = prog(t, b2 + 1.6 + i * 0.25, b2 + 2.1 + i * 0.25); });
+  $("#fine").style.opacity = prog(t, b2 + 3.6, b2 + 4.3);
+  // right card: the six configurations
+  const r = prog(t, b3 - 0.4, b3 + 0.5, easeOut);
+  $("#ccard").style.opacity = r; $("#ccard").style.transform = `translateY(${lerp(30, 0, r)}px)`;
+  grid.style.opacity = r;
+  pts.forEach((p, i) => {
+    const a = prog(t, b3 + 0.2 + i * 0.16, b3 + 0.7 + i * 0.16, easeBack);
+    p.g.style.opacity = Math.min(1, a * 1.5);
+    p.dot.setAttribute("r", (MAJOR.has(p.id) ? 15 : 11) * Math.max(0.01, a));
+    p.halo.style.opacity = 0;
+  });
+  // Ultra: highlight, then its three facts as they are spoken
+  const dur3 = b3e - b3;
+  const u = prog(t, b3 + 0.55, b3 + 1.15, easeOut);
+  const uHalo = pt("ultra").halo; uHalo.style.opacity = u; uHalo.setAttribute("r", lerp(46, 28, u));
+  $("#co-ultra").style.opacity = u; $("#co-ultra").style.transform = `translateY(${lerp(16, 0, u)}px)`;
+  [["u1", 0.2], ["u2", 0.58], ["u3", 0.8]].forEach(([id, f]) => { $("#" + id).style.opacity = prog(t, b3 + dur3 * f - 0.15, b3 + dur3 * f + 0.35); });
+  $$(".pt").forEach(g => g.style.opacity = g.style.opacity);
+  // Nano
+  const dur4 = b4e - b4;
+  const n = prog(t, b4 + 0.15, b4 + 0.8, easeOut);
+  const nHalo = pt("nano").halo; nHalo.style.opacity = n; nHalo.setAttribute("r", lerp(46, 28, n));
+  $("#co-nano").style.opacity = n; $("#co-nano").style.transform = `translateY(${lerp(16, 0, n)}px)`;
+  $("#n1").style.opacity = prog(t, b4 + dur4 * 0.12, b4 + dur4 * 0.12 + 0.4);
+  $("#n2").style.opacity = prog(t, b4 + dur4 * 0.42, b4 + dur4 * 0.42 + 0.4);
+  $("#n3").style.opacity = prog(t, b4 + dur4 * 0.72, b4 + dur4 * 0.72 + 0.4);
+  brk.style.opacity = prog(t, b4 + dur4 * 0.4, b4 + dur4 * 0.4 + 0.5);
+  // while Nano is the subject, Ultra's card steps back
+  $("#co-ultra").style.opacity = u * (1 - 0.65 * n);
+  uHalo.style.opacity = u * (1 - 0.6 * n);
+};
+window.render(0);
+window.ready = document.fonts.ready.then(() => true);
+</script></body></html>

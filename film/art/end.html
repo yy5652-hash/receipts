@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>end</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .wrap { position: absolute; left: 0; right: 0; top: 215px; text-align: center; }
+  .head { display: flex; align-items: center; justify-content: center; gap: 30px; }
+  .head svg { width: 112px; height: 112px; color: var(--ink); overflow: visible; }
+  .head h1 { font: 600 168px/1 var(--serif); letter-spacing: -0.03em; margin: 0; }
+  .rows { margin: 62px auto 0; width: 1300px; text-align: left; }
+  .row { display: flex; align-items: baseline; gap: 34px; padding: 22px 0; border-top: 1.5px solid var(--rule-strong); }
+  .row:last-child { border-bottom: 1.5px solid var(--rule-strong); }
+  .row .k { width: 230px; font: 600 20px/1 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .row .v { font: 500 46px/1.15 var(--serif); letter-spacing: -0.005em; }
+  .row .v.mono { font-family: var(--serif); }
+  .built { margin-top: 38px; font: 500 26px/1.4 var(--sans); color: var(--ink-2); }
+</style></head>
+<body>
+<div class="wrap">
+  <div class="head"><div id="mark"></div><h1 id="name">Receipts</h1></div>
+  <div class="rows">
+    <div class="row" id="r1"><span class="k">Try it</span><span class="v">https://receipts.43-160-214-187.sslip.io</span></div>
+    <div class="row" id="r2"><span class="k">Source</span><span class="v">github.com/yy5652-hash/receipts</span></div>
+  </div>
+  <div class="built" id="built">Built with NVIDIA Nemotron on Nebius Token Factory and Tavily</div>
+</div>
+<div class="grain"></div>
+<div class="veil" id="veil"></div>
+<script type="module">
+import { $, $$, prog, lerp, line, easeOut, LOGO } from "./common.js";
+$("#mark").innerHTML = LOGO;
+const paths = $$("#mark path"), lens = paths.map(p => p.getTotalLength());
+paths.forEach((p, i) => { p.style.strokeDasharray = lens[i]; });
+window.render = t => {
+  const end = window.SCENE_END || 9.7;
+  const [z1] = line("z1", [1.2, 4.7]);
+  $("#veil").style.opacity = Math.max(1 - prog(t, 0, 0.6), prog(t, end - 1.8, end));
+  paths.forEach((p, i) => { p.style.strokeDashoffset = lens[i] * (1 - prog(t, 0.2 + i * 0.3, 1.0 + i * 0.3, easeOut)); });
+  const n = prog(t, 0.4, 1.2, easeOut);
+  $("#name").style.opacity = n; $("#name").style.transform = `translateY(${lerp(22, 0, n)}px)`;
+  [["#r1", z1 + 1.6], ["#r2", z1 + 2.2], ["#built", z1 + 2.9]].forEach(([id, a]) => { const p = prog(t, a, a + 0.7, easeOut); $(id).style.opacity = p; $(id).style.transform = `translateY(${lerp(16, 0, p)}px)`; });
+};
+window.render(0);
+window.ready = document.fonts.ready.then(() => true);
+</script></body></html>

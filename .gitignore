@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 out/
+
+# demo film (scripts in film/ stay tracked-by-review; renders and caches do not)
+film/work/
+film/out/

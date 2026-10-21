@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>how</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .head { position: absolute; left: 95px; top: 92px; }
+  .head h1 { font: 600 56px/1.1 var(--serif); letter-spacing: -0.02em; margin: 14px 0 0; }
+  .node { position: absolute; top: 224px; width: 290px; height: 352px; padding: 22px 22px 20px; background: var(--surface); border: 2px solid var(--rule); border-radius: 22px; box-shadow: 0 2px 4px rgba(45,35,15,.05); }
+  .node .n { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 600 19px/1 var(--sans); background: var(--surface-2); color: var(--ink-2); margin-bottom: 14px; }
+  .node h2 { font: 600 31px/1.1 var(--serif); letter-spacing: -0.01em; margin: 0 0 14px; white-space: nowrap; }
+  .node p { font: 400 20px/1.4 var(--sans); color: var(--ink-2); margin: 14px 0 0; }
+  .chip { display: inline-block; font: 600 19px/1 var(--sans); padding: 9px 14px; border-radius: 999px; margin: 0 6px 8px 0; white-space: nowrap; }
+  .chip.model { background: var(--ink); color: var(--bg); }
+  .chip.tool { background: var(--surface-2); color: var(--ink); border: 1px solid var(--rule-strong); }
+  .chip.state { background: transparent; color: var(--ink-2); border: 1.5px dashed var(--rule-strong); }
+  .arrow { position: absolute; top: 385px; width: 70px; height: 30px; }
+  svg.wires { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; pointer-events: none; }
+  .branch { position: absolute; left: 95px; top: 618px; width: 820px; padding: 16px 24px; background: var(--surface); border: 2px dashed var(--rule-strong); border-radius: 18px; display: flex; gap: 18px; align-items: center; }
+  .branch .t { font: 400 21px/1.4 var(--sans); color: var(--ink-2); }
+  .branch .t b { color: var(--ink); font-weight: 600; }
+  .strip { position: absolute; left: 95px; top: 748px; width: 1730px; height: 112px; padding: 0 34px; background: var(--ink); color: var(--bg); border-radius: 22px; display: flex; align-items: center; gap: 36px; }
+  .strip .k { font: 600 17px/1.3 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: #cfc8b8; width: 250px; }
+  .strip code { font: 500 31px/1 ui-monospace, "SF Mono", Menlo, monospace; color: #fff; flex: 1; white-space: nowrap; }
+  .strip code em { font-style: normal; color: #f3cb72; }
+  .seg { display: flex; background: #3a372f; border-radius: 14px; padding: 5px; gap: 4px; }
+  .seg span { font: 600 21px/1 var(--sans); padding: 12px 20px; border-radius: 10px; color: #cfc8b8; }
+  .seg span.on { background: var(--bg); color: var(--ink); }
+</style></head>
+<body>
+<div class="head"><div class="kicker">How it works</div><h1>One pipeline, three Nemotron sizes</h1></div>
+<svg class="wires" id="wires"><path id="w-branch" d="M240,576 L240,618" fill="none" stroke="#b9b09b" stroke-width="3" stroke-dasharray="7 7"/></svg>
+<div id="nodes"></div>
+<div class="branch" id="branch"><span class="chip model">Nemotron 3 Super</span><div class="t"><b>Rewrites vague claims.</b><br>Only the few that lean on a neighbouring sentence.</div></div>
+<div class="strip" id="strip"><div class="k">Nebius Token Factory<br>one endpoint</div><code id="cmd">receipts audit report.md --mode <em id="mode">ultra</em></code><div class="seg" id="seg"><span id="s-nano">Nano</span><span id="s-super">Super</span><span id="s-ultra" class="on">Ultra</span></div></div>
+<div class="grain"></div>
+<div class="veil" id="veil"></div>
+<script type="module">
+import { $, $$, prog, lerp, clamp, line, parts, easeOut, easeInOut } from "./common.js";
+const X = [95, 455, 815, 1175, 1535];
+const NODES = [
+  { n: 1, h: "Extract", html: '<span class="chip model" id="c-nano">Nemotron 3 Nano</span><span class="chip state">reasoning off</span>', p: "Turns each citing sentence into a claim, and reads the reference list." },
+  { n: 2, h: "Find sources", html: '<span class="chip tool">Tavily Extract &amp; Search</span><span class="chip tool">OpenAlex</span><span class="chip tool">arXiv</span>', p: "Reads every cited page and paper in full." },
+  { n: 3, h: "Locate passages", html: '<span class="chip tool">BM25 over the full text</span><span class="chip state">weighs exact figures</span>', p: "Ranks the passages that bear on the claim." },
+  { n: 4, h: "Judge", html: '<span class="chip model" id="c-ultra">Nemotron 3 Ultra</span><span class="chip state" id="c-think">reasoning on</span>', p: "A label, a confidence, a verbatim quote and a reason." },
+  { n: 5, h: "Verify quote", html: '<span class="chip tool">verbatim match</span>', p: "The quote must appear, character for character, in the source." },
+];
+$("#nodes").innerHTML = NODES.map((d, i) => `<div class="node" id="n${i}" style="left:${X[i]}px"><div class="n">${d.n}</div><h2>${d.h}</h2>${d.html}<p>${d.p}</p></div>`).join("")
+  + X.slice(0, 4).map((x, i) => `<svg class="arrow" id="a${i}" style="left:${x + 290}px" viewBox="0 0 70 30"><path d="M8 15h50M46 5l12 10-12 10" fill="none" stroke="#9f9784" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`).join("");
+const ink = "#1f1d19";
+window.render = t => {
+  const end = window.SCENE_END || 18.5;
+  const w = id => line(id, [0, 1]);
+  const [w1] = w("w1"), [w2] = w("w2"), [w3] = w("w3"), [w4] = w("w4"), [w5] = w("w5");
+  $("#veil").style.opacity = Math.max(1 - prog(t, 0, 0.5), prog(t, end - 0.6, end));
+  $(".head").style.opacity = prog(t, 0.1, 0.8);
+  // the five steps are there from the start, quiet; each lights up when it is mentioned
+  const on = [w2 - 0.1, w2 + 1.2, w2 + 2.2, w4 - 0.1, w4 + 1.4];
+  X.forEach((x, i) => {
+    const enter = prog(t, 0.3 + i * 0.12, 0.95 + i * 0.12, easeOut);
+    const a = prog(t, on[i], on[i] + 0.45);
+    const el = $("#n" + i);
+    el.style.opacity = enter * (0.62 + 0.38 * a);
+    el.style.transform = `translateY(${lerp(30, 0, enter) - 8 * a}px)`;
+    el.style.borderColor = a > 0.5 ? ink : "var(--rule)";
+    el.style.boxShadow = `0 ${2 + 24 * a}px ${6 + 34 * a}px -${a * 14}px rgba(45,35,15,${0.05 + 0.2 * a})`;
+    if (i < 4) $("#a" + i).style.opacity = enter * (0.35 + 0.65 * prog(t, on[i + 1] - 0.3, on[i + 1] + 0.3));
+  });
+  // Super: a small branch under step 1
+  const sb = prog(t, w3 - 0.15, w3 + 0.6, easeOut);
+  $("#branch").style.opacity = 0.0 + sb; $("#branch").style.transform = `translateY(${lerp(18, 0, sb)}px)`;
+  $("#branch").style.borderColor = ink; $("#branch").style.borderStyle = sb > 0.5 ? "solid" : "dashed";
+  $("#w-branch").style.opacity = sb;
+  $("#c-think").style.opacity = 0.35 + 0.65 * prog(t, w4, w4 + 0.5);
+  // one endpoint, one setting
+  const st = prog(t, w5 - 0.2, w5 + 0.6, easeOut);
+  $("#strip").style.opacity = st; $("#strip").style.transform = `translateY(${lerp(26, 0, st)}px)`;
+  const dur = (line("w5", [0, 6])[1] - w5);
+  const phase = clamp((t - (w5 + 1.9)) / 0.1) - clamp((t - (w5 + 3.9)) / 0.1);   // Ultra -> Nano -> Ultra
+  const mode = phase > 0.5 ? "nano" : "ultra";
+  $("#mode").textContent = mode;
+  $("#s-nano").classList.toggle("on", mode === "nano");
+  $("#s-ultra").classList.toggle("on", mode === "ultra");
+  $("#c-ultra").textContent = mode === "nano" ? "Nemotron 3 Nano" : "Nemotron 3 Ultra";
+};
+window.render(0);
+window.ready = document.fonts.ready.then(() => true);
+</script></body></html>

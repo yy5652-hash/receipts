@@ -1,0 +1,225 @@
+{
+  "note": "Receipts demo film. `text` is the caption (and the .srt line), `spoken` is what the voice says. {name} is filled from work/facts.json (see narrate.py); `at` = earliest start in seconds from the scene start.",
+  "voice": "kokoro:af_heart",
+  "rate": 168,
+  "scenes": [
+    {
+      "id": "hook",
+      "kind": "art",
+      "page": "art/hook.html",
+      "lead": 0.7,
+      "tail": 1.6,
+      "lines": [
+        {
+          "id": "h1",
+          "text": "AI research assistants write fluent reports with confident citations.",
+          "gap": 0.0
+        },
+        {
+          "id": "h2",
+          "text": "But does the source really say that?",
+          "gap": 0.7
+        },
+        {
+          "id": "h3",
+          "text": "Courts have already ruled on {cases} cases where filings relied on hallucinated content.",
+          "spoken": "Courts have already ruled on {cases_words} cases where filings relied on hallucinated content.",
+          "gap": 1.2
+        }
+      ]
+    },
+    {
+      "id": "title",
+      "kind": "art",
+      "page": "art/title.html",
+      "lead": 0.9,
+      "tail": 1.0,
+      "lines": [
+        {
+          "id": "t1",
+          "text": "Receipts checks every cited sentence, against the source itself.",
+          "gap": 0.9
+        }
+      ]
+    },
+    {
+      "id": "paste",
+      "kind": "app",
+      "lead": 0.5,
+      "tail": 1.2,
+      "lines": [
+        {
+          "id": "p0",
+          "text": "Paste a report.",
+          "gap": 0.2
+        },
+        {
+          "id": "p1",
+          "text": "Nemotron Nano, on Nebius Token Factory, pulls out each claim and the source it cites.",
+          "gap": 3.6
+        },
+        {
+          "id": "p2",
+          "text": "Tavily reads every cited page in full, and OpenAlex and arXiv track down the papers.",
+          "spoken": "Tavily reads every cited page in full, and Open Alex and archive track down the papers.",
+          "gap": 2.9
+        },
+        {
+          "id": "p3",
+          "text": "Then Nemotron Ultra judges each claim against the passages that matter.",
+          "gap": 1.4
+        }
+      ]
+    },
+    {
+      "id": "findings",
+      "kind": "app",
+      "lead": 0.8,
+      "tail": 1.4,
+      "lines": [
+        {
+          "id": "f1",
+          "text": "This briefing says data-centre demand grew {wrong_growth} a year.",
+          "spoken": "This briefing says data center demand grew {wrong_growth_words} a year.",
+          "gap": 0.0
+        },
+        {
+          "id": "f2",
+          "text": "The IEA says {real_growth}.",
+          "spoken": "The I.E.A. says {real_growth_words}.",
+          "gap": 0.9
+        },
+        {
+          "id": "f3",
+          "text": "It swaps China and Europe.",
+          "gap": 1.5
+        },
+        {
+          "id": "f4",
+          "text": "It credits the IEA with a forecast that is not in the IEA report.",
+          "spoken": "It credits the I.E.A. with a forecast that is not in the I.E.A. report.",
+          "gap": 1.1
+        },
+        {
+          "id": "f5",
+          "text": "It cites a Nature Energy paper that has no record anywhere.",
+          "gap": 1.3
+        },
+        {
+          "id": "f6",
+          "text": "And one of its links is dead.",
+          "gap": 1.3
+        },
+        {
+          "id": "f7",
+          "text": "Every verdict carries a quote, matched word for word against the source.",
+          "gap": 1.5
+        }
+      ]
+    },
+    {
+      "id": "papers",
+      "kind": "app",
+      "lead": 0.5,
+      "tail": 1.6,
+      "lines": [
+        {
+          "id": "r1",
+          "text": "It reads research papers too.",
+          "gap": 0.0
+        },
+        {
+          "id": "r2",
+          "text": "This related-work paragraph shrinks GPT-3 tenfold and inflates a BERT score.",
+          "spoken": "This related-work paragraph shrinks G.P.T. three tenfold, and inflates a Bert score.",
+          "gap": 1.9
+        },
+        {
+          "id": "r3",
+          "text": "Receipts quotes the real numbers from the full papers.",
+          "gap": 2.4
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "kind": "art",
+      "page": "art/how.html",
+      "lead": 0.8,
+      "tail": 1.4,
+      "lines": [
+        {
+          "id": "w1",
+          "text": "Each Nemotron size has one job.",
+          "gap": 0.0
+        },
+        {
+          "id": "w2",
+          "text": "Nano extracts claims.",
+          "gap": 0.35
+        },
+        {
+          "id": "w3",
+          "text": "Super rewrites the few that lean on context.",
+          "gap": 0.35
+        },
+        {
+          "id": "w4",
+          "text": "Ultra judges, with reasoning on.",
+          "gap": 0.35
+        },
+        {
+          "id": "w5",
+          "text": "One Token Factory endpoint serves all three, so moving a job to another size is a single setting.",
+          "gap": 0.9
+        }
+      ]
+    },
+    {
+      "id": "bench",
+      "kind": "art",
+      "page": "art/bench.html",
+      "lead": 0.8,
+      "tail": 1.5,
+      "lines": [
+        {
+          "id": "b1",
+          "text": "We measured every choice.",
+          "gap": 0.0
+        },
+        {
+          "id": "b2",
+          "text": "ReceiptsBench: {items} cited sentences from {sources} real sources, half with planted errors, written by an independent model.",
+          "spoken": "Receipts Bench. {items_words} cited sentences from {sources_words} real sources, half with planted errors, written by an independent model.",
+          "gap": 0.35
+        },
+        {
+          "id": "b3",
+          "text": "Nemotron Ultra caught {ultra_k} of {ultra_n} problems with no false alarms, for about {ultra_cost} per claim.",
+          "spoken": "Nemotron Ultra caught {ultra_k_words} of {ultra_n_words} problems with no false alarms, for about {ultra_cost_words} per claim.",
+          "gap": 0.9
+        },
+        {
+          "id": "b4",
+          "text": "Nano reaches {nano_macro} at a {nano_fraction_word} of the cost, one click away.",
+          "spoken": "Nano reaches {nano_macro_words} at a {nano_fraction_word} of the cost, one click away.",
+          "gap": 0.8
+        }
+      ]
+    },
+    {
+      "id": "end",
+      "kind": "art",
+      "page": "art/end.html",
+      "lead": 1.2,
+      "tail": 5.0,
+      "lines": [
+        {
+          "id": "z1",
+          "text": "Receipts. Check the citations before you trust the report.",
+          "gap": 0.0
+        }
+      ]
+    }
+  ]
+}

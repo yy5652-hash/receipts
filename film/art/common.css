@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap");
+
+/* The app's own palette (app/static/app.css): paper, ink, thin rules, five label colours. */
+:root {
+  --bg: #f6f3ec; --surface: #fffefb; --surface-2: #f0ece1;
+  --ink: #1f1d19; --ink-2: #57534a; --ink-3: #6b665c;
+  --rule: #e3ddcf; --rule-strong: #cdc5b3;
+  --sup-bg: #e1f2e5; --sup-ink: #14633a; --sup-line: #2f9e63;
+  --par-bg: #fbeecb; --par-ink: #7d4f06; --par-line: #b27a05;
+  --con-bg: #fbe1de; --con-ink: #a3262a; --con-line: #d6434a;
+  --nis-bg: #e6e9ef; --nis-ink: #434e60; --nis-line: #7e8aa0;
+  --src-bg: #ebe5f7; --src-ink: #653aa8; --src-line: #8d63d6;
+  --serif: "Source Serif 4", Georgia, serif;
+  --sans: Inter, system-ui, sans-serif;
+  --shadow: 0 2px 4px rgba(45, 35, 15, 0.06), 0 24px 60px -24px rgba(45, 35, 15, 0.28);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; position: relative; }
+.grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+.veil { position: absolute; inset: 0; background: var(--bg); pointer-events: none; z-index: 50; }
+.kicker { font: 600 20px/1 var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+.badge { display: inline-flex; align-items: center; gap: 10px; padding: 6px 18px 6px 12px; border-radius: 999px; background: var(--c-bg); color: var(--c-ink); border: 2px solid var(--c-line); font: 600 24px/1.4 var(--sans); white-space: nowrap; }
+.badge svg { width: 24px; height: 24px; flex: none; }
+[data-label="supported"] { --c-bg: var(--sup-bg); --c-ink: var(--sup-ink); --c-line: var(--sup-line); }
+[data-label="partial"] { --c-bg: var(--par-bg); --c-ink: var(--par-ink); --c-line: var(--par-line); }
+[data-label="contradicted"] { --c-bg: var(--con-bg); --c-ink: var(--con-ink); --c-line: var(--con-line); }
+[data-label="not_in_source"] { --c-bg: var(--nis-bg); --c-ink: var(--nis-ink); --c-line: var(--nis-line); }
+[data-label="source_unavailable"] { --c-bg: var(--src-bg); --c-ink: var(--src-ink); --c-line: var(--src-line); }
+.logo { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
