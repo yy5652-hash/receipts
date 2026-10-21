@@ -117,7 +117,38 @@ def test_audit_streams_claims_then_verdicts_then_done(client):
     assert verdicts and all(v["passages"] is not None for v in verdicts)
     report = ev[-1]["report"]
     assert len(report["verdicts"]) == len(verdicts) and all(f["text"] == "" for f in report["fetched"])
-    assert [s["stage"] for s in ev if s["type"] == "stage"] == ["extract", "fetch", "judge", "done"]
+    assert [s["stage"] for s in ev if s["type"] == "stage"] == ["extract", "fetch", "judge", "suggest", "done"]
+
+
+def test_audit_streams_suggestions_for_unsupported_claims(client):
+    ev = events_of(client.post("/api/audit", json={"document": DOC, "mode": "cascade"}))
+    kinds = [e["type"] for e in ev]
+    suggestions = [e["suggestion"] for e in ev if e["type"] == "suggestion"]
+    assert {s["claim_id"]: s["status"] for s in suggestions} == {"c3": "supported", "c5": "contradicted", "c6": "none"}
+    assert kinds.index("suggestion") > max(i for i, k in enumerate(kinds) if k == "verdict")
+    assert max(i for i, k in enumerate(kinds) if k == "suggestion") < kinds.index("done")
+    sup = next(s for s in suggestions if s["status"] == "supported")
+    assert sup["url"] == "https://hvac.example/heat-pump-sales" and sup["quote_found"] and sup["tier"] == "nano"
+    report = ev[-1]["report"]
+    assert sorted(s["claim_id"] for s in report["suggestions"]) == ["c3", "c5", "c6"]
+
+
+def test_suggest_false_turns_the_stage_off(client):
+    ev = events_of(client.post("/api/audit", json={"document": DOC, "suggest": False}))
+    assert not any(e["type"] == "suggestion" for e in ev) and ev[-1]["report"]["suggestions"] == []
+    assert "suggest" not in [e["stage"] for e in ev if e["type"] == "stage"]
+    assert client.post("/api/audit", json={"document": DOC, "suggest": "maybe"}).status_code == 400
+
+
+def test_suggest_calls_are_charged_to_the_budget(tmp_path):
+    def spent(suggest: bool) -> float:
+        path = tmp_path / f"budget-{suggest}.json"
+        cfg = ServerConfig(daily_budget_usd=100, budget_file=path)
+        c = TestClient(create_app(settings=keyed_settings(tmp_path), config=cfg, factory=costly_factory()))
+        assert events_of(c.post("/api/audit", json={"document": DOC, "suggest": suggest}))[-1]["type"] == "done"
+        return json.loads(path.read_text())[today()]
+
+    assert spent(True) > spent(False)
 
 
 def test_audit_validates_the_request(client):

@@ -1,4 +1,4 @@
-"""The audit pipeline: extract -> fetch -> judge."""
+"""The audit pipeline: extract -> fetch -> judge -> suggest."""
 
 import time
 from collections.abc import Callable
@@ -11,6 +11,7 @@ from .models import AuditReport
 from .scholarly import Scholarly
 from .search import Searcher, http_status
 from .sources import fetch_sources
+from .suggest import suggest_sources, suggest_targets
 
 
 def audit(
@@ -23,6 +24,7 @@ def audit(
     status_fn: Callable[[str], int | None] = http_status,
     openalex: Scholarly | None = None,
     max_claims: int | None = None,
+    suggest: bool = True,
 ) -> AuditReport:
     if mode not in MODES:
         raise ValueError(f"unknown mode {mode!r}; choose one of {sorted(MODES)}")
@@ -40,7 +42,11 @@ def audit(
     fetched = fetch_sources(sources, searcher, status_fn=status_fn, openalex=openalex, on_event=on_event)
     emit({"type": "stage", "stage": "judge"})
     verdicts = judge_all(claims, sources, fetched, llm, mode, settings, on_event=on_event)
+    suggestions = []
+    if suggest and suggest_targets(claims, verdicts, settings.suggest_max_claims):
+        emit({"type": "stage", "stage": "suggest"})
+        suggestions = suggest_sources(claims, sources, fetched, verdicts, searcher, llm, settings, on_event=on_event)
     emit({"type": "stage", "stage": "done"})
     usage = [u.model_copy() for _, u in sorted(llm.usage.items(), key=lambda kv: kv[0])]
     return AuditReport(document=doc, mode=mode, sources=sources, claims=claims, fetched=fetched,
-                       verdicts=verdicts, usage=usage, seconds=round(time.monotonic() - t0, 2))
+                       verdicts=verdicts, usage=usage, suggestions=suggestions, seconds=round(time.monotonic() - t0, 2))
