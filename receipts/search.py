@@ -4,6 +4,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
+from collections.abc import Callable
 from typing import Protocol
 
 import httpx
@@ -46,9 +47,11 @@ class DiskCache:
 class TavilySearcher:
     """Tavily REST client. Every call is cached, so each URL / query is fetched once."""
 
-    def __init__(self, api_key: str, cache: DiskCache | None = None, client: httpx.Client | None = None):
+    def __init__(self, api_key: str, cache: DiskCache | None = None, client: httpx.Client | None = None,
+                 on_credits: Callable[[float], None] | None = None):
         self._key = api_key
         self.cache = cache
+        self.on_credits = on_credits  # told the Tavily credits each network call costs (cache hits are free)
         self.client = client or httpx.Client(timeout=60)
 
     def _post(self, path: str, body: dict) -> dict | None:
@@ -82,6 +85,8 @@ class TavilySearcher:
         for i in range(0, len(todo), 20):
             batch = todo[i : i + 20]
             data = self._post("/extract", {"urls": batch, "extract_depth": "basic"})
+            if data is not None and self.on_credits:
+                self.on_credits(-(-len(batch) // 5))  # basic extract: 1 credit per 5 URLs
             if data is None:  # transient failure: report None but do not cache it
                 out.update({u: None for u in batch})
                 continue
@@ -104,6 +109,8 @@ class TavilySearcher:
         )
         if data is None:
             return []
+        if self.on_credits:
+            self.on_credits(1)  # basic search: 1 credit
         results = [
             {k: r.get(k) for k in ("url", "title", "content", "raw_content")} for r in data.get("results", [])
         ]

@@ -228,3 +228,12 @@ def test_render_endpoint_returns_the_markdown_report(client):
     assert r.text.startswith("# Receipts: citation audit of “Renewable Energy Outlook 2023”")
     assert "❌ contradicted" in r.text and "$400 billion in 2022" in r.text
     assert client.post("/api/render", json={"nope": 1}).status_code == 400
+
+
+def test_tavily_credit_budget_pauses_live_audits(tmp_path):
+    (tmp_path / "tavily_budget.json").write_text(json.dumps({today(): 45}))
+    cfg = ServerConfig(daily_budget_usd=2.0, daily_tavily_credits=45, budget_file=tmp_path / "budget.json")
+    c = TestClient(create_app(settings=keyed_settings(tmp_path), config=cfg, factory=costly_factory()))
+    cfg_json = c.get("/api/config").json()
+    assert (cfg_json["live"], cfg_json["reason"], cfg_json["limits"]["tavily_credits_per_day"]) == (False, "budget", 45)
+    assert c.post("/api/audit", json={"document": "x [1].\n\n[1] https://a.example"}).status_code == 503

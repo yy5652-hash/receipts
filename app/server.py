@@ -52,6 +52,7 @@ class ServerConfig:
     max_claims: int = 60
     per_ip_per_hour: int = 6
     daily_budget_usd: float = 2.0
+    daily_tavily_credits: float = 45.0  # keeps a public demo inside Tavily's free monthly credits
     max_concurrent: int = 4
     trust_proxy: bool = False  # take the client IP from X-Forwarded-For (behind a reverse proxy)
     budget_file: Path | None = None  # default: <cache_dir>/budget.json
@@ -63,6 +64,7 @@ class ServerConfig:
             max_claims=_env_num("RECEIPTS_MAX_CLAIMS", 60, int),
             per_ip_per_hour=_env_num("RECEIPTS_IP_LIMIT_PER_HOUR", 6, int),
             daily_budget_usd=_env_num("RECEIPTS_DAILY_BUDGET_USD", 2.0, float),
+            daily_tavily_credits=_env_num("RECEIPTS_DAILY_TAVILY_CREDITS", 45.0, float),
             max_concurrent=_env_num("RECEIPTS_MAX_CONCURRENT", 4, int),
             trust_proxy=os.environ.get("RECEIPTS_TRUST_PROXY", "") not in ("", "0", "false"),
         )
@@ -193,14 +195,15 @@ def fake_factory(fixtures: str | Path) -> Factory:
     return make
 
 
-def live_factory(settings: Settings) -> Factory:
+def live_factory(settings: Settings, on_credits: Callable[[float], None] | None = None) -> Factory:
     """A fresh TokenFactoryLLM per audit (usage is per audit); the HTTP clients and the disk cache are shared."""
     from receipts.llm import TokenFactoryLLM
     from receipts.scholarly import OpenAlex
     from receipts.search import DiskCache, TavilySearcher
 
     cache = DiskCache(settings.cache_dir)
-    searcher, openalex = TavilySearcher(settings.tavily_api_key, cache), OpenAlex(cache)
+    searcher = TavilySearcher(settings.tavily_api_key, cache, on_credits=on_credits)
+    openalex = OpenAlex(cache)
     return lambda: (TokenFactoryLLM(settings), searcher, http_status, openalex)
 
 
@@ -233,6 +236,8 @@ def create_app(
         factory = fake_factory(fake)
     has_keys = bool(settings.nebius_api_key and settings.tavily_api_key)
     budget = Budget(cfg.budget_file or settings.cache_dir / "budget.json", cfg.daily_budget_usd)
+    budget_dir = (cfg.budget_file.parent if cfg.budget_file else settings.cache_dir)
+    tavily = Budget(budget_dir / "tavily_budget.json", cfg.daily_tavily_credits)  # credits, not USD
     limiter = RateLimiter(cfg.per_ip_per_hour)
     slots = threading.BoundedSemaphore(max(1, cfg.max_concurrent))
     state: dict = {"factory": factory}
@@ -240,13 +245,13 @@ def create_app(
     def live_state() -> tuple[bool, str | None]:
         if enforce and not (has_keys or factory):
             return False, "keys"
-        if enforce and not budget.has_room():
+        if enforce and not (budget.has_room() and tavily.has_room()):
             return False, "budget"
         return True, None
 
     def get_factory() -> Factory:
         if state["factory"] is None:
-            state["factory"] = live_factory(settings)
+            state["factory"] = live_factory(settings, on_credits=tavily.add if enforce else None)
         return state["factory"]
 
     app = FastAPI(title="Receipts", docs_url=None, redoc_url=None, openapi_url=None)
@@ -279,6 +284,7 @@ def create_app(
             "fake": fake is not None,
             "models": dict(settings.models),
             "limits": {"max_chars": cfg.max_doc_chars, "max_claims": cfg.max_claims, "per_ip_per_hour": cfg.per_ip_per_hour,
+                       "tavily_credits_per_day": cfg.daily_tavily_credits,
                        "suggest_max": settings.suggest_max_claims},
             "examples": [{k: e[k] for k in ("id", "title", "blurb")} for e in examples],
         }

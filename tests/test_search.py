@@ -69,3 +69,22 @@ def test_http_status_head_then_get():
 
     c2 = httpx.Client(transport=httpx.MockTransport(boom))
     assert http_status("https://nowhere.invalid/", client=c2) is None
+
+
+def test_tavily_reports_credits_for_network_calls_only(tmp_path):
+    import httpx
+    from receipts.search import DiskCache, TavilySearcher
+
+    def handler(request):
+        body = json.loads(request.content)
+        if request.url.path == "/extract":
+            return httpx.Response(200, json={"results": [{"url": u, "raw_content": "text"} for u in body["urls"]]})
+        return httpx.Response(200, json={"results": [{"url": "https://a.example", "title": "A", "content": "c"}]})
+
+    spent = []
+    t = TavilySearcher("k", DiskCache(tmp_path), client=httpx.Client(transport=httpx.MockTransport(handler)),
+                       on_credits=spent.append)
+    t.extract([f"https://e.example/{i}" for i in range(7)])   # 7 URLs in one batch: 2 credits
+    t.search("q")                                                # 1 credit
+    t.extract(["https://e.example/0"]); t.search("q")            # cached: free
+    assert spent == [2, 1]

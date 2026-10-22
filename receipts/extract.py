@@ -151,7 +151,8 @@ def extract(doc: str, llm: LLM) -> tuple[list[Source], list[Claim]]:
     for m in LINK_RE.finditer(body):
         url = _clean_url(m.group(2))
         if url not in url_to_id:
-            s = Source(id=f"s{len(sources) + 1}", raw=m.group(0), url=url, title=m.group(1).strip())
+            # link text is usually a site name ("Wikipedia", "NASA"), not a title: the page's own title is used instead
+            s = Source(id=f"s{len(sources) + 1}", raw=m.group(0), url=url)
             sources.append(s)
             url_to_id[url] = s.id
 

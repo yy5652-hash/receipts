@@ -9,6 +9,8 @@ Built for the Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) 
 - **Devpost:** https://devpost.com/software/receipts-5oqhv6
 - **Benchmark:** [ReceiptsBench results](bench/RESULTS.md) · [Find a real source results](bench/results_suggest/RESULTS.md)
 
+**Try it in a minute.** Open the live demo and click one of the two recorded audits; they open instantly. Press `j` to step through the sentences and read the evidence on the right. To run your own, paste any AI answer together with its sources (ChatGPT, Perplexity, Gemini or a deep-research report) and press *Check citations*: a ten-claim report takes about 20 seconds.
+
 ## Why
 
 AI research assistants write fluent reports with confident citations, and checking them by hand means opening every link and finding the sentence that matters. The cost of skipping that step is already on record:
