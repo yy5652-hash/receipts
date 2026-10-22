@@ -69,15 +69,30 @@ def _from_record(s: Source, rec: dict, searcher: Searcher, fallback_url: str | N
 
 
 _GENERIC_HEADINGS = {"contents", "table of contents", "navigation", "navigation menu", "menu", "search",
-                     "main menu", "references", "abstract", "introduction"}
+                     "main menu", "references", "abstract", "introduction", "suggested searches", "search results",
+                     "site navigation", "main navigation", "skip to content", "skip to main content", "share",
+                     "related", "related articles", "explore", "breadcrumb", "breadcrumbs", "footer", "header"}
 
 
-def page_title(text: str) -> str | None:
-    """The page's own title: its first markdown heading, else its first short line."""
-    head = text[:6000]
-    for m in re.finditer(r"^#{1,3}[ \t]+(.{3,150}?)[ \t#]*$", head, re.M):
-        if m.group(1).strip().lower() not in _GENERIC_HEADINGS:
-            return m.group(1).strip()
+def page_title(text: str, url: str | None = None) -> str | None:
+    """The page's own title. Among its first headings, the one that shares the most words with the URL's last
+    path segment ("webbs-sunshield" -> "Webb's Sunshield"); else the first heading that is not site furniture;
+    else the first short line."""
+    head = text[:8000]
+    every = [m.group(1).strip() for m in re.finditer(r"^#{1,3}[ \t]+(.{3,150}?)[ \t#]*$", text[:200_000], re.M)]
+    every = [h for h in every if h.lower() not in _GENERIC_HEADINGS]
+    slug = set(re.findall(r"[a-z0-9]+", _slug(url).lower())) - {"the", "and", "of", "a", "in", "html", "htm", "index"}
+    slug = {w for w in slug if not w.isdigit()}
+    if slug and every:
+        words = lambda h: set(re.findall(r"[a-z0-9]+", h.lower().replace("'", "").replace("\u2019", "")))  # noqa: E731
+        best = max(every, key=lambda h: len(words(h) & slug))  # max keeps the first of equals
+        if words(best) & slug:
+            return best
+        if len(slug) >= 2:
+            return None  # a meaningful URL with no matching heading: the page is mostly site furniture
+    headings = [h for h in every if text.find(h) < len(head)]
+    if headings:
+        return headings[0]
     for line in head.splitlines():
         line = line.strip(" |*_")
         if 3 <= len(line) <= 150 and not line.lower().startswith(("http", "skip to", "menu", "cookie")):
@@ -127,7 +142,7 @@ def fetch_sources(
         academic = openalex is not None and _looks_academic(s)
         landing = bool(text) and (len(text) < SHORT_PAGE or "doi.org/" in (url or ""))
         if text and not base["title"]:
-            base["title"] = page_title(text)  # a bare URL in the reference list: name it after the page
+            base["title"] = page_title(text, url)  # a bare URL in the reference list: name it after the page
         if text and not (landing and academic):
             return FetchedSource(**base, status="ok", text=text, via="tavily_extract", exists=True)
         reachable = bool(text)  # the link answered; a short landing page may still lead to the paper

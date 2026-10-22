@@ -214,3 +214,15 @@ def test_page_title_skips_table_of_contents_and_falls_back_to_first_line():
 def test_bare_url_source_takes_the_page_title():
     (f,), _ = fetch([src("s1", url="https://a.example/x")], {"https://a.example/x": "# A Real Page Title\n\nBody. " * 3})
     assert f.title == "A Real Page Title"
+
+
+def test_page_title_skips_site_search_widgets():
+    from receipts.sources import page_title
+    assert page_title("## Suggested Searches\n\n* Climate\n\n# Webb's Sunshield\n\nBody") == "Webb's Sunshield"
+
+
+def test_page_title_prefers_the_heading_matching_the_url():
+    from receipts.sources import page_title
+    text = "## Highlights\n\nNews\n\n## Webb's Sunshield\n\nBody\n\n## Mirrors"
+    assert page_title(text, "https://science.nasa.gov/mission/webb/webbs-sunshield") == "Webb's Sunshield"
+    assert page_title(text) == "Highlights"

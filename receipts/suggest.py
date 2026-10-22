@@ -90,7 +90,7 @@ def _candidates(hits: list[dict], exclude: set[str]) -> list[tuple[Source, Fetch
         if not text:
             continue
         i = len(out) + 1
-        title = (hit.get("title") or "").strip() or page_title(text)
+        title = (hit.get("title") or "").strip() or page_title(text, url)
         source = Source(id=f"w{i}", raw=f"{title}. {url}" if title else url, url=url, title=title)
         fetched = FetchedSource(source_id=source.id, status="ok", url=url, title=title, text=text,
                                 via="tavily_search", exists=True)
